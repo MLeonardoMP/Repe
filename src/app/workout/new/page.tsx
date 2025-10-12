@@ -1,0 +1,247 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import type { WorkoutSession } from '@/types/workout';
+import type { Exercise } from '@/types/exercise';
+
+export default function NewWorkoutPage() {
+  const router = useRouter();
+  const [workoutName, setWorkoutName] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  
+  // Common workout templates
+  const workoutTemplates = [
+    {
+      id: 'push',
+      name: 'Push Day',
+      description: 'Chest, Shoulders, Triceps',
+      exercises: ['Bench Press', 'Overhead Press', 'Incline Dumbbell Press', 'Tricep Dips', 'Lateral Raises']
+    },
+    {
+      id: 'pull',
+      name: 'Pull Day',
+      description: 'Back, Biceps',
+      exercises: ['Pull-ups', 'Barbell Rows', 'Lat Pulldowns', 'Bicep Curls', 'Face Pulls']
+    },
+    {
+      id: 'legs',
+      name: 'Leg Day',
+      description: 'Legs, Glutes',
+      exercises: ['Squats', 'Deadlifts', 'Lunges', 'Leg Press', 'Calf Raises']
+    },
+    {
+      id: 'upper',
+      name: 'Upper Body',
+      description: 'Full Upper Body',
+      exercises: ['Bench Press', 'Pull-ups', 'Overhead Press', 'Rows', 'Dips']
+    },
+    {
+      id: 'full',
+      name: 'Full Body',
+      description: 'Complete Workout',
+      exercises: ['Squats', 'Bench Press', 'Deadlifts', 'Pull-ups', 'Overhead Press']
+    }
+  ];
+
+  const createWorkout = async () => {
+    if (!workoutName.trim()) return;
+    
+    setIsCreating(true);
+    try {
+      const template = selectedTemplate ? workoutTemplates.find(t => t.id === selectedTemplate) : null;
+      
+      // Create initial exercises from template
+      const exercises: Exercise[] = template ? template.exercises.map((name, index) => ({
+        id: `exercise-${Date.now()}-${index}`,
+        sessionId: '', // Will be set when workout is created
+        name,
+        sets: [],
+        order: index,
+        category: 'strength',
+        notes: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })) : [];
+
+      const newWorkout: Partial<WorkoutSession> = {
+        name: workoutName.trim(),
+        startTime: new Date().toISOString(),
+        exercises,
+        notes: template ? `Created from ${template.name} template` : ''
+      };
+
+      const response = await fetch('/api/workouts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newWorkout),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        router.push(`/workout/active?id=${result.data.id}`);
+      } else {
+        console.error('Failed to create workout');
+      }
+    } catch (error) {
+      console.error('Error creating workout:', error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const createEmptyWorkout = () => {
+    setSelectedTemplate(null);
+    if (workoutName.trim()) {
+      createWorkout();
+    }
+  };
+
+  return (
+    <div className="flex-1 p-4">
+      <div className="max-w-md mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="text-gray-400 hover:text-white p-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </Button>
+          <h1 className="text-2xl font-bold text-white">New Workout</h1>
+        </div>
+
+        {/* Workout Name */}
+        <Card className="bg-gray-900 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-lg text-white">Workout Name</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Input
+              type="text"
+              placeholder="Enter workout name..."
+              value={workoutName}
+              onChange={(e) => setWorkoutName(e.target.value)}
+              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              maxLength={50}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Template Selection */}
+        <Card className="bg-gray-900 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-lg text-white">Choose Template</CardTitle>
+            <p className="text-sm text-gray-400">Or start with an empty workout</p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {workoutTemplates.map((template) => (
+              <div
+                key={template.id}
+                onClick={() => setSelectedTemplate(template.id)}
+                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                  selectedTemplate === template.id
+                    ? 'border-blue-500 bg-blue-900/20'
+                    : 'border-gray-600 bg-gray-800 hover:border-gray-500'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-white">{template.name}</h3>
+                    <p className="text-sm text-gray-400">{template.description}</p>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-xs text-gray-500 mr-2">
+                      {template.exercises.length} exercises
+                    </span>
+                    {selectedTemplate === template.id && (
+                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {selectedTemplate === template.id && (
+                  <div className="mt-3 pt-3 border-t border-gray-700">
+                    <div className="flex flex-wrap gap-1">
+                      {template.exercises.map((exercise) => (
+                        <span
+                          key={exercise}
+                          className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded"
+                        >
+                          {exercise}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Empty Workout Option */}
+            <div
+              onClick={() => setSelectedTemplate('empty')}
+              className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                selectedTemplate === 'empty'
+                  ? 'border-blue-500 bg-blue-900/20'
+                  : 'border-gray-600 bg-gray-800 hover:border-gray-500'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-white">Empty Workout</h3>
+                  <p className="text-sm text-gray-400">Start from scratch</p>
+                </div>
+                {selectedTemplate === 'empty' && (
+                  <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Create Button */}
+        <div className="space-y-3">
+          <Button
+            onClick={() => selectedTemplate === 'empty' ? createEmptyWorkout() : createWorkout()}
+            disabled={!workoutName.trim() || !selectedTemplate || isCreating}
+            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCreating ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Creating...
+              </div>
+            ) : (
+              `Start ${selectedTemplate === 'empty' ? 'Empty' : 'Template'} Workout`
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="w-full text-gray-400 hover:text-white"
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

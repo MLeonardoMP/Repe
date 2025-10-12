@@ -1,50 +1,44 @@
 # [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Repe Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Modularidad
+Cada componente debe ser independiente, reutilizable y fácil de mantener. La modularidad permite escalar y modificar la aplicación sin afectar el resto del sistema.
+**Rationale**: Facilita la evolución y el mantenimiento, reduce el acoplamiento y mejora la calidad del código.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Minimalismo
+Siempre se debe escoger la solución más simple posible, evitando complejidad innecesaria. El minimalismo implica eliminar lo superfluo y centrarse en lo esencial.
+**Rationale**: Reduce errores, facilita la comprensión y acelera el desarrollo.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Rendimiento
+Las soluciones deben ser eficientes y rápidas, priorizando la experiencia del usuario. Se deben seguir buenas prácticas modernas para optimizar recursos sin sacrificar simplicidad.
+**Rationale**: Un alto rendimiento mejora la satisfacción del usuario y la competitividad del producto.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Simplicidad
+La simplicidad es prioritaria en cada decisión técnica. Se debe justificar cualquier aumento de complejidad y preferir siempre el camino más directo y claro.
+**Rationale**: La simplicidad reduce la carga cognitiva y facilita la colaboración.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Experiencia de Usuario
+La experiencia de usuario es el objetivo principal. Todas las decisiones deben considerar el impacto en la usabilidad y satisfacción del usuario final.
+**Rationale**: Un producto útil y agradable es esencial para el éxito y adopción.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Requisitos Adicionales
+Se deben seguir las mejores prácticas modernas en desarrollo, pero evitando complejizar innecesariamente. La tecnología elegida debe ser actual, mantenible y alineada con los principios rectores.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Flujo de Desarrollo
+Cada cambio debe ser revisado para asegurar que cumple con los principios de modularidad, minimalismo, rendimiento, simplicidad y experiencia de usuario. Las revisiones de código y pruebas son obligatorias antes de cualquier despliegue.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Gobernanza
+Esta constitución prevalece sobre cualquier otra práctica. Las enmiendas requieren documentación, aprobación y un plan de migración. Cada revisión debe verificar el cumplimiento de los principios. Cualquier aumento de complejidad debe estar justificado y documentado.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
-
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
-
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+<!--
+Sync Impact Report
+Version change: 1.0.0 → 1.1.0
+Principles modificados: todos redefinidos
+Secciones añadidas: Requisitos Adicionales, Flujo de Desarrollo
+Secciones eliminadas: ninguna
+Templates requeridos: plan-template.md ✅, spec-template.md ✅, tasks-template.md ✅
+Follow-up TODOs: TODO(RATIFICATION_DATE): confirmar fecha original de ratificación
+-->
+**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE): confirmar fecha original de ratificación | **Last Amended**: 2025-09-19
