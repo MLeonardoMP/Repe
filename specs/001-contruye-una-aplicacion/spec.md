@@ -35,6 +35,8 @@ Un usuario va al gimnasio y necesita registrar su sesión de entrenamiento. Abre
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
+
+#### Core Workout Tracking
 - **FR-001**: System MUST allow users to create new workout sessions
 - **FR-002**: System MUST allow users to add exercises to a workout session
 - **FR-003**: System MUST allow users to record sets for each exercise with start time, end time, weight (kg), repetitions, intensity level, and notes
@@ -46,15 +48,66 @@ Un usuario va al gimnasio y necesita registrar su sesión de entrenamiento. Abre
 - **FR-009**: Users MUST be able to delete exercises or sets if entered incorrectly
 - **FR-010**: System MUST provide a simple and intuitive user interface following minimalist principles
 - **FR-011**: System MUST calculate set duration automatically from start/end times
-- **FR-012**: System MUST support different intensity levels [NEEDS CLARIFICATION: scale range not specified - 1-5, 1-10, descriptive levels?]
-- **FR-013**: System MUST handle offline scenarios [NEEDS CLARIFICATION: offline capability requirements not specified]
-- **FR-014**: System MUST support user authentication [NEEDS CLARIFICATION: auth method not specified - email/password, guest mode, social login?]
+- **FR-012**: System MUST support intensity levels on a 1-5 scale (1=easy, 5=maximum effort)
+
+#### Exercise Library (NEW - Based on Research)
+- **FR-015**: System MUST provide a pre-populated exercise library with 100+ common exercises
+- **FR-016**: System MUST categorize exercises by muscle group (Chest, Back, Legs, Shoulders, Arms, Core, Cardio)
+- **FR-017**: System MUST allow users to search and filter exercises by name, category, or equipment
+- **FR-018**: System MUST allow users to mark exercises as favorites for quick access
+- **FR-019**: System MUST include exercise descriptions and muscle groups targeted for each exercise
+- **FR-020**: System MUST allow users to select exercises from library instead of typing names manually
+
+#### Rest Timer (NEW - Based on Research)
+- **FR-021**: System MUST provide a configurable rest timer between sets
+- **FR-022**: System MUST support default rest times (30s, 60s, 90s, 120s, 180s)
+- **FR-023**: System MUST auto-start rest timer after completing a set (configurable)
+- **FR-024**: System MUST notify user when rest period is complete
+- **FR-025**: System MUST allow users to skip or extend rest time during workout
+
+#### Workout Templates (NEW - Based on Research)
+- **FR-026**: System MUST allow users to save completed workouts as templates
+- **FR-027**: System MUST allow users to start new workouts from saved templates
+- **FR-028**: System MUST allow users to edit and delete workout templates
+- **FR-029**: System MUST provide "Repeat Last Workout" quick start option
+- **FR-030**: System MUST copy previous set data when adding new sets
+
+#### Exercise History & Progress (NEW - Based on Research)
+- **FR-031**: System MUST track and display history for each specific exercise
+- **FR-032**: System MUST calculate and display personal records (max weight, max reps, max volume)
+- **FR-033**: System MUST display progress graphs for exercises over time
+- **FR-034**: System MUST calculate total workout volume (sets × reps × weight)
+- **FR-035**: System MUST automatically detect and celebrate new personal records
+
+#### Statistics & Analytics (NEW - Based on Research)
+- **FR-036**: System MUST display total workouts completed
+- **FR-037**: System MUST display total volume lifted (all time and weekly)
+- **FR-038**: System MUST display workout frequency statistics
+- **FR-039**: System MUST show workout streak counter
+- **FR-040**: System MUST display muscle group distribution chart
+
+#### Data Management (NEW - Based on Research)
+- **FR-041**: System MUST allow users to export all workout data to JSON format
+- **FR-042**: System MUST allow users to import workout data from JSON file
+- **FR-043**: System MUST allow users to download individual workouts as CSV
+- **FR-044**: System MUST maintain data backup functionality
+
+#### User Experience Enhancements (NEW - Based on Research)
+- **FR-045**: System MUST provide quick weight adjustment buttons (+2.5kg, +5kg)
+- **FR-046**: System MUST support swipe gestures for delete actions
+- **FR-047**: System MUST provide one-tap duplicate set functionality
+- **FR-048**: System MUST work in single-user mode without authentication (guest mode)
+- **FR-049**: System MUST handle gracefully when offline (basic functionality maintained)
 
 ### Key Entities *(include if feature involves data)*
 - **Workout Session**: Represents a complete gym visit with timestamp, duration, and collection of exercises performed
 - **Exercise**: Represents a specific exercise within a session with name, type, and collection of sets
 - **Set**: Represents individual set within an exercise with start time, end time, weight, repetitions, intensity, and notes
 - **User**: Represents the person using the application to track their workouts
+- **Exercise Template** (NEW): Pre-defined exercise from library with name, category, muscle groups, equipment, and instructions
+- **Workout Template** (NEW): Saved workout configuration with exercises, sets, and parameters for quick reuse
+- **Exercise History** (NEW): Aggregated data for specific exercise showing progress, personal records, and trends
+- **Workout Statistics** (NEW): Calculated metrics including volume, frequency, streaks, and muscle group distribution
 
 ---
 
