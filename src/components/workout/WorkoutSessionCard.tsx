@@ -132,10 +132,13 @@ export const WorkoutSessionCard = React.memo<WorkoutSessionCardProps>(({
       tabIndex={0}
       clickable
       className={cn(
-        "w-full transition-all duration-200",
-        "hover:shadow-md hover:scale-[1.02]",
-        "focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-        "touch-manipulation",
+        "group relative w-full overflow-hidden",
+        "bg-[#0a0a0a] border-neutral-800",
+        "transition-all duration-200",
+        "hover:border-neutral-700 hover:shadow-lg hover:shadow-black/50",
+        "focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black",
+        "touch-manipulation cursor-pointer",
+        isActive && "border-emerald-900/30",
         className
       )}
       onClick={handleCardClick}
@@ -143,28 +146,42 @@ export const WorkoutSessionCard = React.memo<WorkoutSessionCardProps>(({
       onTouchEnd={handleTouchEnd}
       aria-label={`View ${sessionName} workout details`}
     >
-      <CardHeader className="pb-2">
+      {/* Subtle gradient overlay */}
+      {isActive && (
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 to-transparent pointer-events-none"></div>
+      )}
+      
+      {/* Hover effect - subtle border highlight */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+      </div>
+      
+      <CardHeader className="pb-2 relative">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-white truncate">
+            <h3 className="text-lg font-semibold text-white truncate group-hover:text-neutral-100 transition-colors">
               {sessionName}
             </h3>
-            <p className="text-sm text-gray-400 mt-1">
-              {formatDate(session.startTime)} • {formatExerciseCount(exerciseCount)} • {duration}
-            </p>
+            <div className="flex items-center gap-2 mt-1.5 text-sm text-neutral-400 font-mono">
+              <span>{formatDate(session.startTime)}</span>
+              <span className="text-neutral-700">•</span>
+              <span>{formatExerciseCount(exerciseCount)}</span>
+              <span className="text-neutral-700">•</span>
+              <span>{duration}</span>
+            </div>
           </div>
           
           {isActive && (
             <div className="flex items-center ml-2">
-              <div 
-                data-testid="active-indicator"
-                className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"
-              />
               <Badge 
                 variant="default"
-                className="bg-green-600 text-white"
+                className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 backdrop-blur-sm"
                 aria-live="polite"
               >
+                <span 
+                  data-testid="active-indicator"
+                  className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-glow mr-1.5"
+                />
                 Active
               </Badge>
             </div>
@@ -173,21 +190,22 @@ export const WorkoutSessionCard = React.memo<WorkoutSessionCardProps>(({
       </CardHeader>
 
       {variant === 'default' && (
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 relative">
           {/* Exercise list preview */}
           {exerciseCount > 0 && (
             <div className="mb-3">
-              <div className="flex flex-wrap gap-1">
-                {session.exercises.slice(0, 3).map((exercise) => (
+              <div className="flex flex-wrap gap-1.5">
+                {session.exercises.slice(0, 3).map((exercise, index) => (
                   <span
                     key={exercise.id}
-                    className="text-xs text-gray-300 bg-gray-800 px-2 py-1 rounded"
+                    className="text-xs text-neutral-300 bg-neutral-900/70 backdrop-blur-sm px-2.5 py-1.5 rounded-md border border-neutral-800 hover:border-neutral-700 transition-colors"
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
                     {exercise.name}
                   </span>
                 ))}
                 {exerciseCount > 3 && (
-                  <span className="text-xs text-gray-400 px-2 py-1">
+                  <span className="text-xs text-neutral-500 px-2 py-1 font-medium">
                     +{exerciseCount - 3} more
                   </span>
                 )}
@@ -204,14 +222,14 @@ export const WorkoutSessionCard = React.memo<WorkoutSessionCardProps>(({
 
           {/* Action buttons */}
           {(onEdit || onDelete) && (
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-neutral-800/50">
               {onEdit && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleEditClick}
                   aria-label="Edit workout"
-                  className="min-h-[44px] min-w-[44px] text-gray-400 hover:text-white hover:bg-gray-700"
+                  className="min-h-[44px] min-w-[44px] text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all button-press"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -224,7 +242,7 @@ export const WorkoutSessionCard = React.memo<WorkoutSessionCardProps>(({
                   size="sm"
                   onClick={handleDeleteClick}
                   aria-label="Delete workout"
-                  className="min-h-[44px] min-w-[44px] text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                  className="min-h-[44px] min-w-[44px] text-neutral-400 hover:text-red-400 hover:bg-red-950/30 transition-all button-press"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
