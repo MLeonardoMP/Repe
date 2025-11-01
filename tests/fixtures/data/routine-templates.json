@@ -1,0 +1,32 @@
+[
+  {
+    "id": "routine-template-pecho-dinamico",
+    "name": "Rutina Pecho Dinámico",
+    "origin": "prebuilt",
+    "createdAt": "2024-01-02T09:00:00.000Z",
+    "updatedAt": "2024-10-01T08:05:00.000Z",
+    "exerciseIds": [
+      "exercise-template-bench-press",
+      "exercise-template-incline-fly"
+    ]
+  },
+  {
+    "id": "routine-template-piernas-explosivas",
+    "name": "Piernas Explosivas",
+    "origin": "user-session",
+    "createdAt": "2024-02-12T09:00:00.000Z",
+    "updatedAt": "2024-09-15T10:05:00.000Z",
+    "exerciseIds": [
+      "exercise-template-back-squat",
+      "exercise-template-lunge"
+    ]
+  },
+  {
+    "id": "routine-template-fallback-dia",
+    "name": "Rutina Lunes Base",
+    "origin": "prebuilt",
+    "createdAt": "2024-04-01T09:00:00.000Z",
+    "updatedAt": "2024-06-01T09:15:00.000Z",
+    "exerciseIds": []
+  }
+]

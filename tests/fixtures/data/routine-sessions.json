@@ -1,0 +1,48 @@
+[
+  {
+    "id": "routine-session-20241001",
+    "userId": "user-1",
+    "routineTemplateId": "routine-template-pecho-dinamico",
+    "routineName": "Rutina Pecho Dinámico",
+    "startedAt": "2024-10-01T07:00:00.000Z",
+    "initialExerciseId": "exercise-template-bench-press",
+    "notes": "Inicio rápido tras sugerencia principal",
+    "createdExercises": [],
+    "createdAt": "2024-10-01T07:00:05.000Z",
+    "updatedAt": "2024-10-01T07:00:05.000Z"
+  },
+  {
+    "id": "routine-session-20240920",
+    "userId": "user-1",
+    "routineTemplateId": "routine-template-pecho-dinamico",
+    "routineName": "Rutina Pecho Dinámico",
+    "startedAt": "2024-09-20T07:05:00.000Z",
+    "initialExerciseId": "exercise-template-bench-press",
+    "notes": "Sesión repetida para reforzar técnica.",
+    "createdExercises": [],
+    "createdAt": "2024-09-20T07:05:05.000Z",
+    "updatedAt": "2024-09-20T07:05:05.000Z"
+  },
+  {
+    "id": "routine-session-20240915",
+    "userId": "user-1",
+    "routineTemplateId": "routine-template-piernas-explosivas",
+    "routineName": "Piernas Explosivas",
+    "startedAt": "2024-09-15T09:00:00.000Z",
+    "initialExerciseId": "exercise-template-back-squat",
+    "notes": "Incluye nuevo ejercicio guardado en plantilla.",
+    "createdExercises": [
+      {
+        "id": "exercise-template-lunge",
+        "name": "Zancadas alternas",
+        "category": "legs",
+        "equipment": null,
+        "defaultReps": 12,
+        "defaultSets": 3,
+        "createdBy": "user"
+      }
+    ],
+    "createdAt": "2024-09-15T09:00:05.000Z",
+    "updatedAt": "2024-09-15T09:00:05.000Z"
+  }
+]

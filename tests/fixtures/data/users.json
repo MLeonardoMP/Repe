@@ -1,1 +1,13 @@
-[]
+[
+	{
+		"id": "user-1",
+		"name": "Marina Entrenadora",
+		"preferences": {
+			"defaultWeightUnit": "kg",
+			"defaultIntensityScale": 10,
+			"theme": "dark"
+		},
+		"createdAt": "2024-01-10T09:00:00.000Z",
+		"updatedAt": "2024-09-02T17:45:00.000Z"
+	}
+]

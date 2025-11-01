@@ -1,0 +1,225 @@
+openapi: 3.1.0
+info:
+  title: Auto-Named Routine API
+  version: 0.1.0
+paths:
+  /api/routines/templates:
+    get:
+      summary: List routine templates and derived suggestions for the current user
+      tags:
+        - routines
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+          description: Max number of suggestions to return
+        - in: query
+          name: includeExercises
+          schema:
+            type: boolean
+          description: When true, include exercise payload for each template
+      responses:
+        '200':
+          description: Suggestions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoutineSuggestion'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/routines/start:
+    post:
+      summary: Start a routine session with an auto-generated name and selected exercise
+      tags:
+        - routines
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartRoutineRequest'
+      responses:
+        '201':
+          description: Routine session created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    $ref: '#/components/schemas/RoutineSession'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Duplicate routine name conflict beyond allowed suffix attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ServerError'
+components:
+  schemas:
+    RoutineSuggestion:
+      type: object
+      required:
+        - templateId
+        - displayName
+        - usageCount
+        - lastUsedAt
+        - exercises
+      properties:
+        templateId:
+          type: string
+        displayName:
+          type: string
+        usageCount:
+          type: integer
+          minimum: 0
+        lastUsedAt:
+          type: string
+          format: date-time
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/Exercise'
+    StartRoutineRequest:
+      type: object
+      required:
+        - templateId
+        - selectedExerciseId
+      properties:
+        templateId:
+          type: string
+          description: Identifier of the routine template that provided the name suggestion
+        selectedExerciseId:
+          type: string
+          description: Exercise chosen to start the session
+        persistNewExercise:
+          type: boolean
+          default: false
+        newExercise:
+          $ref: '#/components/schemas/NewExercisePayload'
+    RoutineSession:
+      type: object
+      required:
+        - sessionId
+        - routineName
+        - startedAt
+        - selectedExercise
+      properties:
+        sessionId:
+          type: string
+        routineName:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        selectedExercise:
+          $ref: '#/components/schemas/Exercise'
+        newlyCreatedExercise:
+          $ref: '#/components/schemas/Exercise'
+          nullable: true
+    Exercise:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+          nullable: true
+        equipment:
+          type: string
+          nullable: true
+        defaultReps:
+          type: integer
+          nullable: true
+        defaultSets:
+          type: integer
+          nullable: true
+    NewExercisePayload:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+          nullable: true
+        equipment:
+          type: string
+          nullable: true
+        defaultReps:
+          type: integer
+          nullable: true
+        defaultSets:
+          type: integer
+          nullable: true
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: Request payload validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServerError:
+      description: Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

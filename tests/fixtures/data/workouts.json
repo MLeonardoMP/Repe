@@ -1,1 +1,146 @@
-[]
+[
+	{
+		"id": "session-pecho-20241001",
+		"userId": "user-1",
+		"name": "Rutina Pecho Dinámico",
+		"startTime": "2024-10-01T07:00:00.000Z",
+		"endTime": "2024-10-01T08:05:00.000Z",
+		"exercises": [
+			{
+				"id": "exercise-pecho-press-1",
+				"name": "Press de banca",
+				"category": "strength",
+				"muscleGroups": ["chest", "triceps"],
+				"sets": [
+					{
+						"id": "set-pecho-press-1",
+						"type": "working",
+						"reps": 8,
+						"weight": 55,
+						"intensity": 8,
+						"restTime": 90,
+						"timestamp": "2024-10-01T07:10:00.000Z"
+					},
+					{
+						"id": "set-pecho-press-2",
+						"type": "working",
+						"reps": 6,
+						"weight": 60,
+						"intensity": 9,
+						"restTime": 120,
+						"timestamp": "2024-10-01T07:18:00.000Z"
+					}
+				]
+			},
+			{
+				"id": "exercise-pecho-fly-1",
+				"name": "Aperturas inclinadas",
+				"category": "strength",
+				"muscleGroups": ["chest"],
+				"sets": [
+					{
+						"id": "set-pecho-fly-1",
+						"type": "working",
+						"reps": 12,
+						"weight": 14,
+						"intensity": 7,
+						"timestamp": "2024-10-01T07:30:00.000Z"
+					}
+				]
+			}
+		],
+		"notes": "Sesión enfocada en fuerza y volumen pecho.",
+		"createdAt": "2024-10-01T06:50:00.000Z",
+		"updatedAt": "2024-10-01T08:05:00.000Z"
+	},
+	{
+		"id": "session-pecho-20240920",
+		"userId": "user-1",
+		"name": "Rutina Pecho Dinámico",
+		"startTime": "2024-09-20T07:05:00.000Z",
+		"endTime": "2024-09-20T08:00:00.000Z",
+		"exercises": [
+			{
+				"id": "exercise-pecho-press-2",
+				"name": "Press de banca",
+				"category": "strength",
+				"muscleGroups": ["chest", "triceps"],
+				"sets": [
+					{
+						"id": "set-pecho-press-3",
+						"type": "working",
+						"reps": 8,
+						"weight": 52,
+						"intensity": 8,
+						"restTime": 90,
+						"timestamp": "2024-09-20T07:12:00.000Z"
+					}
+				]
+			},
+			{
+				"id": "exercise-pecho-fly-2",
+				"name": "Aperturas inclinadas",
+				"category": "strength",
+				"muscleGroups": ["chest"],
+				"sets": [
+					{
+						"id": "set-pecho-fly-2",
+						"type": "working",
+						"reps": 15,
+						"weight": 12,
+						"intensity": 7,
+						"timestamp": "2024-09-20T07:28:00.000Z"
+					}
+				]
+			}
+		],
+		"notes": "Repetición del bloque pecho dinámico.",
+		"createdAt": "2024-09-20T06:55:00.000Z",
+		"updatedAt": "2024-09-20T08:00:00.000Z"
+	},
+	{
+		"id": "session-piernas-20240915",
+		"userId": "user-1",
+		"name": "Piernas Explosivas",
+		"startTime": "2024-09-15T09:00:00.000Z",
+		"endTime": "2024-09-15T10:05:00.000Z",
+		"exercises": [
+			{
+				"id": "exercise-piernas-squat-1",
+				"name": "Sentadilla trasera",
+				"category": "strength",
+				"muscleGroups": ["legs", "glutes"],
+				"sets": [
+					{
+						"id": "set-piernas-squat-1",
+						"type": "working",
+						"reps": 10,
+						"weight": 70,
+						"intensity": 8,
+						"restTime": 120,
+						"timestamp": "2024-09-15T09:12:00.000Z"
+					}
+				]
+			},
+			{
+				"id": "exercise-piernas-lunge-1",
+				"name": "Zancadas alternas",
+				"category": "strength",
+				"muscleGroups": ["legs"],
+				"sets": [
+					{
+						"id": "set-piernas-lunge-1",
+						"type": "working",
+						"reps": 12,
+						"weight": 18,
+						"intensity": 7,
+						"timestamp": "2024-09-15T09:28:00.000Z"
+					}
+				]
+			}
+		],
+		"notes": "Sesión enfocada en potencia de piernas.",
+		"createdAt": "2024-09-15T08:50:00.000Z",
+		"updatedAt": "2024-09-15T10:05:00.000Z"
+	}
+]

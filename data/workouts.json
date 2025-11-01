@@ -28,5 +28,15 @@
     "notes": "Created from Push Day template",
     "createdAt": "2025-10-12T22:47:41.228Z",
     "updatedAt": "2025-10-12T22:47:41.228Z"
+  },
+  {
+    "id": "746b4568-c4e9-46be-99ab-fffc05a8317c",
+    "userId": "user-1",
+    "name": "Push",
+    "startTime": "2025-10-13T00:36:56.954Z",
+    "exercises": [],
+    "notes": "Created from Push Day template",
+    "createdAt": "2025-10-13T00:36:57.281Z",
+    "updatedAt": "2025-10-13T00:36:57.281Z"
   }
 ]
