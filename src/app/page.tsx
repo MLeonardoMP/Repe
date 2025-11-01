@@ -42,12 +42,21 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex-1 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-700 rounded w-3/4"></div>
-            <div className="h-32 bg-gray-700 rounded"></div>
-            <div className="h-20 bg-gray-700 rounded"></div>
+      <div className="flex-1 p-4 md:p-6">
+        <div className="max-w-md mx-auto space-y-8 pt-4">
+          <div className="animate-pulse space-y-8">
+            {/* Header skeleton */}
+            <div className="text-center space-y-2">
+              <div className="h-10 bg-neutral-900 rounded w-32 mx-auto"></div>
+              <div className="h-4 bg-neutral-900 rounded w-48 mx-auto"></div>
+            </div>
+            {/* Button skeletons */}
+            <div className="space-y-2">
+              <div className="h-14 bg-neutral-900 rounded-lg"></div>
+              <div className="h-12 bg-neutral-900 rounded-lg"></div>
+            </div>
+            {/* Card skeleton */}
+            <div className="h-32 bg-neutral-900 rounded-xl border border-neutral-800"></div>
           </div>
         </div>
       </div>
@@ -55,36 +64,36 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex-1 p-4">
-      <div className="max-w-md mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-white">Repe</h1>
-          <p className="text-gray-400">Track your strength training</p>
+    <div className="flex-1 p-4 md:p-6">
+      <div className="max-w-md mx-auto space-y-8">
+        {/* Header - Geist minimalist style */}
+        <div className="text-center space-y-1 pt-4">
+          <h1 className="text-4xl font-bold text-white tracking-tight">Repe</h1>
+          <p className="text-neutral-400 text-sm">Track your strength training</p>
         </div>
 
-        {/* Active Workout */}
+        {/* Active Workout - Geist style with clean borders */}
         {activeWorkout && (
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-[#0a0a0a] border-neutral-800 hover:border-neutral-700 transition-colors">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-white">Active Workout</CardTitle>
-                <Badge variant="success" className="bg-green-900 text-green-300 border-green-600">
+                <CardTitle className="text-base font-semibold text-white">Active Workout</CardTitle>
+                <Badge variant="success" className="bg-emerald-950 text-emerald-400 border-emerald-900 text-xs font-medium">
                   In Progress
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold text-white">{activeWorkout.name}</h3>
-                <p className="text-sm text-gray-400">
+                <h3 className="font-semibold text-white text-lg">{activeWorkout.name}</h3>
+                <p className="text-sm text-neutral-400 mt-1">
                   Started {new Date(activeWorkout.startTime).toLocaleTimeString([], { 
                     hour: '2-digit', 
                     minute: '2-digit' 
                   })}
                 </p>
               </div>
-              <div className="flex gap-4 text-xs text-gray-400">
+              <div className="flex gap-6 text-sm text-neutral-400 font-mono">
                 <span>{activeWorkout.exercises?.length || 0} exercises</span>
                 <span>
                   {activeWorkout.exercises?.reduce((total, ex) => 
@@ -93,7 +102,7 @@ export default function HomePage() {
               </div>
               <Button
                 onClick={() => handleContinueWorkout(activeWorkout)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full h-12 bg-white hover:bg-neutral-100 text-black font-semibold transition-colors"
               >
                 Continue Workout
               </Button>
@@ -101,28 +110,28 @@ export default function HomePage() {
           </Card>
         )}
 
-        {/* Quick Actions */}
-        <div className="space-y-3">
+        {/* Quick Actions - Geist minimalist buttons */}
+        <div className="space-y-2">
           {!activeWorkout && (
             <Link href="/workout/new">
-              <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-lg">
+              <Button className="w-full h-14 bg-white hover:bg-neutral-100 text-black text-base font-semibold transition-colors">
                 Start New Workout
               </Button>
             </Link>
           )}
           
           <Link href="/history">
-            <Button variant="outline" className="w-full h-12 border-gray-600 text-gray-300 hover:bg-gray-700">
+            <Button variant="outline" className="w-full h-12 border-neutral-800 text-neutral-200 hover:bg-[#0a0a0a] hover:border-neutral-700 transition-colors">
               View History
             </Button>
           </Link>
         </div>
 
-        {/* Recent Workouts */}
+        {/* Recent Workouts - Cleaner section header */}
         {recentWorkouts.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-white">Recent Workouts</h2>
-            <div className="space-y-3">
+            <h2 className="text-lg font-semibold text-white tracking-tight">Recent Workouts</h2>
+            <div className="space-y-2">
               {recentWorkouts.slice(0, 3).map((workout) => (
                 <WorkoutSessionCard
                   key={workout.id}
@@ -134,28 +143,28 @@ export default function HomePage() {
             </div>
             {recentWorkouts.length > 3 && (
               <Link href="/history">
-                <Button variant="ghost" className="w-full text-blue-400 hover:text-blue-300">
-                  View All Workouts
+                <Button variant="ghost" className="w-full text-neutral-400 hover:text-white hover:bg-[#0a0a0a] transition-colors">
+                  View All Workouts →
                 </Button>
               </Link>
             )}
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Empty State - Minimalist Geist style */}
         {recentWorkouts.length === 0 && !activeWorkout && (
-          <Card className="bg-gray-900 border-gray-700">
-            <CardContent className="text-center py-8 space-y-4">
-              <div className="text-gray-400">
-                <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <Card className="bg-[#0a0a0a] border-neutral-800">
+            <CardContent className="text-center py-12 space-y-4">
+              <div className="text-neutral-600">
+                <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Ready to get started?</h3>
-                <p className="text-gray-400 mb-4">Create your first workout session</p>
+                <h3 className="text-base font-semibold text-white mb-1">Ready to get started?</h3>
+                <p className="text-sm text-neutral-400 mb-6">Create your first workout session</p>
                 <Link href="/workout/new">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button className="h-12 px-8 bg-white hover:bg-neutral-100 text-black font-semibold transition-colors">
                     Start Your First Workout
                   </Button>
                 </Link>
