@@ -1,3 +1,7 @@
+'use client';
+
+import Link from 'next/link';
+
 export default function NotFound() {
   return (
     <div className="flex-1 p-6 min-h-screen">
@@ -7,14 +11,14 @@ export default function NotFound() {
         </div>
         <h1 className="text-2xl font-semibold">Page not found</h1>
         <p className="text-neutral-400 text-sm max-w-sm mx-auto">
-          The content you are looking for doesn’t exist or was moved.
+          The content you are looking for doesn&apos;t exist or was moved.
         </p>
-        <a
+        <Link
           href="/"
           className="button-press inline-flex items-center justify-center h-12 px-6 rounded-md bg-white text-black font-semibold hover:bg-neutral-100"
         >
           Go home
-        </a>
+        </Link>
       </div>
     </div>
   );

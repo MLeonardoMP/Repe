@@ -62,8 +62,9 @@ export function ExercisePickerDialog({
       } else {
         setError(data.error?.message || 'Failed to load exercises');
       }
-    } catch (err: any) {
-      setError('Failed to load exercise library');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to load exercise library';
+      setError(message);
       console.error('Error loading exercises:', err);
     } finally {
       setLoading(false);

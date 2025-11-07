@@ -188,7 +188,7 @@ export function TimerDisplay({
           className="text-center text-green-400 font-semibold"
           data-testid="timer-completed"
         >
-          Time's Up! ⏰
+          Time&apos;s Up! ⏰
         </div>
       )}
 

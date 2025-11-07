@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { workoutStorage } from '@/lib/storage';
+import type { WorkoutSession } from '@/types';
 
 type RouteParams = {
   params: Promise<{
@@ -111,7 +112,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // Update workout
-    const updates: any = {};
+    const updates: Partial<WorkoutSession> = {};
     if (body.name !== undefined) updates.name = body.name;
     if (body.endTime !== undefined) updates.endTime = body.endTime;
     if (body.notes !== undefined) updates.notes = body.notes;

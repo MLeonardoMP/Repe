@@ -8,7 +8,7 @@ import { Exercise } from './exercise';
 import { Set } from './set';
 
 // Base API response types
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = Record<string, unknown>> {
   success: true;
   data: T;
 }
@@ -18,11 +18,11 @@ export interface ApiErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
 }
 
-export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
+export type ApiResponse<T = Record<string, unknown>> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 // Pagination interface for list responses
 export interface PaginationInfo {
@@ -37,18 +37,18 @@ export interface PaginatedResponse<T> extends ApiSuccessResponse<T[]> {
 }
 
 // Workout Session API Response Types
-export interface CreateWorkoutResponse extends ApiSuccessResponse<WorkoutSession> {}
-export interface GetWorkoutResponse extends ApiSuccessResponse<WorkoutSession> {}
-export interface UpdateWorkoutResponse extends ApiSuccessResponse<WorkoutSession> {}
-export interface GetWorkoutsResponse extends PaginatedResponse<WorkoutSession> {}
+export type CreateWorkoutResponse = ApiSuccessResponse<WorkoutSession>;
+export type GetWorkoutResponse = ApiSuccessResponse<WorkoutSession>;
+export type UpdateWorkoutResponse = ApiSuccessResponse<WorkoutSession>;
+export type GetWorkoutsResponse = PaginatedResponse<WorkoutSession>;
 
 // Exercise API Response Types  
-export interface AddExerciseResponse extends ApiSuccessResponse<Exercise> {}
-export interface UpdateExerciseResponse extends ApiSuccessResponse<Exercise> {}
+export type AddExerciseResponse = ApiSuccessResponse<Exercise>;
+export type UpdateExerciseResponse = ApiSuccessResponse<Exercise>;
 
 // Set API Response Types
-export interface AddSetResponse extends ApiSuccessResponse<Set> {}
-export interface UpdateSetResponse extends ApiSuccessResponse<Set> {}
+export type AddSetResponse = ApiSuccessResponse<Set>;
+export type UpdateSetResponse = ApiSuccessResponse<Set>;
 
 // Request body types for API endpoints
 export interface CreateWorkoutRequest {

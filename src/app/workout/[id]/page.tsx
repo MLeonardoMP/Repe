@@ -213,7 +213,7 @@ export default function WorkoutDetailPage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">No exercises</h3>
-                <p className="text-gray-400">This workout doesn't have any exercises yet.</p>
+                <p className="text-gray-400">This workout doesn&apos;t have any exercises yet.</p>
               </CardContent>
             </Card>
           )}

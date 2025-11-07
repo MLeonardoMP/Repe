@@ -30,7 +30,7 @@ export function Settings({
   const [localSettings, setLocalSettings] = useState<UserSettings>(settings);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const handleSettingChange = (key: keyof UserSettings, value: any) => {
+  const handleSettingChange = (key: keyof UserSettings, value: string | number | boolean) => {
     const newSettings = { ...localSettings, [key]: value };
     setLocalSettings(newSettings);
     setHasChanges(true);

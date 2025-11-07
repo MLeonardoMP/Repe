@@ -22,8 +22,9 @@ export async function GET() {
       success: true,
       data: exercises,
     });
-  } catch (error: any) {
-    console.error('Error loading exercise library:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error loading exercise library:', message);
     
     return NextResponse.json(
       {
@@ -31,7 +32,7 @@ export async function GET() {
         error: {
           code: 'INTERNAL_ERROR',
           message: 'Failed to load exercise library',
-          details: error.message,
+          details: message,
         },
       },
       { status: 500 }

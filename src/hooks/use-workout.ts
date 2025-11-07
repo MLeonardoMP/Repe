@@ -232,7 +232,7 @@ export function useWorkout(): UseWorkoutReturn {
       duration: 0,
       notes: '',
       isTemplate: true,
-    } as any; // TypeScript workaround for isTemplate
+    } as unknown as WorkoutSession; // TypeScript workaround for isTemplate
     
     await storage.create(templateWorkout);
   }, [storage]);
