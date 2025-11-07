@@ -159,7 +159,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/workouts/[id] - Delete workout session
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     if (!id) {
       return NextResponse.json(
