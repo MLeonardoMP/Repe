@@ -128,7 +128,7 @@ export function isPaginatedResponse<T>(response: ApiResponse<T[] | T>): response
 }
 
 // Utility type for API endpoints that return void/no content
-export interface VoidResponse extends ApiSuccessResponse<void> {}
+export type VoidResponse = ApiSuccessResponse<void>;
 
 // Type for form data that maps to API requests
 export interface WorkoutFormData {
