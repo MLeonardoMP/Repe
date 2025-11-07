@@ -43,21 +43,28 @@ const WorkoutSessionSchema = z.object({
   endTime: z.string().refine((val) => !isNaN(Date.parse(val))).optional(),
   exercises: z.array(z.object({
     id: z.string().min(1),
+    sessionId: z.string().min(1),
     name: z.string().min(1),
-    category: z.enum(['strength', 'cardio', 'flexibility', 'other']),
-    muscleGroups: z.array(z.string()),
+    category: z.string().optional(),
+    muscleGroups: z.array(z.string()).optional(),
     sets: z.array(z.object({
       id: z.string().min(1),
-      type: z.enum(['working', 'warmup', 'dropset', 'failure', 'rest-pause']),
-      reps: z.number().int().positive().optional(),
+      exerciseId: z.string().min(1),
       weight: z.number().positive().optional(),
-      duration: z.number().int().positive().optional(),
-      distance: z.number().positive().optional(),
-      intensity: z.number().int().min(1).max(10).optional(),
+      repetitions: z.number().int().positive().optional(),
+      intensity: z.number().positive().optional(),
       notes: z.string().optional(),
-      restTime: z.number().int().min(0).optional(),
-      timestamp: z.string().refine((val) => !isNaN(Date.parse(val)))
-    }))
+      isCompleted: z.boolean(),
+      order: z.number().int(),
+      startTime: z.string().refine((val) => !isNaN(Date.parse(val))).optional(),
+      endTime: z.string().refine((val) => !isNaN(Date.parse(val))).optional(),
+      createdAt: z.string().refine((val) => !isNaN(Date.parse(val))),
+      updatedAt: z.string().refine((val) => !isNaN(Date.parse(val)))
+    })),
+    notes: z.string().optional(),
+    order: z.number().int(),
+    createdAt: z.string().refine((val) => !isNaN(Date.parse(val))),
+    updatedAt: z.string().refine((val) => !isNaN(Date.parse(val)))
   })),
   notes: z.string().optional(),
   createdAt: z.string().refine((val) => !isNaN(Date.parse(val))),

@@ -73,18 +73,32 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     
     // Parse query parameters
+    const page = parseInt(searchParams.get('page') || '1');
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const searchQuery = searchParams.get('search')?.toLowerCase() || '';
+    const offset = (page - 1) * limit;
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
 
     // Get all workouts for the user
     const allWorkouts = await workoutStorage.findByUserId('user-1');
     
-    // Filter by date range if provided
+    // Filter by search query if provided
     let filteredWorkouts = allWorkouts;
-    if (startDate || endDate) {
+    if (searchQuery) {
       filteredWorkouts = allWorkouts.filter(workout => {
+        const nameMatch = workout.name?.toLowerCase().includes(searchQuery);
+        const notesMatch = workout.notes?.toLowerCase().includes(searchQuery);
+        const exerciseMatch = workout.exercises.some(ex => 
+          ex.name.toLowerCase().includes(searchQuery)
+        );
+        return nameMatch || notesMatch || exerciseMatch;
+      });
+    }
+    
+    // Filter by date range if provided
+    if (startDate || endDate) {
+      filteredWorkouts = filteredWorkouts.filter(workout => {
         const workoutDate = new Date(workout.startTime);
         
         if (startDate) {
@@ -109,11 +123,12 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      data: paginatedWorkouts,
-      pagination: {
+      data: {
+        workouts: paginatedWorkouts,
         total: filteredWorkouts.length,
-        offset,
+        page,
         limit,
+        hasMore: offset + limit < filteredWorkouts.length,
       },
     });
   } catch (error) {

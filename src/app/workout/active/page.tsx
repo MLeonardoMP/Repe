@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExerciseCard } from '@/components/workout/ExerciseCard';
+import { ExercisePickerDialog } from '@/components/workout/ExercisePickerDialog';
+import { QuickSetDialog } from '@/components/workout/QuickSetDialog';
 import type { WorkoutSession } from '@/types/workout';
 import type { Exercise } from '@/types/exercise';
 import type { Set } from '@/types/set';
@@ -20,6 +22,11 @@ export default function ActiveWorkoutPage() {
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
   const [workoutDuration, setWorkoutDuration] = useState(0);
+  
+  // Dialog states
+  const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
+  const [isQuickSetDialogOpen, setIsQuickSetDialogOpen] = useState(false);
+  const [currentExerciseIdForSet, setCurrentExerciseIdForSet] = useState<string | null>(null);
   
   // Update workout duration every second
   useEffect(() => {
@@ -100,20 +107,14 @@ export default function ActiveWorkoutPage() {
     }
   };
 
-  const addSet = async (exerciseId: string) => {
+  const addSet = async (exerciseId: string, reps: number, weight?: number) => {
     if (!workout) return;
-
-    // Simple form inputs for now
-    const reps = parseInt(prompt('Enter number of reps:') || '0', 10);
-    const weight = parseFloat(prompt('Enter weight (kg):') || '0');
-    
-    if (reps <= 0) return;
 
     try {
       const setData = {
         order: workout.exercises.find(e => e.id === exerciseId)?.sets.length || 0,
         repetitions: reps,
-        weight: weight > 0 ? weight : undefined,
+        weight: weight && weight > 0 ? weight : undefined,
         isCompleted: true,
         startTime: new Date().toISOString(),
         endTime: new Date().toISOString()
@@ -146,6 +147,17 @@ export default function ActiveWorkoutPage() {
       }
     } catch (error) {
       console.error('Error adding set:', error);
+    }
+  };
+
+  const handleAddSetClick = (exerciseId: string) => {
+    setCurrentExerciseIdForSet(exerciseId);
+    setIsQuickSetDialogOpen(true);
+  };
+
+  const handleSetConfirm = (reps: number, weight?: number) => {
+    if (currentExerciseIdForSet) {
+      addSet(currentExerciseIdForSet, reps, weight);
     }
   };
 
@@ -280,7 +292,7 @@ export default function ActiveWorkoutPage() {
               key={exercise.id}
               exercise={exercise}
               onEditExercise={() => setActiveExerciseId(exercise.id)}
-              onAddSet={() => addSet(exercise.id)}
+              onAddSet={() => handleAddSetClick(exercise.id)}
               onEditSet={() => {}}
               onDeleteSet={() => {}}
             />
@@ -292,12 +304,7 @@ export default function ActiveWorkoutPage() {
           <CardContent className="p-4">
             <Button
               variant="ghost"
-              onClick={() => {
-                const name = window.prompt('Enter exercise name:');
-                if (name?.trim()) {
-                  addExercise(name.trim());
-                }
-              }}
+              onClick={() => setIsExercisePickerOpen(true)}
               className="w-full text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 border border-dashed border-gray-600 py-8"
             >
               <div className="text-center">
@@ -335,6 +342,22 @@ export default function ActiveWorkoutPage() {
             Save & Exit
           </Button>
         </div>
+
+        {/* Dialogs */}
+        <ExercisePickerDialog
+          open={isExercisePickerOpen}
+          onClose={() => setIsExercisePickerOpen(false)}
+          onSelect={(name) => {
+            addExercise(name);
+            setIsExercisePickerOpen(false);
+          }}
+        />
+
+        <QuickSetDialog
+          open={isQuickSetDialogOpen}
+          onClose={() => setIsQuickSetDialogOpen(false)}
+          onConfirm={handleSetConfirm}
+        />
       </div>
     </div>
   );

@@ -59,10 +59,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// PUT /api/workouts/[id] - Update workout session
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+// PATCH /api/workouts/[id] - Update workout session (partial)
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     
     if (!id) {
@@ -148,6 +148,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     );
   }
+}
+
+// PUT /api/workouts/[id] - Update workout session (full replacement)
+export async function PUT(request: NextRequest, { params }: RouteParams) {
+  return PATCH(request, { params });
 }
 
 // DELETE /api/workouts/[id] - Delete workout session
