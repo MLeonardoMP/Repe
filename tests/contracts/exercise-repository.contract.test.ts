@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
-import { createTestDb, cleanupTestDb, fixtures } from "@/tests/setup/db-setup";
+import { createTestDb, cleanupTestDb, fixtures } from "../setup/db-setup";
 import { StorageError } from "@/lib/storage-errors";
 
 /**

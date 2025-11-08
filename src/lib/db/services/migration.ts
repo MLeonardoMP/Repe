@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { exercises, workouts, sets, history } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
 import { count } from "drizzle-orm";
@@ -79,7 +79,7 @@ export class BackfillService {
 
       for (const exercise of seedData) {
         try {
-          const result = await db
+          const result = await getDb()
             .insert(exercises)
             .values({
               id: exercise.id,
@@ -124,7 +124,7 @@ export class BackfillService {
 
       for (const workout of data) {
         try {
-          const result = await db
+          const result = await getDb()
             .insert(workouts)
             .values({
               id: workout.id,
@@ -168,13 +168,13 @@ export class ParityChecker {
       const jsonCounts = this.countJsonData();
 
       // Count DB data
-      const dbExerciseCount = await db
+      const dbExerciseCount = await getDb()
         .select({ count: count() })
         .from(exercises);
-      const dbWorkoutCount = await db
+      const dbWorkoutCount = await getDb()
         .select({ count: count() })
         .from(workouts);
-      const dbHistoryCount = await db
+      const dbHistoryCount = await getDb()
         .select({ count: count() })
         .from(history);
 
@@ -213,7 +213,7 @@ export class ParityChecker {
 
     let exercises = 0;
     let workouts = 0;
-    let history = 0;
+    const history = 0;
 
     try {
       if (fs.existsSync(exercisePath)) {
@@ -241,7 +241,7 @@ export async function checkDatabaseHealth(): Promise<{
   message: string;
 }> {
   try {
-    await db.select({ count: count() }).from(exercises);
+    await getDb().select({ count: count() }).from(exercises);
     return { connected: true, message: "Database connected" };
   } catch (error) {
     return {

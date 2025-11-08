@@ -51,13 +51,16 @@ export const errorToHttpStatus = (error: StorageError): number => {
  * Helper to create error response
  */
 export const createErrorResponse = (error: StorageError) => {
-  return {
+  const response: any = {
     error: {
       type: error.type,
       message: error.message,
-      ...(process.env.NODE_ENV === 'development' && error.cause && {
-        cause: error.cause instanceof Error ? error.cause.message : String(error.cause),
-      }),
     },
   };
+
+  if (process.env.NODE_ENV === 'development' && error.cause) {
+    response.error.cause = error.cause instanceof Error ? error.cause.message : String(error.cause);
+  }
+
+  return response;
 };

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { workoutStorage } from '@/lib/storage';
+import { z } from 'zod';
+import { getDb } from '@/lib/db';
+import { workoutExercises } from '@/lib/db/schema';
+import { StorageError, errorToHttpStatus } from '@/lib/storage-errors';
+import { eq } from 'drizzle-orm';
 
 type RouteParams = {
   params: Promise<{
@@ -8,114 +12,157 @@ type RouteParams = {
   }>;
 };
 
-// PUT /api/workouts/[id]/exercises/[exerciseId] - Update exercise
+const UpdateExerciseSchema = z.object({
+  orderIndex: z.number().int().nonnegative().optional(),
+  targetSets: z.number().int().positive().optional().nullable(),
+  targetReps: z.number().int().positive().optional().nullable(),
+  targetWeight: z.number().positive().optional().nullable(),
+});
+
+// PUT /api/workouts/[id]/exercises/[exerciseId] - Update workout exercise
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id, exerciseId } = await params;
+    const { exerciseId } = await params;
     const body = await request.json();
     
-    if (!id || !exerciseId) {
+    if (!exerciseId) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Workout ID and Exercise ID are required',
+            message: 'Exercise ID is required',
           },
         },
         { status: 400 }
       );
     }
 
-    // Validate name if provided
-    if (body.name !== undefined && body.name.trim() === '') {
+    const input = UpdateExerciseSchema.parse(body);
+
+    // Build update object with only provided fields
+    const updateData: any = {};
+    if (input.orderIndex !== undefined) updateData.orderIndex = input.orderIndex;
+    if (input.targetSets !== undefined) updateData.targetSets = input.targetSets;
+    if (input.targetReps !== undefined) updateData.targetReps = input.targetReps;
+    if (input.targetWeight !== undefined) {
+      updateData.targetWeight = input.targetWeight ? parseFloat(input.targetWeight.toString()) : null;
+    }
+
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Exercise name cannot be empty',
+            message: 'No fields to update',
           },
         },
         { status: 400 }
       );
     }
 
-    // Get existing workout session
-    const workout = await workoutStorage.findById(id);
-    if (!workout) {
+    // Update workout exercise
+    const result = await getDb()
+      .update(workoutExercises)
+      .set(updateData)
+      .where(eq(workoutExercises.id, exerciseId))
+      .returning();
+
+    if (!result[0]) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'NOT_FOUND',
-            message: 'Workout session not found',
+            message: 'Workout exercise not found',
           },
         },
         { status: 404 }
       );
     }
-
-    // Find the exercise to update
-    const exerciseIndex = workout.exercises.findIndex(ex => ex.id === exerciseId);
-    if (exerciseIndex === -1) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Exercise not found in workout session',
-          },
-        },
-        { status: 404 }
-      );
-    }
-
-    // Update the exercise
-    const updatedExercise = {
-      ...workout.exercises[exerciseIndex],
-      name: body.name !== undefined ? body.name.trim() : workout.exercises[exerciseIndex].name,
-      category: body.category !== undefined ? body.category : workout.exercises[exerciseIndex].category,
-      notes: body.notes !== undefined ? body.notes : workout.exercises[exerciseIndex].notes,
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Update the workout with the modified exercise
-    const updatedExercises = [...workout.exercises];
-    updatedExercises[exerciseIndex] = updatedExercise;
-
-    const updatedWorkout = await workoutStorage.update(id, {
-      exercises: updatedExercises,
-    });
-
-    if (!updatedWorkout) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Failed to update exercise',
-          },
-        },
-        { status: 500 }
-      );
-    }
-
-    // Find and return the updated exercise
-    const resultExercise = updatedWorkout.exercises.find(ex => ex.id === exerciseId);
 
     return NextResponse.json({
       success: true,
-      data: resultExercise,
+      data: result[0],
     });
   } catch (error) {
-    console.error('Error updating exercise:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid request body',
+            details: error.issues,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    if (error instanceof StorageError) {
+      return NextResponse.json(
+        { success: false, error: { code: error.type, message: error.message } },
+        { status: errorToHttpStatus(error) }
+      );
+    }
+
+    console.error('PUT /api/workouts/[id]/exercises/[exerciseId] error:', error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
           message: 'Failed to update exercise',
+        },
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/workouts/[id]/exercises/[exerciseId] - Remove exercise from workout
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { exerciseId } = await params;
+    
+    if (!exerciseId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Exercise ID is required',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    await getDb()
+      .delete(workoutExercises)
+      .where(eq(workoutExercises.id, exerciseId));
+
+    return NextResponse.json({
+      success: true,
+      message: 'Exercise removed from workout',
+    });
+  } catch (error) {
+    if (error instanceof StorageError) {
+      return NextResponse.json(
+        { success: false, error: { code: error.type, message: error.message } },
+        { status: errorToHttpStatus(error) }
+      );
+    }
+
+    console.error('DELETE /api/workouts/[id]/exercises/[exerciseId] error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Failed to remove exercise from workout',
         },
       },
       { status: 500 }

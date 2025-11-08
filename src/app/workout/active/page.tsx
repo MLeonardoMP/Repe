@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { ExerciseCard } from '@/components/workout/ExerciseCard';
 import { ExercisePickerDialog } from '@/components/workout/ExercisePickerDialog';
 import { QuickSetDialog } from '@/components/workout/QuickSetDialog';
-import { useWorkout } from '@/hooks/use-workout';
+import { useWorkout, type Exercise } from '@/hooks/use-workout';
 
 export default function ActiveWorkoutPage() {
   const router = useRouter();
@@ -48,13 +48,13 @@ export default function ActiveWorkoutPage() {
     if (!activeWorkout) return;
     
     try {
-      await addExerciseToWorkout({
-        sessionId: activeWorkout.id,
+      const newExercise: Exercise = {
+        id: Math.random().toString(36).substr(2, 9),
         name: exerciseName,
-        order: activeWorkout.exercises.length,
-        category: 'strength',
-        notes: ''
-      });
+        sets: [],
+        restTime: 60,
+      };
+      await addExerciseToWorkout(newExercise);
     } catch (error) {
       console.error('Error adding exercise:', error);
     }
@@ -64,14 +64,14 @@ export default function ActiveWorkoutPage() {
     if (!activeWorkout) return;
     
     try {
-      await addSetToWorkout(exerciseId, {
-        order: activeWorkout.exercises.find(e => e.id === exerciseId)?.sets.length || 0,
-        repetitions: reps,
-        weight: weight && weight > 0 ? weight : undefined,
-        isCompleted: true,
-        startTime: new Date().toISOString(),
-        endTime: new Date().toISOString()
-      });
+      const newSet = {
+        id: Math.random().toString(36).substr(2, 9),
+        reps,
+        weight: weight && weight > 0 ? weight : 0,
+        completed: false,
+        restTime: 60,
+      };
+      await addSetToWorkout(exerciseId, newSet);
     } catch (error) {
       console.error('Error adding set:', error);
     }
@@ -192,7 +192,7 @@ export default function ActiveWorkoutPage() {
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">
                   {activeWorkout.exercises.reduce((total, ex) => 
-                    total + ex.sets.filter(set => set.isCompleted).length, 0
+                    total + ex.sets.filter(set => set.completed).length, 0
                   )}
                 </div>
                 <div className="text-xs text-gray-400">Completas</div>
@@ -206,7 +206,7 @@ export default function ActiveWorkoutPage() {
           {activeWorkout.exercises.map((exercise) => (
             <ExerciseCard
               key={exercise.id}
-              exercise={exercise}
+              exercise={exercise as any}
               onEditExercise={() => {}}
               onAddSet={() => handleAddSetClick(exercise.id)}
               onEditSet={() => {}}

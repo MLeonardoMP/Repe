@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
-import { createTestDb, cleanupTestDb, fixtures, clearAllTables } from "@/tests/setup/db-setup";
+import { createTestDb, cleanupTestDb, fixtures, clearAllTables } from "../setup/db-setup";
 
 /**
  * T007: Contract test suite for /api/exercises endpoints

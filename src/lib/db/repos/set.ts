@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { sets, workoutExercises } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
 import { eq, desc } from "drizzle-orm";
@@ -50,7 +50,7 @@ export async function addSet(input: NewSetPayload): Promise<Set> {
     }
 
     // Create set
-    const result = await db
+    const result = await getDb()
       .insert(sets)
       .values({
         workoutExerciseId: input.workoutExerciseId,
@@ -59,7 +59,7 @@ export async function addSet(input: NewSetPayload): Promise<Set> {
         rpe: input.rpe ? parseFloat(input.rpe.toString()) : null,
         restSeconds: input.restSeconds,
         notes: input.notes,
-      })
+      } as any)
       .returning();
 
     if (!result[0]) {
@@ -97,8 +97,7 @@ export async function updateSet(
         throw StorageError.validation("RPE must be between 0 and 10");
       }
     }
-
-    const result = await db
+    const result = await getDb()
       .update(sets)
       .set({
         reps: patch.reps ?? undefined,
@@ -106,7 +105,7 @@ export async function updateSet(
         rpe: patch.rpe !== undefined ? (patch.rpe ? parseFloat(patch.rpe.toString()) : null) : undefined,
         restSeconds: patch.restSeconds ?? undefined,
         notes: patch.notes ?? undefined,
-      })
+      } as any)
       .where(eq(sets.id, id))
       .returning();
 
@@ -129,7 +128,7 @@ export async function updateSet(
  */
 export async function deleteSet(id: string): Promise<void> {
   try {
-    await db.delete(sets).where(eq(sets.id, id));
+    await getDb().delete(sets).where(eq(sets.id, id));
   } catch (error) {
     throw StorageError.internal(
       "Failed to delete set",
@@ -146,11 +145,11 @@ export async function listSetsByWorkout(
   options?: { limit?: number; offset?: number }
 ): Promise<Set[]> {
   try {
-    let query = db
+    let query = getDb()
       .select()
       .from(sets)
       .where(eq(sets.workoutExerciseId, workoutExerciseId))
-      .orderBy(desc(sets.performedAt));
+      .orderBy(desc(sets.performedAt)) as any;
 
     if (options?.limit) {
       query = query.limit(Math.max(1, options.limit));

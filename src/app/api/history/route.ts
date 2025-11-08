@@ -10,8 +10,8 @@ const QuerySchema = z.object({
     id: z.string().uuid(),
   }).optional(),
   limit: z.coerce.number().int().positive().default(20).pipe(z.number().max(100)),
-  from: z.string().datetime().optional(),
-  to: z.string().datetime().optional(),
+  from: z.string().datetime().nullable().optional(),
+  to: z.string().datetime().nullable().optional(),
 });
 
 const LogSessionSchema = z.object({
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     
     // Parse cursor if provided
-    let cursor: any = undefined;
+    let cursor: { performedAt: string; id: string } | undefined = undefined;
     const cursorStr = searchParams.get('cursor');
     if (cursorStr) {
       try {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
           code: 'custom',
           message: 'Invalid cursor format',
           path: ['cursor'],
-        }]);
+        } as any]);
       }
     }
 
@@ -47,7 +47,12 @@ export async function GET(request: NextRequest) {
       to: searchParams.get('to'),
     });
 
-    const result = await listHistory(query);
+    const result = await listHistory({
+      cursor: query.cursor,
+      limit: query.limit,
+      from: query.from || undefined,
+      to: query.to || undefined,
+    });
 
     return NextResponse.json(
       {

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { workoutStorage } from '@/lib/storage';
+import { z } from 'zod';
+import { addSet, listSetsByWorkout } from '@/lib/db/repos/set';
+import { StorageError, errorToHttpStatus } from '@/lib/storage-errors';
 
 type RouteParams = {
   params: Promise<{
@@ -8,112 +10,80 @@ type RouteParams = {
   }>;
 };
 
+const AddSetSchema = z.object({
+  reps: z.number().int().nonnegative(),
+  weight: z.number().nonnegative().optional(),
+  rpe: z.number().min(0).max(10).optional(),
+  restSeconds: z.number().int().nonnegative().optional(),
+  notes: z.string().optional(),
+});
+
 // POST /api/workouts/[id]/exercises/[exerciseId]/sets - Add set to exercise
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id, exerciseId } = await params;
+    const { exerciseId } = await params;
     const body = await request.json();
     
-    if (!id || !exerciseId) {
+    if (!exerciseId) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Workout ID and Exercise ID are required',
+            message: 'Exercise ID is required',
           },
         },
         { status: 400 }
       );
     }
 
-    // Get existing workout session
-    const workout = await workoutStorage.findById(id);
-    if (!workout) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Workout session not found',
-          },
-        },
-        { status: 404 }
-      );
-    }
+    const input = AddSetSchema.parse(body);
 
-    // Find the exercise
-    const exerciseIndex = workout.exercises.findIndex(ex => ex.id === exerciseId);
-    if (exerciseIndex === -1) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Exercise not found in workout',
-          },
-        },
-        { status: 404 }
-      );
-    }
-
-    const exercise = workout.exercises[exerciseIndex];
-
-    // Create new set
-    const newSet = {
-      id: `set-${Date.now()}`,
-      exerciseId,
-      weight: body.weight || undefined,
-      repetitions: body.repetitions || body.reps || 0,
-      intensity: body.intensity || undefined,
-      notes: body.notes || '',
-      isCompleted: true,
-      order: exercise.sets.length + 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Add set to exercise
-    const updatedExercises = [...workout.exercises];
-    updatedExercises[exerciseIndex] = {
-      ...exercise,
-      sets: [...exercise.sets, newSet],
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Update workout
-    const updatedWorkout = await workoutStorage.update(id, {
-      exercises: updatedExercises,
+    const set = await addSet({
+      workoutExerciseId: exerciseId,
+      reps: input.reps,
+      weight: input.weight,
+      rpe: input.rpe,
+      restSeconds: input.restSeconds,
+      notes: input.notes,
     });
-
-    if (!updatedWorkout) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Failed to add set to exercise',
-          },
-        },
-        { status: 500 }
-      );
-    }
 
     return NextResponse.json(
       {
         success: true,
-        data: newSet,
+        data: set,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error adding set:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid request body',
+            details: error.issues,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    if (error instanceof StorageError) {
+      return NextResponse.json(
+        { success: false, error: { code: error.type, message: error.message } },
+        { status: errorToHttpStatus(error) }
+      );
+    }
+
+    console.error('POST /api/workouts/[id]/exercises/[exerciseId]/sets error:', error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: 'Failed to add set to exercise',
+          message: 'Failed to add set',
         },
       },
       { status: 500 }
@@ -124,55 +94,40 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 // GET /api/workouts/[id]/exercises/[exerciseId]/sets - Get all sets for an exercise
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id, exerciseId } = await params;
+    const { exerciseId } = await params;
+    const searchParams = request.nextUrl.searchParams;
     
-    if (!id || !exerciseId) {
+    if (!exerciseId) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Workout ID and Exercise ID are required',
+            message: 'Exercise ID is required',
           },
         },
         { status: 400 }
       );
     }
 
-    const workout = await workoutStorage.findById(id);
-    if (!workout) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Workout session not found',
-          },
-        },
-        { status: 404 }
-      );
-    }
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined;
 
-    const exercise = workout.exercises.find(ex => ex.id === exerciseId);
-    if (!exercise) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Exercise not found in workout',
-          },
-        },
-        { status: 404 }
-      );
-    }
+    const sets = await listSetsByWorkout(exerciseId, { limit, offset });
 
     return NextResponse.json({
       success: true,
-      data: exercise.sets,
+      data: sets,
     });
   } catch (error) {
-    console.error('Error fetching sets:', error);
+    if (error instanceof StorageError) {
+      return NextResponse.json(
+        { success: false, error: { code: error.type, message: error.message } },
+        { status: errorToHttpStatus(error) }
+      );
+    }
+
+    console.error('GET /api/workouts/[id]/exercises/[exerciseId]/sets error:', error);
     return NextResponse.json(
       {
         success: false,

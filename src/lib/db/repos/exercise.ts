@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
 import { sql, ilike, eq, count } from "drizzle-orm";
@@ -27,7 +27,8 @@ export async function listExercises(
   try {
     const { search, category, limit = 20, offset = 0 } = params;
 
-    let query = db.select().from(exercises);
+    // Build the query with conditions
+    let query = getDb().select().from(exercises) as any;
 
     // Apply search filter on name
     if (search && search.trim()) {
@@ -39,20 +40,26 @@ export async function listExercises(
       query = query.where(eq(exercises.category, category.trim()));
     }
 
-    // Get total count
-    const countQuery = db.select({ count: count() }).from(exercises);
+    // Add pagination
+    query = query.limit(Math.max(1, limit)).offset(Math.max(0, offset));
+
+    // Get total count - use the same filters
+    let countQuery = getDb()
+      .select({ count: count() })
+      .from(exercises) as any;
+
     if (search && search.trim()) {
-      countQuery.where(ilike(exercises.name, `%${search.trim()}%`));
+      countQuery = countQuery.where(ilike(exercises.name, `%${search.trim()}%`));
     }
     if (category && category.trim()) {
-      countQuery.where(eq(exercises.category, category.trim()));
+      countQuery = countQuery.where(eq(exercises.category, category.trim()));
     }
 
     const countResult = await countQuery;
     const total = countResult[0]?.count || 0;
 
     // Get paginated data
-    const data = await query.limit(Math.max(1, limit)).offset(Math.max(0, offset));
+    const data = await query;
 
     return { data, total };
   } catch (error) {
@@ -87,7 +94,7 @@ export async function createExercise(input: {
     }
 
     // Check for duplicate name
-    const existing = await db
+    const existing = await getDb()
       .select()
       .from(exercises)
       .where(eq(exercises.name, input.name.trim()))
@@ -100,7 +107,7 @@ export async function createExercise(input: {
     }
 
     // Create exercise
-    const result = await db
+    const result = await getDb()
       .insert(exercises)
       .values({
         name: input.name.trim(),
@@ -129,7 +136,7 @@ export async function createExercise(input: {
  */
 export async function getExerciseById(id: string): Promise<Exercise | null> {
   try {
-    const result = await db
+    const result = await getDb()
       .select()
       .from(exercises)
       .where(eq(exercises.id, id))
@@ -161,7 +168,7 @@ export async function bulkSeedExercises(
       return 0;
     }
 
-    const result = await db
+    const result = await getDb()
       .insert(exercises)
       .values(
         exerciseList.map((e) => ({

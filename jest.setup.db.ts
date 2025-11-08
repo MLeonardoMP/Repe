@@ -7,4 +7,5 @@ process.env.DATABASE_URL_TEST = process.env.DATABASE_URL_TEST || 'postgresql://l
 jest.setTimeout(15000);
 
 // Global test utilities
-global.testDb = null;
+(globalThis as any).testDb = null;
+

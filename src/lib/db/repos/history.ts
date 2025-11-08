@@ -1,7 +1,7 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { history, workouts } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
-import { eq, desc, gte, lte, and } from "drizzle-orm";
+import { eq, desc, gte, lte, and, or, lt } from "drizzle-orm";
 
 export type History = typeof history.$inferSelect;
 
@@ -48,7 +48,7 @@ export async function logSession(input: NewHistoryEntry): Promise<History> {
       throw StorageError.validation("Duration must be non-negative");
     }
 
-    const result = await db
+    const result = await getDb()
       .insert(history)
       .values({
         workoutId: input.workoutId,
@@ -82,10 +82,10 @@ export async function listHistory(
 ): Promise<HistoryPage> {
   try {
     const limit = Math.min(Math.max(1, params.limit || 20), 100);
-    let query = db
+    let query = getDb()
       .select()
       .from(history)
-      .orderBy(desc(history.performedAt), desc(history.id));
+      .orderBy(desc(history.performedAt), desc(history.id)) as any;
 
     // Apply date range filters
     const conditions: any[] = [];
@@ -106,17 +106,13 @@ export async function listHistory(
     if (params.cursor) {
       const cursorDate = new Date(params.cursor.performedAt);
       query = query.where(
-        and(
-          lte(history.performedAt, cursorDate),
-          // Exclude the cursor row itself
-          or(
-            lt(history.performedAt, cursorDate),
-            and(
-              eq(history.performedAt, cursorDate),
-              lt(history.id, params.cursor.id)
-            )
-          )
-        )
+        (or(
+          lt(history.performedAt, cursorDate),
+          (and(
+            eq(history.performedAt, cursorDate),
+            lt(history.id, params.cursor.id)
+          ) as any)
+        ) as any)
       );
     }
 
@@ -164,7 +160,7 @@ export async function backfillHistory(
     // Insert with ON CONFLICT DO NOTHING for idempotency
     for (const entry of entries) {
       try {
-        const result = await db
+        const result = await getDb()
           .insert(history)
           .values({
             id: entry.id,
@@ -193,12 +189,4 @@ export async function backfillHistory(
       error instanceof Error ? error.message : String(error)
     );
   }
-}
-
-// Helper function for keyset pagination
-function or(...conditions: any[]) {
-  return conditions.reduce((acc, cond) => acc || cond);
-}
-function lt(field: any, value: any) {
-  return field < value;
 }

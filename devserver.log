@@ -1,0 +1,18 @@
+
+> repe-app@0.1.0 dev
+> next dev --turbopack
+
+   Ôû▓ Next.js 15.5.3 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.7:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ┬À optimizePackageImports
+
+ Ô£ô Starting...
+ Ô£ô Ready in 1327ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 1111ms
+ GET /api/history?limit=20 200 in 2417ms
+ Ô£ô Compiled /api/exercises in 149ms
+ GET /api/exercises?limit=3 400 in 436ms

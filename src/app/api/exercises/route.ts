@@ -5,8 +5,8 @@ import { StorageError, errorToHttpStatus } from '@/lib/storage-errors';
 
 // Validation schemas
 const QuerySchema = z.object({
-  search: z.string().optional(),
-  category: z.string().optional(),
+  search: z.string().nullable().optional(),
+  category: z.string().nullable().optional(),
   limit: z.coerce.number().int().positive().default(20).pipe(z.number().max(100)),
   offset: z.coerce.number().int().nonnegative().default(0),
 });
@@ -28,7 +28,12 @@ export async function GET(request: NextRequest) {
       offset: searchParams.get('offset'),
     });
 
-    const result = await listExercises(query);
+    const result = await listExercises({
+      search: query.search || undefined,
+      category: query.category || undefined,
+      limit: query.limit,
+      offset: query.offset,
+    });
 
     return NextResponse.json(
       {

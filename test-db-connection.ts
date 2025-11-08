@@ -1,10 +1,12 @@
-import { db } from './src/lib/db';
+import { getDb } from './src/lib/db';
 import { exercises } from './src/lib/db/schema';
 import { count } from 'drizzle-orm';
 
 async function testConnection() {
   try {
     console.log('🔍 Probando conexión a Neon...');
+
+    const db = getDb();
 
     // Test 1: Simple query
     console.log('\n✅ Test 1: Verificando tablas...');

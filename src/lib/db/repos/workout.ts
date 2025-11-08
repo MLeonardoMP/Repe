@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import {
   workouts,
   workoutExercises,
@@ -10,14 +10,14 @@ import { sql, eq, desc } from "drizzle-orm";
 
 export type Workout = typeof workouts.$inferSelect;
 export type WorkoutExercise = typeof workoutExercises.$inferSelect;
-export type Exercise = typeof exercises.$inferSelect;
+export type WorkoutExerciseType = typeof exercises.$inferSelect;
 
 export interface WorkoutWithExercises extends Workout {
   exercises: WorkoutExercise[];
 }
 
 export interface WorkoutDetail extends Workout {
-  exercises: (WorkoutExercise & { exercise: Exercise })[];
+  exercises: (WorkoutExercise & { exercise: WorkoutExerciseType })[];
   sets: any[];
 }
 
@@ -44,7 +44,7 @@ export async function listWorkouts(params: {
   try {
     const { limit = 20, offset = 0 } = params;
 
-    const result = await db
+    const result = await getDb()
       .select()
       .from(workouts)
       .orderBy(desc(workouts.createdAt))
@@ -54,7 +54,7 @@ export async function listWorkouts(params: {
     // For each workout, get its exercises
     const workoutsWithExercises: WorkoutWithExercises[] = [];
     for (const workout of result) {
-      const exs = await db
+      const exs = await getDb()
         .select()
         .from(workoutExercises)
         .where(eq(workoutExercises.workoutId, workout.id))
@@ -80,7 +80,7 @@ export async function listWorkouts(params: {
  */
 export async function getWorkout(id: string): Promise<WorkoutDetail | null> {
   try {
-    const result = await db
+    const result = await getDb()
       .select()
       .from(workouts)
       .where(eq(workouts.id, id))
@@ -93,7 +93,7 @@ export async function getWorkout(id: string): Promise<WorkoutDetail | null> {
     const workout = result[0];
 
     // Get workout exercises
-    const exs = await db
+    const exs = await getDb()
       .select()
       .from(workoutExercises)
       .where(eq(workoutExercises.workoutId, workout.id))
@@ -107,7 +107,7 @@ export async function getWorkout(id: string): Promise<WorkoutDetail | null> {
     };
 
     for (const ex of exs) {
-      const exercise = await db
+      const exercise = await getDb()
         .select()
         .from(exercises)
         .where(eq(exercises.id, ex.exerciseId))
@@ -121,7 +121,7 @@ export async function getWorkout(id: string): Promise<WorkoutDetail | null> {
       }
 
       // Get sets for this workout exercise
-      const exSets = await db
+      const exSets = await getDb()
         .select()
         .from(sets)
         .where(eq(sets.workoutExerciseId, ex.id));
@@ -157,7 +157,7 @@ export async function upsertWorkout(
 
     // Create or update workout
     if (workoutId) {
-      await db
+      await getDb()
         .update(workouts)
         .set({
           name: payload.name.trim(),
@@ -165,7 +165,7 @@ export async function upsertWorkout(
         })
         .where(eq(workouts.id, workoutId));
     } else {
-      const result = await db
+      const result = await getDb()
         .insert(workouts)
         .values({
           name: payload.name.trim(),
@@ -179,20 +179,19 @@ export async function upsertWorkout(
     }
 
     // Remove old exercises
-    await db
+    await getDb()
       .delete(workoutExercises)
       .where(eq(workoutExercises.workoutId, workoutId));
-
     // Insert new exercises
     for (const ex of payload.exercises) {
-      await db.insert(workoutExercises).values({
+      await getDb().insert(workoutExercises).values({
         workoutId,
         exerciseId: ex.id,
         orderIndex: ex.orderIndex,
         targetSets: ex.targetSets,
         targetReps: ex.targetReps,
         targetWeight: ex.targetWeight ? parseFloat(ex.targetWeight.toString()) : null,
-      });
+      } as any);
     }
 
     // Return full details
@@ -215,7 +214,7 @@ export async function upsertWorkout(
  */
 export async function deleteWorkout(id: string): Promise<void> {
   try {
-    await db.delete(workouts).where(eq(workouts.id, id));
+    await getDb().delete(workouts).where(eq(workouts.id, id));
   } catch (error) {
     throw StorageError.internal(
       "Failed to delete workout",

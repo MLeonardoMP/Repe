@@ -1,38 +1,40 @@
 /**
  * GET /api/exercise-library
- * Returns the list of available exercises from the seed data
+ * Returns the list of available exercises from the database
  */
 
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { listExercises } from '@/lib/db/repos/exercise';
+import { StorageError, errorToHttpStatus } from '@/lib/storage-errors';
 
 export async function GET() {
   try {
-    // Read the exercise library seed file
-    const filePath = path.join(process.cwd(), 'data', 'exercise-library-seed.json');
-    const fileContents = await fs.readFile(filePath, 'utf8');
-    const data = JSON.parse(fileContents);
-
-    // Extract exercises array from the seed data structure
-    const exercises = data.exercises || [];
+    // Get all exercises from database with a high limit
+    const result = await listExercises({
+      limit: 1000,
+      offset: 0,
+    });
 
     // Return success response with exercises
     return NextResponse.json({
       success: true,
-      data: exercises,
+      data: result.data,
     });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error loading exercise library:', message);
-    
+  } catch (error) {
+    if (error instanceof StorageError) {
+      return NextResponse.json(
+        { error: error.type, message: error.message },
+        { status: errorToHttpStatus(error) }
+      );
+    }
+
+    console.error('GET /api/exercise-library error:', error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
           message: 'Failed to load exercise library',
-          details: message,
         },
       },
       { status: 500 }

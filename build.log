@@ -1,0 +1,94 @@
+
+> repe-app@0.1.0 build
+> next build --turbopack
+
+   Ôû▓ Next.js 15.5.3 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ┬À optimizePackageImports
+
+   Creating an optimized production build ...
+ Ô£ô Finished writing to disk in 75ms
+ Ô£ô Compiled successfully in 1959ms
+   Linting and checking validity of types ...
+
+./src/app/api/history/route.ts
+39:14  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/history/page.tsx
+7:29  Warning: 'CardHeader' is defined but never used.  @typescript-eslint/no-unused-vars
+7:41  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+60:6  Warning: React Hook useEffect has a missing dependency: 'searchQuery'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/workout/active/page.tsx
+209:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/workout/new/page.tsx
+9:15  Warning: 'Exercise' is defined but never used.  @typescript-eslint/no-unused-vars
+55:13  Warning: 'template' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/workout/[id]/page.tsx
+7:29  Warning: 'CardHeader' is defined but never used.  @typescript-eslint/no-unused-vars
+7:41  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/hooks/use-timer.ts
+95:6  Warning: React Hook useEffect has missing dependencies: 'autoStart' and 'start'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/useWorkoutHistory.ts
+159:6  Warning: React Hook useEffect has a missing dependency: 'loadWorkouts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/lib/db/repos/exercise.ts
+4:10  Warning: 'sql' is defined but never used.  @typescript-eslint/no-unused-vars
+31:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+49:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/db/repos/history.ts
+2:19  Warning: 'workouts' is defined but never used.  @typescript-eslint/no-unused-vars
+88:64  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+91:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+114:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+115:14  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/db/repos/preference.ts
+17:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/db/repos/set.ts
+2:16  Warning: 'workoutExercises' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/db/repos/workout.ts
+9:10  Warning: 'sql' is defined but never used.  @typescript-eslint/no-unused-vars
+21:9  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/db/schema.ts
+9:3  Warning: 'uniqueIndex' is defined but never used.  @typescript-eslint/no-unused-vars
+10:3  Warning: 'foreignKey' is defined but never used.  @typescript-eslint/no-unused-vars
+12:3  Warning: 'serial' is defined but never used.  @typescript-eslint/no-unused-vars
+14:3  Warning: 'varchar' is defined but never used.  @typescript-eslint/no-unused-vars
+15:3  Warning: 'primaryKey' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/db/services/migration.ts
+4:31  Warning: 'sets' is defined but never used.  @typescript-eslint/no-unused-vars
+20:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+38:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+48:25  Warning: 'data' is defined but never used.  @typescript-eslint/no-unused-vars
+48:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/storage.ts
+82:6  Warning: 'StorageExerciseTemplate' is defined but never used.  @typescript-eslint/no-unused-vars
+356:17  Warning: 'createdAt' is defined but never used.  @typescript-eslint/no-unused-vars
+356:28  Warning: 'updatedAt' is defined but never used.  @typescript-eslint/no-unused-vars
+380:13  Warning: 'createdAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+380:24  Warning: 'updatedAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+402:13  Warning: 'createdAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+402:24  Warning: 'updatedAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+423:13  Warning: 'createdAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+423:24  Warning: 'updatedAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/validation.ts
+9:3  Warning: 'UserPreferences' is defined but never used.  @typescript-eslint/no-unused-vars
+20:7  Warning: 'PositiveNumber' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+21:7  Warning: 'NonNegativeNumber' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+30:7  Warning: 'DurationSchema' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+31:7  Warning: 'DistanceSchema' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

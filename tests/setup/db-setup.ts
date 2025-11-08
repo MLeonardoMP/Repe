@@ -1,14 +1,14 @@
-import { drizzle } from ''drizzle-orm/neon-http'';
-import { Client } from ''@neondatabase/serverless'';
-import * as schema from ''@/lib/db/schema'';
-import { sql } from ''drizzle-orm'';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
+import * as schema from '@/lib/db/schema';
+import { sql } from 'drizzle-orm';
 import {
   exercises as exercisesTable,
   workouts as workoutsTable,
   workoutExercises as workoutExercisesTable,
   sets as setsTable,
   history as historyTable,
-} from ''@/lib/db/schema'';
+} from '@/lib/db/schema';
 
 /**
  * Create a test database connection for integration tests
@@ -17,15 +17,13 @@ import {
 export async function createTestDb() {
   const testDbUrl = process.env.DATABASE_URL_TEST || process.env.DATABASE_URL;
   if (!testDbUrl) {
-    throw new Error(''DATABASE_URL_TEST or DATABASE_URL environment variable is required for tests'');
+    throw new Error('DATABASE_URL_TEST or DATABASE_URL environment variable is required for tests');
   }
 
-  const client = new Client({ connectionString: testDbUrl });
-  const db = drizzle(client, { schema });
+  const sql = neon(testDbUrl);
+  const db = drizzle({ client: sql, schema });
 
-  // Begin a transaction for test isolation (if needed)
-  // This allows tests to run in parallel with isolated data
-  return { db, client };
+  return { db, client: null };
 }
 
 /**
@@ -34,9 +32,10 @@ export async function createTestDb() {
  */
 export async function cleanupTestDb(client: any) {
   try {
-    await client.end?.();
+    // HTTP driver cleanup is handled by connection pool
+    // No explicit cleanup needed
   } catch (error) {
-    console.error(''Error cleaning up test database:'', error);
+    console.error('Error cleaning up test database:', error);
   }
 }
 
@@ -48,7 +47,7 @@ export const fixtures = {
     create: async (db: any, data: Partial<typeof exercisesTable.$inferInsert> = {}) => {
       const defaults = {
         name: `Test Exercise ${Math.random()}`,
-        category: ''strength'',
+        category: 'strength',
         equipment: [],
         ...data,
       };
@@ -64,7 +63,7 @@ export const fixtures = {
     create: async (db: any, data: Partial<typeof workoutsTable.$inferInsert> = {}) => {
       const defaults = {
         name: `Test Workout ${Math.random()}`,
-        source: ''custom'',
+        source: 'custom',
         ...data,
       };
       const result = await db
@@ -129,7 +128,7 @@ export async function clearAllTables(db: any) {
     await db.delete(historyTable);
     await db.delete(exercisesTable);
   } catch (error) {
-    console.error(''Error clearing tables:'', error);
+    console.error('Error clearing tables:', error);
     throw error;
   }
 }

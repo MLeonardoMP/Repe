@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { userSettings } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
 import { eq } from "drizzle-orm";
@@ -8,8 +8,8 @@ export type UserSettings = typeof userSettings.$inferSelect;
 
 // Validate user settings with Zod
 const UserSettingsSchema = z.object({
-  units: z.enum(["metric", "imperial"]).default("metric"),
-  preferencesJson: z.record(z.any()).default({}),
+  units: z.enum(["metric" as const, "imperial" as const]).default("metric"),
+  preferencesJson: z.any().default({}),
 });
 
 export interface UserSettingsInput {
@@ -25,7 +25,7 @@ export async function getPreferences(
   userId?: string
 ): Promise<UserSettings | null> {
   try {
-    let query = db.select().from(userSettings);
+    let query = getDb().select().from(userSettings) as any;
 
     if (userId) {
       query = query.where(eq(userSettings.userId, userId));
@@ -55,7 +55,7 @@ export async function savePreferences(
     });
 
     // Check if preferences exist
-    let query = db.select().from(userSettings);
+    let query = getDb().select().from(userSettings) as any;
     if (input.userId) {
       query = query.where(eq(userSettings.userId, input.userId));
     }
@@ -65,7 +65,7 @@ export async function savePreferences(
     let result;
     if (existing[0]) {
       // Update existing
-      result = await db
+      result = await getDb()
         .update(userSettings)
         .set({
           units: validated.units,
@@ -76,7 +76,7 @@ export async function savePreferences(
         .returning();
     } else {
       // Create new
-      result = await db
+      result = await getDb()
         .insert(userSettings)
         .values({
           units: validated.units,
