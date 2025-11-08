@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/neon-http';
-import { Client } from '@neondatabase/serverless';
+import { neon } from '@neondatabase/serverless';
 import * as schema from './schema';
 
 // Get database URL from environment or fallback
@@ -11,19 +11,14 @@ const getDatabaseUrl = (): string => {
   return url;
 };
 
-// Create Neon client
-const createClient = () => {
-  const url = getDatabaseUrl();
-  return new Client({ connectionString: url });
-};
-
 // Create and export Drizzle instance
 let dbInstance: ReturnType<typeof drizzle> | null = null;
 
 export const getDb = () => {
   if (!dbInstance) {
-    const client = createClient();
-    dbInstance = drizzle(client, { schema });
+    const url = getDatabaseUrl();
+    const sql = neon(url);
+    dbInstance = drizzle(sql, { schema });
   }
   return dbInstance;
 };
