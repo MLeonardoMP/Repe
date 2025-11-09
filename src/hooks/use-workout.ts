@@ -150,10 +150,39 @@ export function useWorkout(): UseWorkoutReturn {
   const finishWorkout = useCallback(async () => {
     if (!activeWorkout) return;
     
-    await storage.update(activeWorkout.id, {
+    const completedWorkout = await storage.update(activeWorkout.id, {
       status: 'completed',
       endTime: new Date().toISOString(),
     });
+    
+    // Log the completed workout to history
+    try {
+      console.log('[useWorkout] Finishing workout, logging to history:', completedWorkout);
+      const duration = completedWorkout.endTime && completedWorkout.startTime
+        ? Math.floor((new Date(completedWorkout.endTime).getTime() - new Date(completedWorkout.startTime).getTime()) / 1000)
+        : 0;
+      
+      const response = await fetch('/api/history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workoutId: completedWorkout.id,
+          performedAt: completedWorkout.startTime,
+          durationSeconds: duration,
+          notes: completedWorkout.notes,
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('[useWorkout] Failed to log workout to history:', response.statusText);
+      } else {
+        console.log('[useWorkout] Successfully logged workout to history');
+      }
+    } catch (error) {
+      console.error('[useWorkout] Error logging workout to history:', error);
+    }
     
     setActiveWorkout(null);
   }, [activeWorkout, storage]);

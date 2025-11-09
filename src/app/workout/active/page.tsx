@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExerciseCard } from '@/components/workout/ExerciseCard';
 import { ExercisePickerDialog } from '@/components/workout/ExercisePickerDialog';
-import { QuickSetDialog } from '@/components/workout/QuickSetDialog';
+import { QuickSetForm } from '@/components/workout/QuickSetForm';
 import { useWorkout, type Exercise } from '@/hooks/use-workout';
 
 export default function ActiveWorkoutPage() {
@@ -20,8 +20,7 @@ export default function ActiveWorkoutPage() {
   
   // Dialog states
   const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
-  const [isQuickSetDialogOpen, setIsQuickSetDialogOpen] = useState(false);
-  const [currentExerciseIdForSet, setCurrentExerciseIdForSet] = useState<string | null>(null);
+  const [expandedSetFormExerciseId, setExpandedSetFormExerciseId] = useState<string | null>(null);
   
   // Redirect if no active workout after hook has finished loading
   useEffect(() => {
@@ -72,8 +71,8 @@ export default function ActiveWorkoutPage() {
     try {
       const newSet = {
         id: Math.random().toString(36).substr(2, 9),
-        reps,
-        weight: weight && weight > 0 ? weight : 0,
+        repetitions: reps,
+        weight: weight && weight > 0 ? weight : undefined,
         completed: false,
         restTime: 60,
       };
@@ -84,14 +83,18 @@ export default function ActiveWorkoutPage() {
   };
 
   const handleAddSetClick = (exerciseId: string) => {
-    setCurrentExerciseIdForSet(exerciseId);
-    setIsQuickSetDialogOpen(true);
+    setExpandedSetFormExerciseId(exerciseId);
   };
 
   const handleSetConfirm = (reps: number, weight?: number) => {
-    if (currentExerciseIdForSet) {
-      handleAddSet(currentExerciseIdForSet, reps, weight);
+    if (expandedSetFormExerciseId) {
+      handleAddSet(expandedSetFormExerciseId, reps, weight);
+      setExpandedSetFormExerciseId(null);
     }
+  };
+
+  const handleSetCancel = () => {
+    setExpandedSetFormExerciseId(null);
   };
 
   const handleFinishWorkout = async () => {
@@ -210,14 +213,25 @@ export default function ActiveWorkoutPage() {
         {/* Exercises */}
         <div className="space-y-4">
           {activeWorkout.exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise as any}
-              onEditExercise={() => {}}
-              onAddSet={() => handleAddSetClick(exercise.id)}
-              onEditSet={() => {}}
-              onDeleteSet={() => {}}
-            />
+            <div key={exercise.id} className="space-y-3">
+              <ExerciseCard
+                exercise={exercise as any}
+                onEditExercise={() => {}}
+                onAddSet={() => handleAddSetClick(exercise.id)}
+                onEditSet={() => {}}
+                onDeleteSet={() => {}}
+              />
+              
+              {/* Inline Set Form */}
+              {expandedSetFormExerciseId === exercise.id && (
+                <QuickSetForm
+                  exerciseName={exercise.name}
+                  onConfirm={handleSetConfirm}
+                  onCancel={handleSetCancel}
+                  autoFocus
+                />
+              )}
+            </div>
           ))}
         </div>
 
@@ -273,12 +287,6 @@ export default function ActiveWorkoutPage() {
             handleAddExercise(name);
             setIsExercisePickerOpen(false);
           }}
-        />
-
-        <QuickSetDialog
-          open={isQuickSetDialogOpen}
-          onClose={() => setIsQuickSetDialogOpen(false)}
-          onConfirm={handleSetConfirm}
         />
       </div>
     </div>
