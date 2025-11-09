@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useStorage } from './use-storage';
 
 // Types based on test expectations
@@ -46,12 +46,13 @@ export interface UseWorkoutReturn {
   // Current state
   activeWorkout: WorkoutSession | null;
   isActive: boolean;
+  isLoading: boolean;
   currentExercise: Exercise | null;
   workoutHistory: WorkoutSession[];
   stats: WorkoutStats;
   
   // Workout management
-  startWorkout: (template: WorkoutTemplate) => Promise<void>;
+  startWorkout: (template: WorkoutTemplate) => Promise<WorkoutSession>;
   pauseWorkout: () => Promise<void>;
   resumeWorkout: () => Promise<void>;
   finishWorkout: () => Promise<void>;
@@ -81,8 +82,33 @@ export function useWorkout(): UseWorkoutReturn {
   const [activeWorkout, setActiveWorkout] = useState<WorkoutSession | null>(null);
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [workoutHistory, setWorkoutHistory] = useState<WorkoutSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Load active workout on mount
+  useEffect(() => {
+    const loadActiveWorkout = async () => {
+      try {
+        console.log('[useWorkout] Loading active workout from storage...');
+        const workouts = await storage.list();
+        console.log('[useWorkout] All workouts:', workouts);
+        const active = workouts.find(w => w.status === 'active');
+        console.log('[useWorkout] Active workout found:', active);
+        if (active) {
+          setActiveWorkout(active);
+        }
+      } catch (error) {
+        console.error('Error loading active workout:', error);
+      } finally {
+        console.log('[useWorkout] Loading finished, setting isLoading to false');
+        setIsLoading(false);
+      }
+    };
+    loadActiveWorkout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run on mount
   
   const startWorkout = useCallback(async (template: WorkoutTemplate) => {
+    console.log('[useWorkout] Starting new workout with template:', template);
     const newWorkout: Omit<WorkoutSession, 'id'> = {
       userId: 'user-1', // Default user for now
       name: template.name,
@@ -93,8 +119,12 @@ export function useWorkout(): UseWorkoutReturn {
       notes: '',
     };
     
+    console.log('[useWorkout] Creating workout in storage:', newWorkout);
     const createdWorkout = await storage.create(newWorkout);
+    console.log('[useWorkout] Workout created:', createdWorkout);
     setActiveWorkout(createdWorkout);
+    console.log('[useWorkout] Active workout state updated');
+    return createdWorkout;
   }, [storage]);
 
   const pauseWorkout = useCallback(async () => {
@@ -272,6 +302,7 @@ export function useWorkout(): UseWorkoutReturn {
   return {
     activeWorkout,
     isActive: activeWorkout?.status === 'active',
+    isLoading,
     currentExercise,
     workoutHistory,
     stats,

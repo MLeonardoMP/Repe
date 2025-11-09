@@ -12,9 +12,9 @@ import { useWorkout, type Exercise } from '@/hooks/use-workout';
 
 export default function ActiveWorkoutPage() {
   const router = useRouter();
-  const { activeWorkout, isActive, addExercise: addExerciseToWorkout, addSet: addSetToWorkout, finishWorkout: finishActiveWorkout } = useWorkout();
+  const { activeWorkout, isActive, isLoading, addExercise: addExerciseToWorkout, addSet: addSetToWorkout, finishWorkout: finishActiveWorkout } = useWorkout();
   
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
   const [isFinishing, setIsFinishing] = useState(false);
   const [workoutDuration, setWorkoutDuration] = useState(0);
   
@@ -23,13 +23,19 @@ export default function ActiveWorkoutPage() {
   const [isQuickSetDialogOpen, setIsQuickSetDialogOpen] = useState(false);
   const [currentExerciseIdForSet, setCurrentExerciseIdForSet] = useState<string | null>(null);
   
-  // Redirect if no active workout
+  // Redirect if no active workout after hook has finished loading
   useEffect(() => {
-    if (!isActive && !loading) {
-      router.push('/');
+    console.log('[ActivePage] Effect triggered - isLoading:', isLoading, 'isActive:', isActive, 'activeWorkout:', activeWorkout);
+    if (!isLoading) {
+      if (!isActive) {
+        console.log('[ActivePage] No active workout, redirecting to home');
+        router.push('/');
+      } else {
+        console.log('[ActivePage] Active workout found, staying on page');
+      }
+      setPageLoading(false);
     }
-    setLoading(false);
-  }, [isActive, loading, router]);
+  }, [isActive, isLoading, activeWorkout, router]);
   
   // Update workout duration every second
   useEffect(() => {
@@ -116,7 +122,7 @@ export default function ActiveWorkoutPage() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  if (loading) {
+  if (pageLoading) {
     return (
       <div className="flex-1 p-4">
         <div className="max-w-md mx-auto">
