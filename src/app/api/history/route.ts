@@ -15,7 +15,7 @@ const QuerySchema = z.object({
 });
 
 const LogSessionSchema = z.object({
-  workoutId: z.string().uuid().optional(),
+  workoutId: z.string().optional(),
   performedAt: z.string().datetime().optional(),
   durationSeconds: z.number().int().nonnegative().optional(),
   notes: z.string().optional(),

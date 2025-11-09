@@ -162,21 +162,30 @@ export function useWorkout(): UseWorkoutReturn {
         ? Math.floor((new Date(completedWorkout.endTime).getTime() - new Date(completedWorkout.startTime).getTime()) / 1000)
         : 0;
       
+      const payload = {
+        workoutId: completedWorkout.id,
+        performedAt: completedWorkout.startTime,
+        durationSeconds: duration,
+        notes: completedWorkout.notes,
+      };
+      
+      console.log('[useWorkout] Sending history payload:', payload);
+      
       const response = await fetch('/api/history', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          workoutId: completedWorkout.id,
-          performedAt: completedWorkout.startTime,
-          durationSeconds: duration,
-          notes: completedWorkout.notes,
-        }),
+        body: JSON.stringify(payload),
       });
       
       if (!response.ok) {
-        console.error('[useWorkout] Failed to log workout to history:', response.statusText);
+        const errorData = await response.json();
+        console.error('[useWorkout] Failed to log workout to history:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+        });
       } else {
         console.log('[useWorkout] Successfully logged workout to history');
       }
