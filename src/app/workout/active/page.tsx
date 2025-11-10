@@ -77,8 +77,8 @@ export default function ActiveWorkoutPage() {
     try {
       const newSet = {
         id: Math.random().toString(36).substr(2, 9),
-        repetitions: reps,
-        weight: weight && weight > 0 ? weight : undefined,
+        reps: reps,
+        weight: weight && weight > 0 ? weight : 0,
         completed: false,
         restTime: 60,
       };

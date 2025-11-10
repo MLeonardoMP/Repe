@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useWorkout } from '@/hooks/use-workout';
-import type { Exercise } from '@/types/exercise';
+import { useWorkout, type Exercise } from '@/hooks/use-workout';
 
 export default function NewWorkoutPage() {
   const router = useRouter();

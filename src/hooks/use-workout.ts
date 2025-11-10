@@ -180,22 +180,34 @@ export function useWorkout(): UseWorkoutReturn {
       });
       
       if (!response.ok) {
-        let errorData = {};
+        let errorData: any = { source: 'response_error' };
         try {
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
             errorData = await response.json();
+            errorData.source = 'json_response';
           } else {
-            errorData = { text: await response.text() };
+            const text = await response.text();
+            errorData = { 
+              source: 'text_response',
+              body: text || '(empty response body)'
+            };
           }
         } catch (parseError) {
           console.warn('[useWorkout] Could not parse error response:', parseError);
-          errorData = { parseError: parseError instanceof Error ? parseError.message : 'Unknown parse error' };
+          errorData = { 
+            source: 'parse_error',
+            parseError: parseError instanceof Error ? parseError.message : String(parseError),
+          };
         }
         console.error('[useWorkout] Failed to log workout to history:', {
           status: response.status,
           statusText: response.statusText,
+          headers: {
+            contentType: response.headers.get('content-type'),
+          },
           errorData,
+          message: `API request failed with status ${response.status}`,
         });
       } else {
         console.log('[useWorkout] Successfully logged workout to history');
