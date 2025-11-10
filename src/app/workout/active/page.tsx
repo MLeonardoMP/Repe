@@ -2,13 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExerciseCard } from '@/components/workout/ExerciseCard';
-import { ExercisePickerDialog } from '@/components/workout/ExercisePickerDialog';
 import { QuickSetForm } from '@/components/workout/QuickSetForm';
 import { useWorkout, type Exercise } from '@/hooks/use-workout';
+
+// Dynamic import of ExercisePickerComponent
+const ExercisePickerComponent = dynamic(
+  () => import('@/components/workout/ExercisePickerDialog').then(mod => ({ default: mod.ExercisePickerComponent })),
+  { ssr: false }
+);
 
 export default function ActiveWorkoutPage() {
   const router = useRouter();
@@ -236,22 +242,32 @@ export default function ActiveWorkoutPage() {
         </div>
 
         {/* Add Exercise */}
-        <Card className="bg-gray-900 border-gray-700">
-          <CardContent className="p-4">
-            <Button
-              variant="ghost"
-              onClick={() => setIsExercisePickerOpen(true)}
-              className="w-full text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 border border-dashed border-gray-600 py-8"
-            >
-              <div className="text-center">
-                <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v16m8-8H4" />
-                </svg>
-                <div>Agregar Ejercicio</div>
-              </div>
-            </Button>
-          </CardContent>
-        </Card>
+        {isExercisePickerOpen ? (
+          <ExercisePickerComponent
+            onClose={() => setIsExercisePickerOpen(false)}
+            onSelect={(name) => {
+              handleAddExercise(name);
+              setIsExercisePickerOpen(false);
+            }}
+          />
+        ) : (
+          <Card className="bg-gray-900 border-gray-700">
+            <CardContent className="p-4">
+              <Button
+                variant="ghost"
+                onClick={() => setIsExercisePickerOpen(true)}
+                className="w-full text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 border border-dashed border-gray-600 py-8"
+              >
+                <div className="text-center">
+                  <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <div>Agregar Ejercicio</div>
+                </div>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Action Buttons */}
         <div className="space-y-3">
@@ -278,16 +294,6 @@ export default function ActiveWorkoutPage() {
             Guardar y Salir
           </Button>
         </div>
-
-        {/* Dialogs */}
-        <ExercisePickerDialog
-          open={isExercisePickerOpen}
-          onClose={() => setIsExercisePickerOpen(false)}
-          onSelect={(name) => {
-            handleAddExercise(name);
-            setIsExercisePickerOpen(false);
-          }}
-        />
       </div>
     </div>
   );

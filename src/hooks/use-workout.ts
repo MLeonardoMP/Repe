@@ -180,7 +180,18 @@ export function useWorkout(): UseWorkoutReturn {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData = {};
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json();
+          } else {
+            errorData = { text: await response.text() };
+          }
+        } catch (parseError) {
+          console.warn('[useWorkout] Could not parse error response:', parseError);
+          errorData = { parseError: parseError instanceof Error ? parseError.message : 'Unknown parse error' };
+        }
         console.error('[useWorkout] Failed to log workout to history:', {
           status: response.status,
           statusText: response.statusText,
@@ -190,7 +201,7 @@ export function useWorkout(): UseWorkoutReturn {
         console.log('[useWorkout] Successfully logged workout to history');
       }
     } catch (error) {
-      console.error('[useWorkout] Error logging workout to history:', error);
+      console.error('[useWorkout] Error logging workout to history:', error instanceof Error ? error.message : error);
     }
     
     setActiveWorkout(null);
