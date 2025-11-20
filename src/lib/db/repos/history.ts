@@ -28,7 +28,7 @@ export interface ListHistoryParams {
 }
 
 export interface NewHistoryEntry {
-  workoutId?: string;
+  workoutId?: string | null;
   performedAt?: Date | string;
   durationSeconds?: number;
   notes?: string;
