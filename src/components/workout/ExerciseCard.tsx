@@ -78,7 +78,8 @@ const SetItem = React.memo<SetItemProps>(({ set, index, onEdit, onDelete }) => {
   };
 
   // Handle invalid data gracefully
-  const reps = set.repetitions || 0;
+  // Support both 'reps' (localStorage) and 'repetitions' (API) field names
+  const reps = (set as any).reps ?? (set as any).repetitions ?? 0;
   const weight = set.weight;
   const intensity = set.intensity;
 

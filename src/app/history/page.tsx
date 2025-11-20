@@ -1,103 +1,130 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { WorkoutSessionCard } from '@/components/workout/WorkoutSessionCard';
-import type { WorkoutSession } from '@/types/workout';
+import type { HistoryCursor, HistoryEntry, HistoryResponse } from '@/types/history';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function HistoryPage() {
   const router = useRouter();
-  const [workouts, setWorkouts] = useState<WorkoutSession[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [page, setPage] = useState(1);
+  const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const [cursor, setCursor] = useState<HistoryCursor | null>(null);
   const [hasMore, setHasMore] = useState(true);
-  const [totalWorkouts, setTotalWorkouts] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const ITEMS_PER_PAGE = 10;
-
-  const loadWorkouts = async (pageNum: number = 1, query: string = '') => {
-    try {
-      const searchParams = new URLSearchParams({
-        page: pageNum.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
-        ...(query && { search: query }),
-      });
-
-      const response = await fetch(`/api/workouts?${searchParams}`);
-      if (response.ok) {
-        const data = await response.json();
-        
-        if (pageNum === 1) {
-          setWorkouts(data.data.workouts || []);
-        } else {
-          setWorkouts(prev => [...prev, ...(data.data.workouts || [])]);
-        }
-        
-        setTotalWorkouts(data.data.total || 0);
-        setHasMore((data.data.workouts?.length || 0) === ITEMS_PER_PAGE);
+  // Fetch history using server-side cursor pagination so we always read the DB source of truth.
+  const fetchHistory = useCallback(
+    async (options?: { cursor?: HistoryCursor; append?: boolean }) => {
+      const isLoadMore = Boolean(options?.append);
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
       }
-    } catch (error) {
-      console.error('Error loading workouts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      setError(null);
+
+      try {
+        const params = new URLSearchParams({ limit: ITEMS_PER_PAGE.toString() });
+        if (options?.cursor) {
+          params.set('cursor', JSON.stringify(options.cursor));
+        }
+
+        const response = await fetch(`/api/history?${params.toString()}`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load history: ${response.status}`);
+        }
+
+        const payload: HistoryResponse = await response.json();
+        setEntries(prev => (options?.append ? [...prev, ...payload.data] : payload.data));
+        setCursor(payload.cursor ?? null);
+        setHasMore(payload.hasMore);
+      } catch (err) {
+        console.error('Error loading history:', err);
+        setError('No pudimos cargar tu historial. Intenta nuevamente.');
+      } finally {
+        if (isLoadMore) {
+          setLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    loadWorkouts(1, searchQuery);
-    setPage(1);
-  }, [searchQuery]);
+    fetchHistory();
+  }, [fetchHistory]);
 
-  useEffect(() => {
-    if (page > 1) {
-      loadWorkouts(page, searchQuery);
+  const filteredEntries = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return entries;
     }
-  }, [page]);
+    const term = searchQuery.toLowerCase();
+    return entries.filter(entry => {
+      const inName = entry.workoutName?.toLowerCase().includes(term);
+      const inNotes = entry.notes?.toLowerCase().includes(term);
+      return Boolean(inName || inNotes);
+    });
+  }, [entries, searchQuery]);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+  const totalWorkouts = filteredEntries.length;
+  const totalDurationSeconds = filteredEntries.reduce(
+    (sum, entry) => sum + (entry.durationSeconds || 0),
+    0
+  );
+  const averageDuration = totalWorkouts > 0
+    ? Math.round(totalDurationSeconds / totalWorkouts)
+    : 0;
+  const lastWorkout = filteredEntries[0]?.performedAt ?? null;
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
   };
 
   const loadMore = () => {
-    if (hasMore && !loading) {
-      setPage(prev => prev + 1);
-    }
+    if (!hasMore || loadingMore || !cursor) return;
+    fetchHistory({ cursor, append: true });
   };
 
-  const handleViewWorkout = (workoutId: string) => {
+  const handleViewWorkout = (workoutId: string | null) => {
+    if (!workoutId) return;
     router.push(`/workout/${workoutId}`);
   };
 
-  const handleEditWorkout = (workoutId: string) => {
-    router.push(`/workout/active?id=${workoutId}`);
-  };
-
-  const handleDeleteWorkout = async (workoutId: string) => {
-    if (window.confirm('Are you sure you want to delete this workout? This action cannot be undone.')) {
-      try {
-        const response = await fetch(`/api/workouts/${workoutId}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          // Remove the workout from the list
-          setWorkouts(prev => prev.filter(w => w.id !== workoutId));
-          setTotalWorkouts(prev => prev - 1);
-        } else {
-          console.error('Failed to delete workout');
-        }
-      } catch (error) {
-        console.error('Error deleting workout:', error);
-      }
+  const formatDate = (value: string) => {
+    try {
+      return new Date(value).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    } catch {
+      return value;
     }
   };
 
-  if (loading && workouts.length === 0) {
+  const formatDuration = (seconds?: number | null) => {
+    if (!seconds) return '—';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (minutes === 0) {
+      return `${remainingSeconds}s`;
+    }
+    return `${minutes}m ${remainingSeconds.toString().padStart(2, '0')}s`;
+  };
+
+  if (loading && entries.length === 0) {
     return (
       <div className="flex-1 p-4">
         <div className="max-w-md mx-auto">
@@ -132,7 +159,7 @@ export default function HistoryPage() {
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">Workout History</h1>
             {totalWorkouts > 0 && (
-              <p className="text-sm text-gray-400">{totalWorkouts} total workouts</p>
+              <p className="text-sm text-gray-400">{totalWorkouts} recorded sessions</p>
             )}
           </div>
         </div>
@@ -161,45 +188,82 @@ export default function HistoryPage() {
         </Card>
 
         {/* Quick Stats */}
-        {workouts.length > 0 && (
+        {entries.length > 0 && (
           <div className="grid grid-cols-3 gap-3">
             <Card className="bg-gray-900 border-gray-700">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">{totalWorkouts}</div>
-                <div className="text-xs text-gray-400">Total</div>
+                <div className="text-xs text-gray-400">Stored</div>
               </CardContent>
             </Card>
             <Card className="bg-gray-900 border-gray-700">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">
-                  {workouts.filter(w => w.endTime).length}
+                  {formatDuration(averageDuration)}
                 </div>
-                <div className="text-xs text-gray-400">Completed</div>
+                <div className="text-xs text-gray-400">Avg Duration</div>
               </CardContent>
             </Card>
             <Card className="bg-gray-900 border-gray-700">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">
-                  {workouts.filter(w => !w.endTime).length}
+                  {lastWorkout ? new Date(lastWorkout).toLocaleDateString() : '—'}
                 </div>
-                <div className="text-xs text-gray-400">Active</div>
+                <div className="text-xs text-gray-400">Last Session</div>
               </CardContent>
             </Card>
           </div>
         )}
 
+        {/* Error State */}
+        {error && (
+          <Card className="bg-red-950/40 border-red-900/40">
+            <CardContent className="py-4 text-sm text-red-200">
+              <p>{error}</p>
+              <Button size="sm" className="mt-3" onClick={() => fetchHistory()}>
+                Reintentar
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Workouts List */}
-        {workouts.length > 0 ? (
+        {filteredEntries.length > 0 ? (
           <div className="space-y-4">
             <div className="space-y-3">
-              {workouts.map((workout) => (
-                <WorkoutSessionCard
-                  key={workout.id}
-                  session={workout}
-                  onView={handleViewWorkout}
-                  onEdit={!workout.endTime ? handleEditWorkout : undefined}
-                  onDelete={handleDeleteWorkout}
-                />
+              {filteredEntries.map((entry) => (
+                <Card key={entry.id} className="bg-gray-900 border-gray-700">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-white text-base">
+                          {entry.workoutName || 'Logged Session'}
+                        </CardTitle>
+                        <p className="text-xs text-gray-400">{formatDate(entry.performedAt)}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={!entry.workoutId}
+                        onClick={() => handleViewWorkout(entry.workoutId ?? null)}
+                        className="text-blue-400 hover:text-blue-300"
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between text-sm text-gray-300">
+                      <span>Duration</span>
+                      <span className="font-medium">{formatDuration(entry.durationSeconds)}</span>
+                    </div>
+                    {entry.notes && (
+                      <p className="text-sm text-gray-400 border-t border-gray-800 pt-3">
+                        {entry.notes}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
 
@@ -209,10 +273,10 @@ export default function HistoryPage() {
                 <Button
                   variant="ghost"
                   onClick={loadMore}
-                  disabled={loading}
+                  disabled={loadingMore || !cursor}
                   className="text-blue-400 hover:text-blue-300"
                 >
-                  {loading ? (
+                  {loadingMore ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
                       Loading...
@@ -235,11 +299,11 @@ export default function HistoryPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white mb-2">
-                  {searchQuery ? 'No workouts found' : 'No workouts yet'}
+                  {searchQuery ? 'No sessions found' : 'No workouts yet'}
                 </h3>
                 <p className="text-gray-400 mb-4">
                   {searchQuery 
-                    ? `No workouts match "${searchQuery}"`
+                    ? `No sessions match "${searchQuery}"`
                     : 'Start your first workout to see it here'
                   }
                 </p>

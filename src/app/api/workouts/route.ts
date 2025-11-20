@@ -10,7 +10,9 @@ const QuerySchema = z.object({
 });
 
 const CreateWorkoutSchema = z.object({
+  id: z.string().uuid().optional(), // Permite sincronizar con localStorage
   name: z.string().min(1).max(255),
+  userId: z.string().optional(), // Para compatibilidad con useWorkout
   exercises: z.array(
     z.object({
       id: z.string().uuid(),
@@ -19,7 +21,7 @@ const CreateWorkoutSchema = z.object({
       targetReps: z.number().int().positive().optional(),
       targetWeight: z.number().positive().optional(),
     })
-  ),
+  ).optional().default([]), // Permitir workout sin ejercicios al iniciar
 });
 
 export async function GET(request: NextRequest) {

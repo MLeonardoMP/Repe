@@ -17,3 +17,6 @@ export * from './set';
 
 // API types
 export * from './api';
+
+// History types
+export * from './history';

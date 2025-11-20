@@ -45,8 +45,8 @@ jest.mock('fs', () => ({
   },
 }));
 
-// Mock fetch globally
-global.fetch = jest.fn();
+// Mock fetch globally with a rejected Promise so tests can override per-case
+global.fetch = jest.fn(() => Promise.reject(new Error('global.fetch is not mocked')));
 
 // Web API polyfills for Next.js API routes
 import { TextEncoder, TextDecoder } from 'util';

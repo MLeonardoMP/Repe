@@ -122,6 +122,30 @@ export function useWorkout(): UseWorkoutReturn {
     console.log('[useWorkout] Creating workout in storage:', newWorkout);
     const createdWorkout = await storage.create(newWorkout);
     console.log('[useWorkout] Workout created:', createdWorkout);
+    
+    // FASE 2: Sincronizar con Neon (non-blocking)
+    try {
+      const response = await fetch('/api/workouts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: createdWorkout.id,
+          name: createdWorkout.name,
+          userId: createdWorkout.userId,
+          exercises: [], // Inicialmente vacío
+        }),
+      });
+      
+      if (response.ok) {
+        console.log('[useWorkout] Workout synced to Neon successfully');
+      } else {
+        console.warn('[useWorkout] Failed to sync to Neon:', response.status);
+      }
+    } catch (error) {
+      console.warn('[useWorkout] Failed to sync workout to Neon (non-blocking):', error);
+      // No lanzar error, permitir que la app continúe
+    }
+    
     setActiveWorkout(createdWorkout);
     console.log('[useWorkout] Active workout state updated');
     return createdWorkout;
@@ -155,65 +179,55 @@ export function useWorkout(): UseWorkoutReturn {
       endTime: new Date().toISOString(),
     });
     
-    // Log the completed workout to history
+    // Calcular duración
+    const duration = completedWorkout.endTime && completedWorkout.startTime
+      ? Math.floor((new Date(completedWorkout.endTime).getTime() - new Date(completedWorkout.startTime).getTime()) / 1000)
+      : 0;
+    
+    // FASE 3: Intentar guardar con workoutId, con fallback
     try {
-      console.log('[useWorkout] Finishing workout, logging to history:', completedWorkout);
-      const duration = completedWorkout.endTime && completedWorkout.startTime
-        ? Math.floor((new Date(completedWorkout.endTime).getTime() - new Date(completedWorkout.startTime).getTime()) / 1000)
-        : 0;
-      
-      const payload = {
-        workoutId: completedWorkout.id,
-        performedAt: completedWorkout.startTime,
-        durationSeconds: duration,
-        notes: completedWorkout.notes,
-      };
-      
-      console.log('[useWorkout] Sending history payload:', payload);
+      console.log('[useWorkout] Attempting to log history with workoutId:', completedWorkout.id);
       
       const response = await fetch('/api/history', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workoutId: completedWorkout.id,
+          performedAt: completedWorkout.startTime,
+          durationSeconds: duration,
+          notes: completedWorkout.notes,
+        }),
       });
       
       if (!response.ok) {
-        let errorData: any = { source: 'response_error' };
-        try {
-          const contentType = response.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            errorData = await response.json();
-            errorData.source = 'json_response';
-          } else {
-            const text = await response.text();
-            errorData = { 
-              source: 'text_response',
-              body: text || '(empty response body)'
-            };
-          }
-        } catch (parseError) {
-          console.warn('[useWorkout] Could not parse error response:', parseError);
-          errorData = { 
-            source: 'parse_error',
-            parseError: parseError instanceof Error ? parseError.message : String(parseError),
-          };
-        }
-        console.error('[useWorkout] Failed to log workout to history:', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: {
-            contentType: response.headers.get('content-type'),
-          },
-          errorData,
-          message: `API request failed with status ${response.status}`,
-        });
-      } else {
-        console.log('[useWorkout] Successfully logged workout to history');
+        throw new Error(`History API returned ${response.status}`);
       }
+      
+      console.log('[useWorkout] Successfully logged workout to history with workoutId');
     } catch (error) {
-      console.error('[useWorkout] Error logging workout to history:', error instanceof Error ? error.message : error);
+      console.warn('[useWorkout] Failed with workoutId, trying fallback:', error);
+      
+      // FALLBACK: Guardar sin workoutId
+      try {
+        const fallbackResponse = await fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workoutId: null,
+            performedAt: completedWorkout.startTime,
+            durationSeconds: duration,
+            notes: `${completedWorkout.name}${completedWorkout.notes ? ` - ${completedWorkout.notes}` : ''}`,
+          }),
+        });
+        
+        if (fallbackResponse.ok) {
+          console.log('[useWorkout] Successfully logged to history without workoutId (fallback)');
+        } else {
+          console.error('[useWorkout] Fallback also failed:', fallbackResponse.status);
+        }
+      } catch (fallbackError) {
+        console.error('[useWorkout] Both attempts failed. Last error:', fallbackError);
+      }
     }
     
     setActiveWorkout(null);

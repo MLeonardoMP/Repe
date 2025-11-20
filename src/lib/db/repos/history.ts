@@ -5,13 +5,17 @@ import { eq, desc, gte, lte, and, or, lt } from "drizzle-orm";
 
 export type History = typeof history.$inferSelect;
 
+export interface HistoryListItem extends History {
+  workoutName: string | null;
+}
+
 export interface HistoryCursor {
   performedAt: string;
   id: string;
 }
 
 export interface HistoryPage {
-  data: History[];
+  data: HistoryListItem[];
   cursor?: HistoryCursor;
   hasMore: boolean;
 }
@@ -83,8 +87,17 @@ export async function listHistory(
   try {
     const limit = Math.min(Math.max(1, params.limit || 20), 100);
     let query = getDb()
-      .select()
+      .select({
+        id: history.id,
+        workoutId: history.workoutId,
+        performedAt: history.performedAt,
+        durationSeconds: history.durationSeconds,
+        notes: history.notes,
+        createdAt: history.createdAt,
+        workoutName: workouts.name,
+      })
       .from(history)
+      .leftJoin(workouts, eq(history.workoutId, workouts.id))
       .orderBy(desc(history.performedAt), desc(history.id)) as any;
 
     // Apply date range filters

@@ -16,14 +16,14 @@ export default function HomePage() {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        // Load recent workouts
-        const response = await fetch('/api/workouts?limit=5');
+        // Load recent workouts from the DB-backed API
+        const response = await fetch('/api/workouts?limit=5', { cache: 'no-store' });
         if (response.ok) {
-          const data = await response.json();
-          setRecentWorkouts(data.data.workouts || []);
-          
-          // Check for active workout
-          const activeWorkout = data.data.workouts?.find((w: WorkoutSession) => !w.endTime);
+          const payload: { data: WorkoutSession[] } = await response.json();
+          const workouts = Array.isArray(payload.data) ? payload.data : [];
+          setRecentWorkouts(workouts);
+
+          const activeWorkout = workouts.find((workout) => !workout.endTime);
           setActiveWorkout(activeWorkout || null);
         }
       } catch (error) {
