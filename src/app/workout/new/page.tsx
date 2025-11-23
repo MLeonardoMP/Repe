@@ -110,10 +110,10 @@ export default function NewWorkoutPage() {
         </div>
 
         {/* Workout Name */}
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-black border-neutral-800">
           <CardHeader>
             <CardTitle className="text-lg text-white">Workout Name (Optional)</CardTitle>
-            <p className="text-sm text-gray-400">Leave empty to auto-generate name</p>
+            <p className="text-sm text-neutral-500">Leave empty to auto-generate name</p>
           </CardHeader>
           <CardContent>
             <Input
@@ -121,17 +121,17 @@ export default function NewWorkoutPage() {
               placeholder="Ej: Push Day, Entrenamiento Piernas..."
               value={workoutName}
               onChange={(e) => setWorkoutName(e.target.value)}
-              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              className="bg-neutral-900 border-neutral-800 text-white placeholder-neutral-500"
               maxLength={50}
             />
           </CardContent>
         </Card>
 
         {/* Template Selection */}
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-black border-neutral-800">
           <CardHeader>
             <CardTitle className="text-lg text-white">Choose Template</CardTitle>
-            <p className="text-sm text-gray-400">Or start with an empty workout</p>
+            <p className="text-sm text-neutral-500">Or start with an empty workout</p>
           </CardHeader>
           <CardContent className="space-y-3">
             {workoutTemplates.map((template) => (
@@ -140,22 +140,22 @@ export default function NewWorkoutPage() {
                 onClick={() => setSelectedTemplate(template.id)}
                 className={`p-3 rounded-lg border cursor-pointer transition-all ${
                   selectedTemplate === template.id
-                    ? 'border-blue-500 bg-blue-900/20'
-                    : 'border-gray-600 bg-gray-800 hover:border-gray-500'
+                    ? 'border-white bg-neutral-900'
+                    : 'border-neutral-800 bg-black hover:border-neutral-600'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-white">{template.name}</h3>
-                    <p className="text-sm text-gray-400">{template.description}</p>
+                    <p className="text-sm text-neutral-500">{template.description}</p>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-xs text-gray-500 mr-2">
+                    <span className="text-xs text-neutral-500 mr-2">
                       {template.exercises.length} exercises
                     </span>
                     {selectedTemplate === template.id && (
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
+                        <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
@@ -163,12 +163,12 @@ export default function NewWorkoutPage() {
                   </div>
                 </div>
                 {selectedTemplate === template.id && (
-                  <div className="mt-3 pt-3 border-t border-gray-700">
+                  <div className="mt-3 pt-3 border-t border-neutral-800">
                     <div className="flex flex-wrap gap-1">
                       {template.exercises.map((exercise) => (
                         <span
                           key={exercise}
-                          className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded"
+                          className="text-xs bg-neutral-900 text-neutral-300 px-2 py-1 rounded border border-neutral-800"
                         >
                           {exercise}
                         </span>
@@ -184,18 +184,18 @@ export default function NewWorkoutPage() {
               onClick={() => setSelectedTemplate('empty')}
               className={`p-3 rounded-lg border cursor-pointer transition-all ${
                 selectedTemplate === 'empty'
-                  ? 'border-blue-500 bg-blue-900/20'
-                  : 'border-gray-600 bg-gray-800 hover:border-gray-500'
+                  ? 'border-white bg-neutral-900'
+                  : 'border-neutral-800 bg-black hover:border-neutral-600'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-white">Empty Workout</h3>
-                  <p className="text-sm text-gray-400">Start from scratch</p>
+                  <p className="text-sm text-neutral-500">Start from scratch</p>
                 </div>
                 {selectedTemplate === 'empty' && (
-                  <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
+                    <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -210,11 +210,11 @@ export default function NewWorkoutPage() {
           <Button
             onClick={() => selectedTemplate === 'empty' ? createEmptyWorkout() : createWorkout()}
             disabled={!selectedTemplate || isCreating}
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 bg-white hover:bg-neutral-200 text-black text-lg disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
           >
             {isCreating ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                 Creating...
               </div>
             ) : (
@@ -225,7 +225,7 @@ export default function NewWorkoutPage() {
           <Button
             variant="ghost"
             onClick={() => router.back()}
-            className="w-full text-gray-400 hover:text-white"
+            className="w-full text-neutral-500 hover:text-white"
           >
             Cancel
           </Button>

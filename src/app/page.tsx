@@ -2,245 +2,209 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { WorkoutSessionCard } from '@/components/workout/WorkoutSessionCard';
-import type { WorkoutSession } from '@/types/workout';
+import { motion } from 'framer-motion';
+import { Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export default function HomePage() {
-  const [recentWorkouts, setRecentWorkouts] = useState<WorkoutSession[]>([]);
-  const [activeWorkout, setActiveWorkout] = useState<WorkoutSession | null>(null);
-  const [loading, setLoading] = useState(true);
+// --- Components ---
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        // Load recent workouts from the DB-backed API
-        const response = await fetch('/api/workouts?limit=5', { cache: 'no-store' });
-        if (response.ok) {
-          const payload: { data: WorkoutSession[] } = await response.json();
-          const workouts = Array.isArray(payload.data) ? payload.data : [];
-          setRecentWorkouts(workouts);
-
-          const activeWorkout = workouts.find((workout) => !workout.endTime);
-          setActiveWorkout(activeWorkout || null);
-        }
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboardData();
-  }, []);
-
-  const handleContinueWorkout = (workout: WorkoutSession) => {
-    window.location.href = `/workout/active?id=${workout.id}`;
-  };
-
-  if (loading) {
-    return (
-      <div className="flex-1 p-4 md:p-6 min-h-screen">
-        <div className="max-w-md mx-auto space-y-8 pt-8">
-          <div className="space-y-8 fade-in">
-            {/* Header skeleton */}
-            <div className="text-center space-y-3">
-              <div className="h-12 skeleton rounded-lg w-40 mx-auto"></div>
-              <div className="h-4 skeleton rounded w-48 mx-auto"></div>
-              <div className="flex items-center justify-center gap-1 mt-2">
-                <div className="h-px w-8 skeleton"></div>
-                <div className="h-1 w-1 rounded-full skeleton"></div>
-                <div className="h-px w-8 skeleton"></div>
-              </div>
-            </div>
-            {/* Button skeletons */}
-            <div className="space-y-3">
-              <div className="h-14 skeleton rounded-lg"></div>
-              <div className="h-12 skeleton rounded-lg"></div>
-            </div>
-            {/* Card skeleton with more detail */}
-            <div className="h-48 skeleton rounded-xl border border-neutral-800 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-neutral-800/10 to-transparent"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+const GridLine = ({
+  direction,
+  className,
+  delay = 0,
+}: {
+  direction: 'horizontal' | 'vertical';
+  className?: string;
+  delay?: number;
+}) => {
+  const isHorizontal = direction === 'horizontal';
 
   return (
-    <div className="flex-1 p-4 md:p-6 min-h-screen smooth-scroll">
-      <div className="max-w-md mx-auto space-y-8 fade-in">
-        {/* Header - Modern minimalist style with subtle gradient */}
-        <div className="text-center space-y-2 pt-8 pb-4">
-          <h1 className="text-5xl font-bold text-white tracking-tight">
-            <span className="bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
-              Repe
-            </span>
-          </h1>
-          <p className="text-neutral-400 text-sm font-medium">Track your strength training</p>
-          <div className="flex items-center justify-center gap-1 mt-2">
-            <div className="h-px w-8 bg-gradient-to-r from-transparent via-neutral-700 to-transparent"></div>
-            <div className="h-1 w-1 rounded-full bg-neutral-700"></div>
-            <div className="h-px w-8 bg-gradient-to-r from-transparent via-neutral-700 to-transparent"></div>
-          </div>
-        </div>
-
-        {/* Active Workout - Modern card with glass effect */}
-        {activeWorkout && (
-          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-950/30 to-[#0a0a0a] border-emerald-900/30 card-hover slide-in-bottom">
-            {/* Subtle glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none"></div>
-            
-            <CardHeader className="pb-3 relative">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold text-white">Active Workout</CardTitle>
-                <Badge variant="success" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-medium backdrop-blur-sm">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-glow mr-1.5"></span>
-                  In Progress
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 relative">
-              <div>
-                <h3 className="font-semibold text-white text-lg">{activeWorkout.name}</h3>
-                <p className="text-sm text-neutral-400 mt-1">
-                  Started {new Date(activeWorkout.startTime).toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </p>
-              </div>
-              <div className="flex gap-6 text-sm text-neutral-300 font-mono">
-                <div className="flex items-center gap-2">
-                  <span className="text-emerald-400">•</span>
-                  <span>{activeWorkout.exercises?.length || 0} exercises</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-emerald-400">•</span>
-                  <span>
-                    {activeWorkout.exercises?.reduce((total, ex) => 
-                      total + (ex.sets?.length || 0), 0) || 0} sets
-                  </span>
-                </div>
-              </div>
-              <Button
-                onClick={() => handleContinueWorkout(activeWorkout)}
-                className="w-full h-12 bg-white hover:bg-neutral-100 text-black font-semibold transition-all button-press hover:shadow-lg"
-              >
-                Continue Workout →
-              </Button>
-            </CardContent>
-          </Card>
+    <motion.div
+      initial={isHorizontal ? { width: 0 } : { height: 0 }}
+      animate={isHorizontal ? { width: '100%' } : { height: '100%' }}
+      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay }}
+      className={cn(
+        'absolute overflow-hidden',
+        isHorizontal ? 'h-[1px] left-0' : 'w-[1px] top-0',
+        className
+      )}
+    >
+      <div
+        className={cn(
+          isHorizontal ? 'dotted-line-h' : 'dotted-line-v',
+          'absolute inset-0'
         )}
+      />
+    </motion.div>
+  );
+};
 
-        {/* Quick Actions - Modern buttons with enhanced feedback */}
-        <div className="space-y-3">
-          {!activeWorkout && (
-            <Link href="/workout/new">
-              <Button className="group w-full h-14 bg-white hover:bg-neutral-100 text-black text-base font-semibold transition-all button-press hover:shadow-xl relative overflow-hidden">
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  Start New Workout
-                  <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </span>
-                {/* Subtle shine effect on hover */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-              </Button>
-            </Link>
-          )}
+const Cross = ({ className, delay = 0 }: { className?: string; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.5, delay }}
+    className={cn('absolute text-neutral-700', className)}
+  >
+    <Plus className="w-3 h-3" />
+  </motion.div>
+);
+
+const CornerCircle = ({ className, delay = 0, id }: { className?: string; delay?: number; id: string }) => (
+  <div className={cn("absolute pointer-events-none", className)}>
+    <svg className="w-[16rem] h-[16rem] -rotate-90" viewBox="0 0 256 256">
+      <defs>
+        <mask id={id}>
+          <motion.circle
+            cx="128"
+            cy="128"
+            r="128"
+            fill="none"
+            stroke="white"
+            strokeWidth="4"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 2, delay, ease: "easeInOut" }}
+          />
+        </mask>
+      </defs>
+      <circle
+        cx="128"
+        cy="128"
+        r="127"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeDasharray="6 6"
+        className="text-[#333]"
+        mask={`url(#${id})`}
+      />
+    </svg>
+  </div>
+);
+
+// --- Main Page ---
+
+export default function HomePage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden selection:bg-white/20">
+      
+      {/* Background Grid (Subtle) */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#222_1px,transparent_1px),linear-gradient(to_bottom,#222_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+
+      {/* Main Hero Container */}
+      <div className="relative z-10 max-w-4xl w-full px-6 md:px-12">
+        
+        {/* The "Architectural" Box */}
+        <div className="relative">
           
-          <Link href="/history">
-            <Button variant="outline" className="group w-full h-12 border-neutral-800 text-neutral-200 hover:bg-[#0a0a0a] hover:border-neutral-600 transition-all button-press relative overflow-hidden">
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                View History
-                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </Button>
-          </Link>
-        </div>
+          {/* Grid Lines - The Reveal */}
+          <GridLine direction="horizontal" className="top-0" delay={0} />
+          <GridLine direction="horizontal" className="bottom-0" delay={0} />
+          <GridLine direction="vertical" className="left-0" delay={0.4} />
+          <GridLine direction="vertical" className="right-0" delay={0.4} />
 
-        {/* Recent Workouts - Modern section with subtle divider */}
-        {recentWorkouts.length > 0 && (
-          <div className="space-y-4 slide-in-bottom">
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-white tracking-tight">Recent Workouts</h2>
-              <div className="flex-1 h-px bg-gradient-to-r from-neutral-800 to-transparent"></div>
-            </div>
-            <div className="space-y-3">
-              {recentWorkouts.slice(0, 3).map((workout, index) => (
-                <div 
-                  key={workout.id}
-                  className="fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <WorkoutSessionCard
-                    session={workout}
-                    onView={(id) => window.location.href = `/workout/${id}`}
-                    onEdit={workout.endTime ? undefined : () => handleContinueWorkout(workout)}
-                  />
-                </div>
-              ))}
-            </div>
-            {recentWorkouts.length > 3 && (
-              <Link href="/history">
-                <Button variant="ghost" className="group w-full text-neutral-400 hover:text-white hover:bg-[#0a0a0a] transition-all button-press">
-                  <span className="flex items-center justify-center gap-2">
-                    View All Workouts
-                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </span>
-                </Button>
-              </Link>
-            )}
-          </div>
-        )}
+          {/* Corner Crosses */}
+          <Cross className="-top-1.5 -left-1.5" delay={0.8} />
+          <Cross className="-top-1.5 -right-1.5" delay={0.8} />
+          <Cross className="-bottom-1.5 -left-1.5" delay={0.8} />
+          <Cross className="-bottom-1.5 -right-1.5" delay={0.8} />
 
-        {/* Empty State - Modern with gradient accents */}
-        {recentWorkouts.length === 0 && !activeWorkout && (
-          <Card className="relative overflow-hidden bg-[#0a0a0a] border-neutral-800 card-hover slide-in-bottom">
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-neutral-900/20 via-transparent to-transparent pointer-events-none"></div>
+          {/* Geometric Circles (Next.js Conf Style) */}
+          <CornerCircle id="circle-top" className="-top-[8rem] -left-[8rem]" delay={1.6} />
+          <CornerCircle id="circle-bottom" className="-bottom-[8rem] -right-[8rem]" delay={1.6} />
+
+          {/* Content Container */}
+          <div className="flex flex-col">
             
-            <CardContent className="relative text-center py-16 space-y-6">
-              {/* Icon with glow effect */}
-              <div className="relative inline-block">
-                <div className="absolute inset-0 bg-neutral-700/20 blur-2xl rounded-full"></div>
-                <div className="relative text-neutral-600 bg-neutral-900/50 rounded-full p-6 inline-block">
-                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-              </div>
+            {/* Top Section: Title & Subtitle */}
+            <div className="py-16 md:py-24 px-8 md:px-16 flex flex-col items-center text-center space-y-6">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.2 }}
+                className="text-7xl md:text-9xl font-bold tracking-tighter text-white"
+              >
+                Repe
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.4 }}
+                className="text-neutral-400 text-lg md:text-xl max-w-xl font-light leading-relaxed"
+              >
+                The minimalist strength tracker for serious lifters.
+              </motion.p>
+            </div>
+
+            {/* Separator Line */}
+            <div className="relative w-full h-[1px] overflow-hidden">
+               <motion.div
+                 initial={{ width: 0 }}
+                 animate={{ width: '100%' }}
+                 transition={{ duration: 1, delay: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                 className="h-full w-full"
+               >
+                 <div className="dotted-line-h absolute inset-0" />
+               </motion.div>
+            </div>
+
+            {/* Bottom Section: Buttons */}
+            <div className="relative grid grid-cols-1 md:grid-cols-2">
               
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Ready to get started?</h3>
-                <p className="text-sm text-neutral-400 mb-8 max-w-xs mx-auto">
-                  Begin your fitness journey by creating your first workout session
-                </p>
-                <Link href="/workout/new">
-                  <Button className="group h-14 px-10 bg-white hover:bg-neutral-100 text-black font-semibold transition-all button-press hover:shadow-xl relative overflow-hidden">
-                    <span className="relative z-10 flex items-center gap-2">
-                      Start Your First Workout
-                      <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </span>
-                    {/* Shine effect */}
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                  </Button>
-                </Link>
+              {/* Vertical Divider (Desktop) */}
+              <GridLine direction="vertical" className="left-1/2 hidden md:block" delay={1.5} />
+              
+              {/* Horizontal Divider (Mobile) */}
+              <GridLine direction="horizontal" className="top-1/2 md:hidden" delay={1.5} />
+
+              {/* Button 1 */}
+              <div className="flex items-center justify-center py-10 md:py-14">
+                 <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 1.6 }}
+                 >
+                    <Link 
+                      href="/workout/new"
+                      className="h-12 px-10 rounded-full bg-white text-black font-medium flex items-center justify-center hover:bg-neutral-200 transition-colors"
+                    >
+                      Start Workout
+                    </Link>
+                 </motion.div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+
+              {/* Button 2 */}
+              <div className="flex items-center justify-center py-10 md:py-14">
+                 <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 1.8 }}
+                 >
+                    <Link 
+                      href="/history"
+                      className="h-12 px-10 rounded-full border border-white/20 text-white font-medium flex items-center justify-center hover:bg-white/10 transition-colors"
+                    >
+                      View History
+                    </Link>
+                 </motion.div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+

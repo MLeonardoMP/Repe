@@ -154,7 +154,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
   const duration = calculateDuration();
 
   return (
-    <Card className={cn("w-full bg-gray-900 border-gray-700", className)}>
+    <Card className={cn("w-full bg-black border-neutral-800", className)}>
       <CardHeader>
         <CardTitle className="text-lg text-white">
           {isEdit ? 'Edit Workout Session' : 'New Workout Session'}
@@ -176,7 +176,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
           <div className="space-y-2">
             <label 
               htmlFor="workout-name" 
-              className="text-sm font-medium text-gray-300"
+              className="text-sm font-medium text-neutral-300"
             >
               Workout Name *
             </label>
@@ -187,7 +187,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
               onChange={handleInputChange('name')}
               onBlur={handleBlur('name')}
               placeholder="e.g., Morning Chest Workout"
-              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              className="bg-neutral-900 border-neutral-700 text-white placeholder-neutral-500"
               maxLength={100}
               disabled={isLoading}
               aria-invalid={!!errors.name}
@@ -204,7 +204,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
           <div className="space-y-2">
             <label 
               htmlFor="start-time" 
-              className="text-sm font-medium text-gray-300"
+              className="text-sm font-medium text-neutral-300"
             >
               Start Time *
             </label>
@@ -214,7 +214,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
               value={formData.startTime}
               onChange={handleInputChange('startTime')}
               onBlur={handleBlur('startTime')}
-              className="bg-gray-800 border-gray-600 text-white"
+              className="bg-neutral-900 border-neutral-700 text-white"
               disabled={isLoading}
               aria-invalid={!!errors.startTime}
               aria-describedby={errors.startTime ? "start-time-error" : undefined}
@@ -230,11 +230,11 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
           <div className="space-y-2">
             <label 
               htmlFor="end-time" 
-              className="text-sm font-medium text-gray-300"
+              className="text-sm font-medium text-neutral-300"
             >
               End Time
               {duration && (
-                <span className="ml-2 text-gray-400 text-xs">
+                <span className="ml-2 text-neutral-400 text-xs">
                   Duration: {duration}
                 </span>
               )}
@@ -245,7 +245,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
               value={formData.endTime}
               onChange={handleInputChange('endTime')}
               onBlur={handleBlur('endTime')}
-              className="bg-gray-800 border-gray-600 text-white"
+              className="bg-neutral-900 border-neutral-700 text-white"
               disabled={isLoading}
               aria-invalid={!!errors.endTime}
               aria-describedby={errors.endTime ? "end-time-error" : undefined}
@@ -261,7 +261,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
           <div className="space-y-2">
             <label 
               htmlFor="notes" 
-              className="text-sm font-medium text-gray-300"
+              className="text-sm font-medium text-neutral-300"
             >
               Notes
             </label>
@@ -272,11 +272,11 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
               onChange={handleInputChange('notes')}
               onBlur={handleBlur('notes')}
               placeholder="Optional notes about this workout session..."
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-md text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent resize-none"
               disabled={isLoading}
               maxLength={500}
             />
-            <div className="text-xs text-gray-500 text-right">
+            <div className="text-xs text-neutral-500 text-right">
               {formData.notes?.length || 0}/500
             </div>
           </div>
@@ -286,11 +286,11 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
             <Button
               type="submit"
               disabled={isLoading}
-              className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+              className="flex-1 h-12 bg-white hover:bg-neutral-200 text-black disabled:opacity-50"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                   {isEdit ? 'Updating...' : 'Creating...'}
                 </div>
               ) : (
@@ -303,7 +303,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
               variant="outline"
               onClick={handleCancel}
               disabled={isLoading}
-              className="flex-1 h-12 border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="flex-1 h-12 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
             >
               Cancel
             </Button>

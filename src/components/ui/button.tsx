@@ -107,7 +107,7 @@ export const WorkoutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Button
         ref={ref}
         className={cn(
-          "font-semibold tracking-wide shadow-lg",
+          "font-semibold tracking-wide",
           "touch-manipulation", // Optimize for touch
           "active:scale-95 transition-transform duration-150", // Touch feedback
           className
@@ -184,8 +184,7 @@ export const FAB = React.forwardRef<HTMLButtonElement, ButtonProps>(
           "fixed bottom-6 right-6 z-50",
           "h-14 w-14 rounded-full", // 56px FAB size
           "bg-primary text-primary-foreground hover:bg-primary/90",
-          "shadow-lg hover:shadow-xl",
-          "border-2 border-primary",
+          "border border-primary",
           "touch-manipulation",
           "active:scale-95 transition-all duration-200",
           className

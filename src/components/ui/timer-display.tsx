@@ -119,9 +119,9 @@ export function TimerDisplay({
   };
 
   const colorClasses = {
-    primary: 'bg-gray-800 border-gray-600 text-white',
-    warning: 'bg-yellow-800 border-yellow-600 text-yellow-100',
-    critical: 'bg-red-800 border-red-600 text-red-100',
+    primary: 'bg-black border-neutral-800 text-white',
+    warning: 'bg-neutral-900 border-neutral-700 text-white',
+    critical: 'bg-red-900/20 border-red-900/50 text-red-400',
   };
 
   const getCurrentColor = () => {
@@ -141,7 +141,7 @@ export function TimerDisplay({
   return (
     <div className={`flex flex-col items-center space-y-4 ${className}`}>
       {label && (
-        <div className="text-sm text-gray-400" data-testid="timer-label">
+        <div className="text-sm text-neutral-400" data-testid="timer-label">
           {label}
         </div>
       )}
@@ -162,11 +162,11 @@ export function TimerDisplay({
 
       {showProgress && maxTime > 0 && (
         <div 
-          className="w-64 h-2 bg-gray-700 rounded-full overflow-hidden"
+          className="w-64 h-2 bg-neutral-800 rounded-full overflow-hidden"
           data-testid="timer-progress"
         >
           <div 
-            className="h-full bg-blue-600 transition-all duration-300"
+            className="h-full bg-white transition-all duration-300"
             style={{ width: `${Math.min(100, (currentTime / maxTime) * 100)}%` }}
             role="progressbar"
             aria-label="Timer progress"
@@ -178,14 +178,14 @@ export function TimerDisplay({
       )}
 
       {status && (
-        <div className="text-sm text-gray-300" data-testid="timer-status">
+        <div className="text-sm text-neutral-400" data-testid="timer-status">
           {status}
         </div>
       )}
 
       {isCompleted && (
         <div 
-          className="text-center text-green-400 font-semibold"
+          className="text-center text-white font-semibold"
           data-testid="timer-completed"
         >
           Time&apos;s Up! ⏰
@@ -194,7 +194,7 @@ export function TimerDisplay({
 
       {mode === 'countdown' && displayTime <= warningThreshold && displayTime > criticalThreshold && (
         <div 
-          className="text-yellow-400 text-sm"
+          className="text-neutral-300 text-sm"
           data-testid="timer-warning"
         >
           ⚠️ Warning: Time running low
@@ -224,12 +224,12 @@ export function TimerDisplay({
           className="w-full max-w-xs space-y-1"
           data-testid="lap-times"
         >
-          <h4 className="text-sm font-medium text-gray-300">Lap Times:</h4>
+          <h4 className="text-sm font-medium text-neutral-300">Lap Times:</h4>
           <div className="max-h-32 overflow-y-auto space-y-1">
             {laps.map((lap, index) => (
               <div 
                 key={index}
-                className="text-xs text-gray-400 flex justify-between"
+                className="text-xs text-neutral-400 flex justify-between"
               >
                 <span>Lap {index + 1}</span>
                 <span>{formatTime(lap)}</span>
@@ -244,7 +244,7 @@ export function TimerDisplay({
           {!isRunning ? (
             <button
               onClick={onStart}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-white hover:bg-neutral-200 text-black rounded-lg transition-colors"
               data-testid="start-button"
               aria-label="Start timer"
             >
@@ -253,7 +253,7 @@ export function TimerDisplay({
           ) : (
             <button
               onClick={onPause}
-              className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 rounded-lg transition-colors"
               data-testid="pause-button"
               aria-label="Pause timer"
             >
@@ -263,7 +263,7 @@ export function TimerDisplay({
           
           <button
             onClick={onStop}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+            className="px-4 py-2 bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/50 rounded-lg transition-colors"
             data-testid="stop-button"
             aria-label="Stop timer"
           >
@@ -272,7 +272,7 @@ export function TimerDisplay({
           
           <button
             onClick={onReset}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+            className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 rounded-lg transition-colors"
             data-testid="reset-button"
             aria-label="Reset timer"
           >
@@ -282,7 +282,7 @@ export function TimerDisplay({
           {showLaps && (
             <button
               onClick={() => onLap?.(currentTime)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 rounded-lg transition-colors"
               data-testid="lap-button"
               aria-label="Record lap time"
             >

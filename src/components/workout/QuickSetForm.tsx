@@ -87,12 +87,12 @@ export function QuickSetForm({
   };
 
   return (
-    <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg space-y-4">
+    <div className="p-4 bg-black border border-neutral-800 rounded-lg space-y-4">
       {/* Header */}
       {exerciseName && (
-        <div className="pb-2 border-b border-gray-700">
-          <h3 className="text-sm font-medium text-gray-300">
-            Agregar Serie a <span className="text-blue-400">{exerciseName}</span>
+        <div className="pb-2 border-b border-neutral-800">
+          <h3 className="text-sm font-medium text-neutral-300">
+            Agregar Serie a <span className="text-white">{exerciseName}</span>
           </h3>
         </div>
       )}
@@ -101,7 +101,7 @@ export function QuickSetForm({
       <div>
         <label
           htmlFor="reps-input"
-          className="block text-sm font-medium text-gray-300 mb-2"
+          className="block text-sm font-medium text-neutral-300 mb-2"
         >
           Repeticiones *
         </label>
@@ -118,7 +118,7 @@ export function QuickSetForm({
           }}
           onKeyPress={handleKeyPress}
           placeholder="Ej: 10"
-          className="bg-gray-900 border-gray-600 text-white placeholder:text-gray-500"
+          className="bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500"
           autoFocus={autoFocus}
         />
         {errors.reps && (
@@ -130,7 +130,7 @@ export function QuickSetForm({
       <div>
         <label
           htmlFor="weight-input"
-          className="block text-sm font-medium text-gray-300 mb-2"
+          className="block text-sm font-medium text-neutral-300 mb-2"
         >
           Peso (kg) - Opcional
         </label>
@@ -148,7 +148,7 @@ export function QuickSetForm({
           }}
           onKeyPress={handleKeyPress}
           placeholder="Ej: 80"
-          className="bg-gray-900 border-gray-600 text-white placeholder:text-gray-500"
+          className="bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500"
         />
         {errors.weight && (
           <p className="text-red-400 text-sm mt-1">{errors.weight}</p>
@@ -159,7 +159,7 @@ export function QuickSetForm({
       <div className="flex gap-2 pt-2">
         <Button
           onClick={handleConfirm}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+          className="flex-1 bg-white hover:bg-neutral-200 text-black"
         >
           Agregar
         </Button>
@@ -167,7 +167,7 @@ export function QuickSetForm({
           <Button
             variant="outline"
             onClick={handleCancel}
-            className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
+            className="flex-1 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
           >
             Cancelar
           </Button>

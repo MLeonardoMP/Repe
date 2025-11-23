@@ -95,11 +95,11 @@ const SetItem = React.memo<SetItemProps>(({ set, index, onEdit, onDelete }) => {
     <li
       data-testid={`set-${set.id}`}
       className={cn(
-        "group relative p-3 bg-gray-800 border border-gray-700 rounded-lg",
-        "cursor-pointer hover:bg-gray-700 hover:border-gray-600",
+        "group relative p-3 bg-neutral-900 border border-neutral-800 rounded-lg",
+        "cursor-pointer hover:bg-neutral-800 hover:border-neutral-700",
         "transition-all duration-200",
-        "focus:outline-none focus:ring-2 focus:ring-blue-500",
-        set.isCompleted ? "border-green-600" : "border-orange-500",
+        "focus:outline-none focus:ring-2 focus:ring-white",
+        set.isCompleted ? "border-white" : "border-neutral-800",
         isSwipeActive && "swipe-left-active"
       )}
       role="listitem"
@@ -114,20 +114,20 @@ const SetItem = React.memo<SetItemProps>(({ set, index, onEdit, onDelete }) => {
         className="flex items-center justify-between"
       >
         <div className="flex items-center space-x-3">
-          <span className="text-sm font-medium text-gray-400">
+          <span className="text-sm font-medium text-neutral-400">
             Set {index + 1}
           </span>
-          <div className="flex items-center space-x-2 text-sm text-gray-200">
+          <div className="flex items-center space-x-2 text-sm text-neutral-200">
             <span>{reps} reps</span>
             {weight !== undefined && (
               <>
-                <span className="text-gray-500">•</span>
+                <span className="text-neutral-500">•</span>
                 <span>{weight} kg</span>
               </>
             )}
             {intensity !== undefined && (
               <>
-                <span className="text-gray-500">•</span>
+                <span className="text-neutral-500">•</span>
                 <span>RPE {intensity}</span>
               </>
             )}
@@ -136,14 +136,14 @@ const SetItem = React.memo<SetItemProps>(({ set, index, onEdit, onDelete }) => {
 
         <div className="flex items-center space-x-2">
           {set.isCompleted && (
-            <div className="w-2 h-2 bg-green-500 rounded-full" />
+            <div className="w-2 h-2 bg-white rounded-full" />
           )}
           <Button
             variant="ghost"
             size="sm"
             onClick={handleDeleteClick}
             aria-label={`Delete set ${index + 1}`}
-            className="min-h-[44px] min-w-[44px] opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 hover:bg-red-900/20 transition-all duration-200"
+            className="min-h-[44px] min-w-[44px] opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-400 hover:bg-red-900/20 transition-all duration-200"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -183,8 +183,8 @@ export const ExerciseCard = React.memo<ExerciseCardProps>(({
   return (
     <Card
       className={cn(
-        "w-full border-gray-700 bg-gray-900",
-        isActive && "ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900",
+        "w-full border-neutral-800 bg-black",
+        isActive && "ring-2 ring-white ring-offset-2 ring-offset-black",
         className
       )}
       role="region"
@@ -193,7 +193,7 @@ export const ExerciseCard = React.memo<ExerciseCardProps>(({
       <CardHeader className="pb-3">
         <div
           data-testid="exercise-header"
-          className="cursor-pointer hover:bg-gray-800 -m-3 p-3 rounded-lg transition-colors duration-200"
+          className="cursor-pointer hover:bg-neutral-900 -m-3 p-3 rounded-lg transition-colors duration-200"
           onClick={handleExerciseHeaderClick}
           role="button"
           tabIndex={0}
@@ -210,12 +210,12 @@ export const ExerciseCard = React.memo<ExerciseCardProps>(({
                 {exercise.name}
               </h3>
               {exercise.category && (
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-neutral-400 mt-1">
                   {exercise.category}
                 </p>
               )}
               {exercise.notes && (
-                <p className="text-sm text-gray-300 mt-2">
+                <p className="text-sm text-neutral-300 mt-2">
                   {exercise.notes}
                 </p>
               )}
@@ -225,9 +225,9 @@ export const ExerciseCard = React.memo<ExerciseCardProps>(({
               <div className="flex items-center ml-3">
                 <div 
                   data-testid="active-exercise-indicator"
-                  className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"
+                  className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"
                 />
-                <Badge variant="default" className="bg-blue-600 text-white text-xs">
+                <Badge variant="default" className="bg-white text-black text-xs">
                   Currently active
                 </Badge>
               </div>
@@ -237,7 +237,7 @@ export const ExerciseCard = React.memo<ExerciseCardProps>(({
 
         {/* Exercise Statistics */}
         {completedSets.length > 0 && (
-          <div className="flex flex-wrap gap-3 text-xs text-gray-400 bg-gray-800 p-3 rounded-lg">
+          <div className="flex flex-wrap gap-3 text-xs text-neutral-400 bg-neutral-900 p-3 rounded-lg">
             <span>Total: {stats.totalReps || 0} reps</span>
             {stats.personalBest?.maxWeight && (
               <span>Max: {stats.personalBest.maxWeight} kg</span>
@@ -254,7 +254,7 @@ export const ExerciseCard = React.memo<ExerciseCardProps>(({
         {exercise.sets.length > 0 ? (
           <div className="mb-4">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-medium text-gray-300">
+              <h4 className="text-sm font-medium text-neutral-300">
                 {exercise.sets.length} {exercise.sets.length === 1 ? 'set' : 'sets'}
               </h4>
             </div>
@@ -273,9 +273,9 @@ export const ExerciseCard = React.memo<ExerciseCardProps>(({
             </ul>
           </div>
         ) : (
-          <div className="text-center py-6 text-gray-400">
+          <div className="text-center py-6 text-neutral-400">
             <p className="text-sm">No sets yet</p>
-            <p className="text-xs text-gray-500 mt-1">Add your first set to get started</p>
+            <p className="text-xs text-neutral-500 mt-1">Add your first set to get started</p>
           </div>
         )}
 
@@ -284,7 +284,7 @@ export const ExerciseCard = React.memo<ExerciseCardProps>(({
           onClick={handleAddSetClick}
           variant="outline"
           size="default"
-          className="w-full min-h-[44px] border-gray-600 hover:border-gray-500 hover:bg-gray-700 text-gray-300 hover:text-white"
+          className="w-full min-h-[44px] border-neutral-700 hover:border-neutral-600 hover:bg-neutral-800 text-neutral-300 hover:text-white"
           role="button"
           aria-label={`Add set to ${exercise.name}`}
         >

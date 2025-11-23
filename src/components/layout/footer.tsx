@@ -20,14 +20,14 @@ export function Footer({ onNavigate, onAction, className = '' }: FooterProps) {
 
   return (
     <footer 
-      className={`fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-4 ${className}`}
+      className={`fixed bottom-0 left-0 right-0 bg-black border-t border-neutral-800 p-4 ${className}`}
       data-testid="app-footer"
     >
       <nav className="flex justify-around items-center max-w-md mx-auto">
         <Button
           variant="ghost"
           onClick={() => handleNavigation('/')}
-          className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white"
+          className="flex flex-col items-center space-y-1 text-neutral-400 hover:text-white hover:bg-transparent"
           data-testid="nav-home"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +39,7 @@ export function Footer({ onNavigate, onAction, className = '' }: FooterProps) {
         <Button
           variant="ghost"
           onClick={() => handleNavigation('/workout/new')}
-          className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white"
+          className="flex flex-col items-center space-y-1 text-neutral-400 hover:text-white hover:bg-transparent"
           data-testid="nav-new-workout"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@ export function Footer({ onNavigate, onAction, className = '' }: FooterProps) {
         <Button
           variant="ghost"
           onClick={() => handleNavigation('/history')}
-          className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white"
+          className="flex flex-col items-center space-y-1 text-neutral-400 hover:text-white hover:bg-transparent"
           data-testid="nav-history"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +63,7 @@ export function Footer({ onNavigate, onAction, className = '' }: FooterProps) {
         <Button
           variant="ghost"
           onClick={() => handleAction('settings')}
-          className="flex flex-col items-center space-y-1 text-gray-400 hover:text-white"
+          className="flex flex-col items-center space-y-1 text-neutral-400 hover:text-white hover:bg-transparent"
           data-testid="nav-settings"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

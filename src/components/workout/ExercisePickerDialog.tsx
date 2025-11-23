@@ -93,13 +93,13 @@ export function ExercisePickerComponent({
   };
 
   return (
-    <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg space-y-4">
+    <div className="p-4 bg-black border border-neutral-800 rounded-lg space-y-4">
       {/* Header */}
-      <div className="pb-2 border-b border-gray-700">
-        <h3 className="text-sm font-medium text-gray-300 mb-1">
+      <div className="pb-2 border-b border-neutral-800">
+        <h3 className="text-sm font-medium text-neutral-300 mb-1">
           Seleccionar Ejercicio
         </h3>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-neutral-400">
           Busca un ejercicio en la biblioteca o ingresa un nombre personalizado
         </p>
       </div>
@@ -111,14 +111,14 @@ export function ExercisePickerComponent({
           placeholder="Buscar ejercicio..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-gray-900 border-gray-600 text-white placeholder:text-gray-500"
+          className="bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500"
           autoFocus
         />
       </div>
 
       {/* Exercise List */}
       {loading ? (
-        <div className="text-center py-8 text-gray-400">
+        <div className="text-center py-8 text-neutral-400">
           Cargando ejercicios...
         </div>
       ) : error ? (
@@ -126,9 +126,9 @@ export function ExercisePickerComponent({
           {error}
         </div>
       ) : (
-        <div className="max-h-[300px] overflow-y-auto space-y-2 border border-gray-700 rounded-md p-2">
+        <div className="max-h-[300px] overflow-y-auto space-y-2 border border-neutral-800 rounded-md p-2">
           {filteredExercises.length === 0 ? (
-            <div className="text-center py-4 text-gray-400">
+            <div className="text-center py-4 text-neutral-400">
               No se encontraron ejercicios
             </div>
           ) : (
@@ -136,12 +136,12 @@ export function ExercisePickerComponent({
               <button
                 key={exercise.id || exercise.name}
                 onClick={() => handleExerciseSelect(exercise.name)}
-                className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-800 transition-colors"
+                className="w-full text-left px-3 py-2 rounded-md hover:bg-neutral-900 transition-colors"
                 aria-label={`Seleccionar ${exercise.name}`}
               >
-                <div className="font-medium">{exercise.name}</div>
+                <div className="font-medium text-white">{exercise.name}</div>
                 {exercise.category && (
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-neutral-400">
                     {exercise.category}
                     {exercise.equipment &&
                       ` ${
@@ -158,10 +158,10 @@ export function ExercisePickerComponent({
       )}
 
       {/* Custom Name Input */}
-      <div className="pt-4 border-t border-gray-700">
+      <div className="pt-4 border-t border-neutral-800">
         <label
           htmlFor="custom-exercise-name"
-          className="block text-sm font-medium text-gray-300 mb-2"
+          className="block text-sm font-medium text-neutral-300 mb-2"
         >
           O ingresa un nombre personalizado:
         </label>
@@ -173,12 +173,12 @@ export function ExercisePickerComponent({
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 bg-gray-900 border-gray-600 text-white placeholder:text-gray-500"
+            className="flex-1 bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500"
           />
           <Button
             onClick={handleCustomNameSubmit}
             disabled={!customName.trim()}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-white hover:bg-neutral-200 text-black"
           >
             Agregar
           </Button>
@@ -190,7 +190,7 @@ export function ExercisePickerComponent({
         <Button
           variant="outline"
           onClick={onClose}
-          className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
+          className="flex-1 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
         >
           Cancelar
         </Button>
@@ -213,10 +213,10 @@ export function ExercisePickerDialog({
   
   return (
     <Dialog open={open} onOpenChange={(isOpen: boolean) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[500px] bg-gray-900 border-gray-700 text-white">
+      <DialogContent className="sm:max-w-[500px] bg-black border-neutral-800 text-white">
         <DialogHeader>
           <DialogTitle>Seleccionar Ejercicio</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-neutral-400">
             Busca un ejercicio en la biblioteca o ingresa un nombre personalizado
           </DialogDescription>
         </DialogHeader>

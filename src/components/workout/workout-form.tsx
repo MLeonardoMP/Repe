@@ -60,7 +60,7 @@ export function WorkoutForm({
   };
 
   return (
-    <Card className={`bg-gray-800 border-gray-700 ${className}`} data-testid="workout-form">
+    <Card className={`bg-black border-neutral-800 ${className}`} data-testid="workout-form">
       <CardHeader>
         <CardTitle className="text-white">
           {workout ? 'Edit Workout' : 'New Workout'}
@@ -71,7 +71,7 @@ export function WorkoutForm({
           <div>
             <label 
               htmlFor="workout-name"
-              className="block text-sm font-medium text-gray-300 mb-1"
+              className="block text-sm font-medium text-neutral-300 mb-1"
             >
               Workout Name *
             </label>
@@ -81,7 +81,7 @@ export function WorkoutForm({
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="Enter workout name"
-              className="bg-gray-900 border-gray-600 text-white"
+              className="bg-neutral-900 border-neutral-700 text-white"
               data-testid="workout-name-input"
               autoComplete="off"
             />
@@ -95,7 +95,7 @@ export function WorkoutForm({
           <div>
             <label 
               htmlFor="workout-notes"
-              className="block text-sm font-medium text-gray-300 mb-1"
+              className="block text-sm font-medium text-neutral-300 mb-1"
             >
               Notes (optional)
             </label>
@@ -105,7 +105,7 @@ export function WorkoutForm({
               value={formData.notes}
               onChange={(e) => handleInputChange('notes', e.target.value)}
               placeholder="Add workout notes"
-              className="bg-gray-900 border-gray-600 text-white"
+              className="bg-neutral-900 border-neutral-700 text-white"
               data-testid="workout-notes-input"
               autoComplete="off"
             />
@@ -115,7 +115,7 @@ export function WorkoutForm({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+              className="flex-1 bg-white hover:bg-neutral-200 text-black disabled:opacity-50"
               data-testid="submit-button"
             >
               {isSubmitting ? 'Saving...' : (workout ? 'Update Workout' : 'Create Workout')}
@@ -126,7 +126,7 @@ export function WorkoutForm({
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
-                className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700 disabled:opacity-50"
+                className="flex-1 border-neutral-700 text-neutral-300 hover:bg-neutral-800 disabled:opacity-50"
                 data-testid="cancel-button"
               >
                 Cancel

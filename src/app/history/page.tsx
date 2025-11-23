@@ -165,7 +165,7 @@ export default function HistoryPage() {
         </div>
 
         {/* Search */}
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="bg-black border-neutral-800">
           <CardContent className="pt-6">
             <div className="relative">
               <Input
@@ -173,10 +173,10 @@ export default function HistoryPage() {
                 placeholder="Search workouts..."
                 value={searchQuery}
                 onChange={handleSearch}
-                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 pl-10"
+                className="bg-neutral-900 border-neutral-800 text-white placeholder-neutral-500 pl-10"
               />
               <svg 
-                className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+                className="w-5 h-5 text-neutral-500 absolute left-3 top-1/2 transform -translate-y-1/2"
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -190,26 +190,26 @@ export default function HistoryPage() {
         {/* Quick Stats */}
         {entries.length > 0 && (
           <div className="grid grid-cols-3 gap-3">
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-black border-neutral-800">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">{totalWorkouts}</div>
-                <div className="text-xs text-gray-400">Stored</div>
+                <div className="text-xs text-neutral-500">Stored</div>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-black border-neutral-800">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">
                   {formatDuration(averageDuration)}
                 </div>
-                <div className="text-xs text-gray-400">Avg Duration</div>
+                <div className="text-xs text-neutral-500">Avg Duration</div>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-black border-neutral-800">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">
                   {lastWorkout ? new Date(lastWorkout).toLocaleDateString() : '—'}
                 </div>
-                <div className="text-xs text-gray-400">Last Session</div>
+                <div className="text-xs text-neutral-500">Last Session</div>
               </CardContent>
             </Card>
           </div>
@@ -217,10 +217,10 @@ export default function HistoryPage() {
 
         {/* Error State */}
         {error && (
-          <Card className="bg-red-950/40 border-red-900/40">
-            <CardContent className="py-4 text-sm text-red-200">
+          <Card className="bg-black border-red-900/50">
+            <CardContent className="py-4 text-sm text-red-400">
               <p>{error}</p>
-              <Button size="sm" className="mt-3" onClick={() => fetchHistory()}>
+              <Button size="sm" className="mt-3 bg-white text-black hover:bg-neutral-200" onClick={() => fetchHistory()}>
                 Reintentar
               </Button>
             </CardContent>
@@ -232,33 +232,33 @@ export default function HistoryPage() {
           <div className="space-y-4">
             <div className="space-y-3">
               {filteredEntries.map((entry) => (
-                <Card key={entry.id} className="bg-gray-900 border-gray-700">
+                <Card key={entry.id} className="bg-black border-neutral-800 hover:border-neutral-600 transition-colors">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="text-white text-base">
                           {entry.workoutName || 'Logged Session'}
                         </CardTitle>
-                        <p className="text-xs text-gray-400">{formatDate(entry.performedAt)}</p>
+                        <p className="text-xs text-neutral-500">{formatDate(entry.performedAt)}</p>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         disabled={!entry.workoutId}
                         onClick={() => handleViewWorkout(entry.workoutId ?? null)}
-                        className="text-blue-400 hover:text-blue-300"
+                        className="text-neutral-400 hover:text-white"
                       >
                         View
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between text-sm text-gray-300">
+                    <div className="flex items-center justify-between text-sm text-neutral-400">
                       <span>Duration</span>
-                      <span className="font-medium">{formatDuration(entry.durationSeconds)}</span>
+                      <span className="font-medium text-white">{formatDuration(entry.durationSeconds)}</span>
                     </div>
                     {entry.notes && (
-                      <p className="text-sm text-gray-400 border-t border-gray-800 pt-3">
+                      <p className="text-sm text-neutral-500 border-t border-neutral-800 pt-3">
                         {entry.notes}
                       </p>
                     )}
@@ -274,11 +274,11 @@ export default function HistoryPage() {
                   variant="ghost"
                   onClick={loadMore}
                   disabled={loadingMore || !cursor}
-                  className="text-blue-400 hover:text-blue-300"
+                  className="text-neutral-400 hover:text-white"
                 >
                   {loadingMore ? (
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Loading...
                     </div>
                   ) : (
@@ -290,9 +290,9 @@ export default function HistoryPage() {
           </div>
         ) : (
           /* Empty State */
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-black border-neutral-800">
             <CardContent className="text-center py-8 space-y-4">
-              <div className="text-gray-400">
+              <div className="text-neutral-600">
                 <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h9.5l1-1V7a2 2 0 00-2-2H13m-4 0V3h4v2" />
                 </svg>
@@ -301,7 +301,7 @@ export default function HistoryPage() {
                 <h3 className="text-lg font-semibold text-white mb-2">
                   {searchQuery ? 'No sessions found' : 'No workouts yet'}
                 </h3>
-                <p className="text-gray-400 mb-4">
+                <p className="text-neutral-500 mb-4">
                   {searchQuery 
                     ? `No sessions match "${searchQuery}"`
                     : 'Start your first workout to see it here'
@@ -309,7 +309,7 @@ export default function HistoryPage() {
                 </p>
                 {!searchQuery && (
                   <Link href="/workout/new">
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button className="bg-white hover:bg-neutral-200 text-black font-semibold">
                       Start Your First Workout
                     </Button>
                   </Link>
@@ -318,7 +318,7 @@ export default function HistoryPage() {
                   <Button
                     variant="ghost"
                     onClick={() => setSearchQuery('')}
-                    className="text-blue-400 hover:text-blue-300"
+                    className="text-neutral-400 hover:text-white"
                   >
                     Clear Search
                   </Button>

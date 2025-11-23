@@ -98,14 +98,14 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
 
   if (step === 'workout') {
     return (
-      <Card className="bg-gray-800 border-gray-700">
+      <Card className="bg-black border-neutral-800">
         <CardHeader>
           <CardTitle className="text-white">Create New Workout</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleWorkoutSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-300 mb-1">
                 Workout Name
               </label>
               <Input
@@ -113,14 +113,14 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
                 value={workoutData.name || ''}
                 onChange={(e) => setWorkoutData({ ...workoutData, name: e.target.value })}
                 placeholder="Enter workout name"
-                className="bg-gray-900 border-gray-600 text-white"
+                className="bg-neutral-900 border-neutral-700 text-white"
                 data-testid="workout-name-input"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-neutral-300 mb-1">
                 Notes (optional)
               </label>
               <Input
@@ -128,7 +128,7 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
                 value={workoutData.notes || ''}
                 onChange={(e) => setWorkoutData({ ...workoutData, notes: e.target.value })}
                 placeholder="Add workout notes"
-                className="bg-gray-900 border-gray-600 text-white"
+                className="bg-neutral-900 border-neutral-700 text-white"
                 data-testid="workout-notes-input"
               />
             </div>
@@ -136,7 +136,7 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
             <div className="flex space-x-2">
               <Button
                 type="submit"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                className="flex-1 bg-white hover:bg-neutral-200 text-black"
                 data-testid="next-button"
               >
                 Next: Add Exercises
@@ -146,7 +146,7 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
                   type="button"
                   variant="outline"
                   onClick={onCancel}
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
                   data-testid="cancel-button"
                 >
                   Cancel
@@ -162,17 +162,17 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
   if (step === 'exercises') {
     return (
       <div className="space-y-4">
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-black border-neutral-800">
           <CardHeader>
             <CardTitle className="text-white">Add Exercises</CardTitle>
-            <p className="text-gray-400 text-sm">
+            <p className="text-neutral-400 text-sm">
               Workout: {workoutData.name}
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddExercise} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-neutral-300 mb-1">
                   Exercise Name
                 </label>
                 <Input
@@ -180,14 +180,14 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
                   value={currentExercise.name || ''}
                   onChange={(e) => setCurrentExercise({ ...currentExercise, name: e.target.value })}
                   placeholder="Enter exercise name"
-                  className="bg-gray-900 border-gray-600 text-white"
+                  className="bg-neutral-900 border-neutral-700 text-white"
                   data-testid="exercise-name-input"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-neutral-300 mb-1">
                   Category
                 </label>
                 <Input
@@ -195,13 +195,13 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
                   value={currentExercise.category || ''}
                   onChange={(e) => setCurrentExercise({ ...currentExercise, category: e.target.value })}
                   placeholder="e.g., Chest, Back, Legs"
-                  className="bg-gray-900 border-gray-600 text-white"
+                  className="bg-neutral-900 border-neutral-700 text-white"
                   data-testid="exercise-category-input"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-neutral-300 mb-1">
                   Notes (optional)
                 </label>
                 <Input
@@ -209,14 +209,14 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
                   value={currentExercise.notes || ''}
                   onChange={(e) => setCurrentExercise({ ...currentExercise, notes: e.target.value })}
                   placeholder="Add exercise notes"
-                  className="bg-gray-900 border-gray-600 text-white"
+                  className="bg-neutral-900 border-neutral-700 text-white"
                   data-testid="exercise-notes-input"
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                className="w-full bg-white hover:bg-neutral-200 text-black"
                 data-testid="add-exercise-button"
               >
                 Add Exercise
@@ -226,7 +226,7 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
         </Card>
 
         {exercises.length > 0 && (
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-black border-neutral-800">
             <CardHeader>
               <CardTitle className="text-white">Added Exercises ({exercises.length})</CardTitle>
             </CardHeader>
@@ -235,18 +235,18 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
                 {exercises.map((exercise, index) => (
                   <div
                     key={exercise.id}
-                    className="p-3 bg-gray-900 rounded-lg border border-gray-600"
+                    className="p-3 bg-neutral-900 rounded-lg border border-neutral-700"
                     data-testid={`exercise-item-${index}`}
                   >
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="text-white font-medium">{exercise.name}</h4>
-                        <p className="text-gray-400 text-sm">{exercise.category}</p>
+                        <p className="text-neutral-400 text-sm">{exercise.category}</p>
                         {exercise.notes && (
-                          <p className="text-gray-300 text-sm mt-1">{exercise.notes}</p>
+                          <p className="text-neutral-300 text-sm mt-1">{exercise.notes}</p>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-neutral-500">
                         {exercise.sets.length} sets
                       </span>
                     </div>
@@ -267,7 +267,7 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
           <Button
             onClick={() => setStep('workout')}
             variant="outline"
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
             data-testid="back-button"
           >
             Back
@@ -275,7 +275,7 @@ export function WorkoutCreationFlow({ onWorkoutCreate, onCancel }: WorkoutCreati
           <Button
             onClick={handleCreateWorkout}
             disabled={exercises.length === 0 || isSubmitting}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+            className="flex-1 bg-white hover:bg-neutral-200 text-black disabled:opacity-50"
             data-testid="create-workout-button"
           >
             {isSubmitting ? 'Creating...' : 'Create Workout'}

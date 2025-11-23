@@ -50,19 +50,19 @@ export function Settings({
 
   return (
     <div className={`space-y-6 ${className}`} data-testid="settings-component">
-      <Card className="bg-gray-800 border-gray-700">
+      <Card className="bg-black border-neutral-800">
         <CardHeader>
           <CardTitle className="text-white">Workout Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-neutral-400 mb-1">
               Weight Units
             </label>
             <select
               value={localSettings.units}
               onChange={(e) => handleSettingChange('units', e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-white focus:outline-none"
               data-testid="units-select"
               aria-label="Weight units selection"
             >
@@ -72,7 +72,7 @@ export function Settings({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-neutral-400 mb-1">
               Default Rest Time (seconds)
             </label>
             <Input
@@ -82,26 +82,26 @@ export function Settings({
               step="15"
               value={localSettings.defaultRestTime}
               onChange={(e) => handleSettingChange('defaultRestTime', parseInt(e.target.value) || 0)}
-              className="bg-gray-900 border-gray-600 text-white"
+              className="bg-neutral-900 border-neutral-700 text-white"
               data-testid="rest-time-input"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-neutral-400 mb-1">
               Theme
             </label>
             <select
               value={localSettings.theme}
               onChange={(e) => handleSettingChange('theme', e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-white focus:outline-none"
               data-testid="theme-select"
               aria-label="Theme selection"
               disabled
             >
               <option value="dark">Dark Theme</option>
             </select>
-            <p className="text-xs text-gray-500 mt-1">Only dark theme is available in this version</p>
+            <p className="text-xs text-neutral-500 mt-1">Only dark theme is available in this version</p>
           </div>
 
           <div className="flex items-center space-x-3">
@@ -110,12 +110,12 @@ export function Settings({
               id="notifications"
               checked={localSettings.notifications}
               onChange={(e) => handleSettingChange('notifications', e.target.checked)}
-              className="w-4 h-4 text-blue-600 bg-gray-900 border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
+              className="w-4 h-4 text-white bg-neutral-900 border-neutral-700 rounded focus:ring-2 focus:ring-white"
               data-testid="notifications-checkbox"
             />
             <label 
               htmlFor="notifications" 
-              className="text-sm font-medium text-gray-300"
+              className="text-sm font-medium text-neutral-400"
             >
               Enable notifications
             </label>
@@ -127,7 +127,7 @@ export function Settings({
         <div className="flex space-x-2">
           <Button
             onClick={handleSave}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            className="flex-1 bg-white hover:bg-neutral-200 text-black"
             data-testid="save-button"
           >
             Save Changes
@@ -135,7 +135,7 @@ export function Settings({
           <Button
             onClick={handleReset}
             variant="outline"
-            className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
+            className="flex-1 border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white"
             data-testid="reset-button"
           >
             Reset

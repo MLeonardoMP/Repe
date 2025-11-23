@@ -88,10 +88,10 @@ export function QuickSetDialog({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen: boolean) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[400px] bg-gray-900 border-gray-700 text-white">
+      <DialogContent className="sm:max-w-[400px] bg-black border-neutral-800 text-white">
         <DialogHeader>
           <DialogTitle>Agregar Serie</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-neutral-400">
             Ingresa las repeticiones y peso (opcional)
           </DialogDescription>
         </DialogHeader>
@@ -101,7 +101,7 @@ export function QuickSetDialog({
           <div>
             <label
               htmlFor="reps-input"
-              className="block text-sm font-medium text-gray-300 mb-2"
+              className="block text-sm font-medium text-neutral-300 mb-2"
             >
               Repeticiones *
             </label>
@@ -118,7 +118,7 @@ export function QuickSetDialog({
               }}
               onKeyPress={handleKeyPress}
               placeholder="Ej: 10"
-              className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
+              className="bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500"
               autoFocus
             />
             {errors.reps && (
@@ -130,7 +130,7 @@ export function QuickSetDialog({
           <div>
             <label
               htmlFor="weight-input"
-              className="block text-sm font-medium text-gray-300 mb-2"
+              className="block text-sm font-medium text-neutral-300 mb-2"
             >
               Peso (kg)
             </label>
@@ -148,7 +148,7 @@ export function QuickSetDialog({
               }}
               onKeyPress={handleKeyPress}
               placeholder="Ej: 80"
-              className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
+              className="bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500"
             />
             {errors.weight && (
               <p className="text-red-400 text-sm mt-1">{errors.weight}</p>
@@ -160,13 +160,13 @@ export function QuickSetDialog({
           <Button
             variant="outline"
             onClick={onClose}
-            className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-800"
+            className="flex-1 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
           >
             Cancelar
           </Button>
           <Button
             onClick={handleConfirm}
-            className="flex-1 bg-blue-600 hover:bg-blue-700"
+            className="flex-1 bg-white hover:bg-neutral-200 text-black"
           >
             Confirmar
           </Button>

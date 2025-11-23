@@ -22,12 +22,12 @@ export function Loading({ size = 'md', text = 'Loading...', className = '' }: Lo
       aria-live="polite"
     >
       <div 
-        className={`animate-spin rounded-full border-2 border-gray-300 border-t-blue-600 ${sizeClasses[size]}`}
+        className={`animate-spin rounded-full border-2 border-neutral-800 border-t-white ${sizeClasses[size]}`}
         data-testid="loading-spinner"
       />
       {text && (
         <span 
-          className="text-gray-400 text-sm"
+          className="text-neutral-400 text-sm"
           data-testid="loading-text"
         >
           {text}

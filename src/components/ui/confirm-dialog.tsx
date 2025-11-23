@@ -40,7 +40,7 @@ export function ConfirmDialog({
       
       {/* Dialog */}
       <div 
-        className={`relative bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-md mx-4 w-full ${className}`}
+        className={`relative bg-black border border-neutral-800 rounded-lg p-6 max-w-md mx-4 w-full ${className}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
@@ -56,7 +56,7 @@ export function ConfirmDialog({
         
         <p 
           id="dialog-description"
-          className="text-gray-300 mb-6"
+          className="text-neutral-400 mb-6"
           data-testid="dialog-description"
         >
           {description}
@@ -66,7 +66,7 @@ export function ConfirmDialog({
           <Button
             variant="outline"
             onClick={onCancel}
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            className="border-neutral-800 text-neutral-400 hover:bg-neutral-900 hover:text-white"
             data-testid="cancel-button"
           >
             {cancelText}
@@ -74,7 +74,7 @@ export function ConfirmDialog({
           
           <Button
             onClick={onConfirm}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/50"
             data-testid="confirm-button"
           >
             {confirmText}

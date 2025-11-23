@@ -69,10 +69,10 @@ export function MinimalSetForm({
   };
 
   return (
-    <div className="p-4 bg-gray-800 rounded-lg border border-gray-700">
+    <div className="p-4 bg-black rounded-lg border border-neutral-800">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="weight-input" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="weight-input" className="block text-sm font-medium text-neutral-300 mb-1">
             Weight (kg)
           </label>
           <Input
@@ -82,7 +82,7 @@ export function MinimalSetForm({
             value={formData.weight}
             onChange={(e) => handleInputChange('weight', e.target.value)}
             placeholder="Enter weight"
-            className="bg-gray-900 border-gray-600 text-white"
+            className="bg-neutral-900 border-neutral-700 text-white"
             data-testid="weight-input"
           />
           {errors.weight && (
@@ -93,7 +93,7 @@ export function MinimalSetForm({
         </div>
 
         <div>
-          <label htmlFor="repetitions-input" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="repetitions-input" className="block text-sm font-medium text-neutral-300 mb-1">
             Repetitions
           </label>
           <Input
@@ -102,7 +102,7 @@ export function MinimalSetForm({
             value={formData.repetitions}
             onChange={(e) => handleInputChange('repetitions', e.target.value)}
             placeholder="Enter repetitions"
-            className="bg-gray-900 border-gray-600 text-white"
+            className="bg-neutral-900 border-neutral-700 text-white"
             data-testid="repetitions-input"
           />
           {errors.repetitions && (
@@ -113,7 +113,7 @@ export function MinimalSetForm({
         </div>
 
         <div>
-          <label htmlFor="intensity-input" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="intensity-input" className="block text-sm font-medium text-neutral-300 mb-1">
             Intensity (RPE 1-10)
           </label>
           <Input
@@ -125,7 +125,7 @@ export function MinimalSetForm({
             value={formData.intensity}
             onChange={(e) => handleInputChange('intensity', e.target.value)}
             placeholder="Enter intensity"
-            className="bg-gray-900 border-gray-600 text-white"
+            className="bg-neutral-900 border-neutral-700 text-white"
             data-testid="intensity-input"
           />
           {errors.intensity && (
@@ -136,7 +136,7 @@ export function MinimalSetForm({
         </div>
 
         <div>
-          <label htmlFor="notes-input" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="notes-input" className="block text-sm font-medium text-neutral-300 mb-1">
             Notes (optional)
           </label>
           <Input
@@ -145,7 +145,7 @@ export function MinimalSetForm({
             value={formData.notes}
             onChange={(e) => handleInputChange('notes', e.target.value)}
             placeholder="Add notes about this set"
-            className="bg-gray-900 border-gray-600 text-white"
+            className="bg-neutral-900 border-neutral-700 text-white"
             data-testid="notes-input"
           />
         </div>
@@ -154,7 +154,7 @@ export function MinimalSetForm({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            className="flex-1 bg-white hover:bg-neutral-200 text-black"
             data-testid="save-button"
           >
             {isSubmitting ? 'Saving...' : 'Save Set'}
@@ -164,7 +164,7 @@ export function MinimalSetForm({
               type="button"
               variant="outline"
               onClick={onCancel}
-              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="flex-1 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
               data-testid="cancel-button"
             >
               Cancel

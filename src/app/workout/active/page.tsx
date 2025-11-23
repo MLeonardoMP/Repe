@@ -136,9 +136,9 @@ export default function ActiveWorkoutPage() {
       <div className="flex-1 p-4">
         <div className="max-w-md mx-auto">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-700 rounded w-3/4"></div>
-            <div className="h-20 bg-gray-700 rounded"></div>
-            <div className="h-32 bg-gray-700 rounded"></div>
+            <div className="h-8 bg-neutral-800 rounded w-3/4"></div>
+            <div className="h-20 bg-neutral-800 rounded"></div>
+            <div className="h-32 bg-neutral-800 rounded"></div>
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function ActiveWorkoutPage() {
     return (
       <div className="flex-1 p-4">
         <div className="max-w-md mx-auto text-center">
-          <p className="text-gray-400">No hay entrenamiento activo</p>
+          <p className="text-neutral-400">No hay entrenamiento activo</p>
           <Button onClick={() => router.push('/')} className="mt-4">
             Ir al inicio
           </Button>
@@ -168,7 +168,7 @@ export default function ActiveWorkoutPage() {
               variant="ghost"
               size="sm"
               onClick={() => router.push('/')}
-              className="text-gray-400 hover:text-white p-2"
+              className="text-neutral-400 hover:text-white p-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -177,10 +177,10 @@ export default function ActiveWorkoutPage() {
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-white">{activeWorkout.name}</h1>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="success" className="bg-green-900 text-green-300">
+                <Badge variant="outline" className="bg-white text-black border-white">
                   Activo
                 </Badge>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-neutral-400">
                   {formatTime(workoutDuration)}
                 </span>
               </div>
@@ -189,28 +189,28 @@ export default function ActiveWorkoutPage() {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-3">
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-black border-neutral-800">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">{activeWorkout.exercises.length}</div>
-                <div className="text-xs text-gray-400">Ejercicios</div>
+                <div className="text-xs text-neutral-400">Ejercicios</div>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-black border-neutral-800">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">
                   {activeWorkout.exercises.reduce((total, ex) => total + ex.sets.length, 0)}
                 </div>
-                <div className="text-xs text-gray-400">Series</div>
+                <div className="text-xs text-neutral-400">Series</div>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-black border-neutral-800">
               <CardContent className="p-3 text-center">
                 <div className="text-lg font-bold text-white">
                   {activeWorkout.exercises.reduce((total, ex) => 
                     total + ex.sets.filter(set => set.completed).length, 0
                   )}
                 </div>
-                <div className="text-xs text-gray-400">Completas</div>
+                <div className="text-xs text-neutral-400">Completas</div>
               </CardContent>
             </Card>
           </div>
@@ -251,12 +251,12 @@ export default function ActiveWorkoutPage() {
             }}
           />
         ) : (
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-black border-neutral-800">
             <CardContent className="p-4">
               <Button
                 variant="ghost"
                 onClick={() => setIsExercisePickerOpen(true)}
-                className="w-full text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 border border-dashed border-gray-600 py-8"
+                className="w-full text-white hover:text-neutral-300 hover:bg-neutral-900 border border-dashed border-neutral-800 py-8"
               >
                 <div className="text-center">
                   <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,11 +274,11 @@ export default function ActiveWorkoutPage() {
           <Button
             onClick={handleFinishWorkout}
             disabled={isFinishing}
-            className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-lg"
+            className="w-full h-12 bg-white hover:bg-neutral-200 text-black text-lg font-medium"
           >
             {isFinishing ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                 Finalizando...
               </div>
             ) : (
@@ -289,7 +289,7 @@ export default function ActiveWorkoutPage() {
           <Button
             variant="ghost"
             onClick={() => router.push('/')}
-            className="w-full text-gray-400 hover:text-white"
+            className="w-full text-neutral-400 hover:text-white"
           >
             Guardar y Salir
           </Button>

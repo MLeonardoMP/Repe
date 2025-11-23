@@ -95,9 +95,9 @@ export default function WorkoutDetailPage() {
       <div className="flex-1 p-4">
         <div className="max-w-md mx-auto">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-700 rounded w-3/4"></div>
-            <div className="h-32 bg-gray-700 rounded"></div>
-            <div className="h-20 bg-gray-700 rounded"></div>
+            <div className="h-8 bg-neutral-800 rounded w-3/4"></div>
+            <div className="h-32 bg-neutral-800 rounded"></div>
+            <div className="h-20 bg-neutral-800 rounded"></div>
           </div>
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function WorkoutDetailPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-400 hover:text-white p-2"
+                className="text-neutral-400 hover:text-white p-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -144,11 +144,11 @@ export default function WorkoutDetailPage() {
               <h1 className="text-2xl font-bold text-white">{workout.name}</h1>
               <div className="flex items-center gap-2 mt-1">
                 {isActive && (
-                  <Badge variant="success" className="bg-green-900 text-green-300">
+                  <Badge variant="outline" className="bg-white text-black border-white">
                     Active
                   </Badge>
                 )}
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-neutral-400">
                   {formatDate(workout.startTime)}
                 </span>
               </div>
@@ -156,33 +156,33 @@ export default function WorkoutDetailPage() {
           </div>
 
           {/* Workout Summary */}
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-black border-neutral-800">
             <CardContent className="p-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">{workout.exercises.length}</div>
-                  <div className="text-xs text-gray-400">Exercises</div>
+                  <div className="text-xs text-neutral-400">Exercises</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">{totalSets}</div>
-                  <div className="text-xs text-gray-400">Total Sets</div>
+                  <div className="text-xs text-neutral-400">Total Sets</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">{completedSets}</div>
-                  <div className="text-xs text-gray-400">Completed</div>
+                  <div className="text-xs text-neutral-400">Completed</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">
                     {formatDuration(workout.startTime, workout.endTime)}
                   </div>
-                  <div className="text-xs text-gray-400">Duration</div>
+                  <div className="text-xs text-neutral-400">Duration</div>
                 </div>
               </div>
 
               {workout.notes && (
-                <div className="mt-4 pt-4 border-t border-gray-700">
-                  <h3 className="text-sm font-medium text-gray-300 mb-2">Notes</h3>
-                  <p className="text-sm text-gray-400">{workout.notes}</p>
+                <div className="mt-4 pt-4 border-t border-neutral-800">
+                  <h3 className="text-sm font-medium text-neutral-300 mb-2">Notes</h3>
+                  <p className="text-sm text-neutral-400">{workout.notes}</p>
                 </div>
               )}
             </CardContent>
@@ -205,15 +205,15 @@ export default function WorkoutDetailPage() {
               />
             ))
           ) : (
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-black border-neutral-800">
               <CardContent className="text-center py-8">
-                <div className="text-gray-400">
+                <div className="text-neutral-400">
                   <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">No exercises</h3>
-                <p className="text-gray-400">This workout doesn&apos;t have any exercises yet.</p>
+                <p className="text-neutral-400">This workout doesn&apos;t have any exercises yet.</p>
               </CardContent>
             </Card>
           )}
@@ -224,7 +224,7 @@ export default function WorkoutDetailPage() {
           {isActive && (
             <Button
               onClick={handleContinue}
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-lg"
+              className="w-full h-12 bg-white hover:bg-neutral-200 text-black text-lg font-medium"
             >
               Continue Workout
             </Button>
@@ -232,7 +232,7 @@ export default function WorkoutDetailPage() {
           
           <div className="flex gap-3">
             <Link href="/history" className="flex-1">
-              <Button variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700">
+              <Button variant="outline" className="w-full border-neutral-800 text-neutral-300 hover:bg-neutral-800">
                 Back to History
               </Button>
             </Link>

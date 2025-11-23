@@ -66,6 +66,34 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-meteor: meteor 5s linear infinite;
+  --animate-shiny-text: shiny-text 8s infinite;
+
+  @keyframes meteor {
+    0% {
+      transform: rotate(215deg) translateX(0);
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(215deg) translateX(-500px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes shiny-text {
+    0%,
+    90%,
+    100% {
+      background-position: calc(-100% - var(--shiny-width)) 0;
+    }
+    30%,
+    60% {
+      background-position: calc(100% + var(--shiny-width)) 0;
+    }
+  }
 }
 
 :root {
@@ -105,36 +133,36 @@
 
 .dark {
   --background: #000000;
-  --foreground: #ffffff;
+  --foreground: #ededed;
   --card: #000000;
-  --card-foreground: #ffffff;
+  --card-foreground: #ededed;
   --popover: #000000;
-  --popover-foreground: #ffffff;
+  --popover-foreground: #ededed;
   --primary: #ffffff;
   --primary-foreground: #000000;
-  --secondary: #1a1a1a;
-  --secondary-foreground: #ffffff;
-  --muted: #1a1a1a;
-  --muted-foreground: #6b7280;
-  --accent: #1a1a1a;
-  --accent-foreground: #ffffff;
-  --destructive: #dc2626;
+  --secondary: #0a0a0a;
+  --secondary-foreground: #ededed;
+  --muted: #0a0a0a;
+  --muted-foreground: #888888;
+  --accent: #111111;
+  --accent-foreground: #ededed;
+  --destructive: #ef4444;
   --border: #333333;
-  --input: #1a1a1a;
-  --ring: #6b7280;
-  --chart-1: #808080;
-  --chart-2: #6b7280;
-  --chart-3: #525252;
-  --chart-4: #404040;
-  --chart-5: #2d2d2d;
+  --input: #333333;
+  --ring: #333333;
+  --chart-1: #ededed;
+  --chart-2: #a1a1a1;
+  --chart-3: #666666;
+  --chart-4: #444444;
+  --chart-5: #222222;
   --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
+  --sidebar-foreground: #ededed;
   --sidebar-primary: #ffffff;
   --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #1a1a1a;
-  --sidebar-accent-foreground: #ffffff;
+  --sidebar-accent: #111111;
+  --sidebar-accent-foreground: #ededed;
   --sidebar-border: #333333;
-  --sidebar-ring: #6b7280;
+  --sidebar-ring: #333333;
 }
 
 @layer base {
@@ -190,58 +218,17 @@
     background: var(--background);
   }
   
-  /* Modern UI Enhancements */
-  .glass-effect {
-    background: rgba(26, 26, 26, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+  /* Minimalist UI Enhancements */
+  .subtle-border {
+    border: 1px solid var(--border);
   }
-  
-  .glass-border {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .subtle-glow {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.03);
-  }
-  
-  .card-hover {
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-  }
-  
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  }
-  
+
   .button-press {
     transition: transform 0.1s ease-out;
   }
   
   .button-press:active {
     transform: scale(0.98);
-  }
-  
-  /* Gradient utilities */
-  .gradient-accent {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
-  }
-  
-  .gradient-border {
-    position: relative;
-    border: none;
-  }
-  
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
   }
   
   /* Smooth scrolling */
@@ -320,5 +307,38 @@
   
   .slide-in-bottom {
     animation: slideInBottom 0.4s ease-out;
+  }
+
+  /* Meteor animation */
+  @keyframes meteor {
+    0% {
+      transform: rotate(var(--angle)) translateX(0);
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(var(--angle)) translateX(-500px);
+      opacity: 0;
+    }
+  }
+
+  .animate-meteor {
+    animation: meteor 5s linear infinite;
+  }
+
+  .dotted-line-h {
+    background-image: linear-gradient(to right, #333 50%, transparent 50%);
+    background-size: 12px 100%;
+    height: 1px;
+    width: 100%;
+  }
+
+  .dotted-line-v {
+    background-image: linear-gradient(to bottom, #333 50%, transparent 50%);
+    background-size: 100% 12px;
+    width: 1px;
+    height: 100%;
   }
 }
