@@ -97,10 +97,10 @@ export function ExercisePickerComponent({
       {/* Header */}
       <div className="pb-2 border-b border-neutral-800">
         <h3 className="text-sm font-medium text-neutral-300 mb-1">
-          Seleccionar Ejercicio
+          Select Exercise
         </h3>
         <p className="text-xs text-neutral-400">
-          Busca un ejercicio en la biblioteca o ingresa un nombre personalizado
+          Search for an exercise in the library or enter a custom name
         </p>
       </div>
 
@@ -108,7 +108,7 @@ export function ExercisePickerComponent({
       <div>
         <Input
           type="text"
-          placeholder="Buscar ejercicio..."
+          placeholder="Search exercise..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="bg-neutral-900 border-neutral-700 text-white placeholder:text-neutral-500"
@@ -119,7 +119,7 @@ export function ExercisePickerComponent({
       {/* Exercise List */}
       {loading ? (
         <div className="text-center py-8 text-neutral-400">
-          Cargando ejercicios...
+          Loading exercises...
         </div>
       ) : error ? (
         <div className="text-center py-8 text-red-400">
@@ -129,7 +129,7 @@ export function ExercisePickerComponent({
         <div className="max-h-[300px] overflow-y-auto space-y-2 border border-neutral-800 rounded-md p-2">
           {filteredExercises.length === 0 ? (
             <div className="text-center py-4 text-neutral-400">
-              No se encontraron ejercicios
+              No exercises found
             </div>
           ) : (
             filteredExercises.map((exercise) => (
@@ -137,7 +137,7 @@ export function ExercisePickerComponent({
                 key={exercise.id || exercise.name}
                 onClick={() => handleExerciseSelect(exercise.name)}
                 className="w-full text-left px-3 py-2 rounded-md hover:bg-neutral-900 transition-colors"
-                aria-label={`Seleccionar ${exercise.name}`}
+                aria-label={`Select ${exercise.name}`}
               >
                 <div className="font-medium text-white">{exercise.name}</div>
                 {exercise.category && (
@@ -163,13 +163,13 @@ export function ExercisePickerComponent({
           htmlFor="custom-exercise-name"
           className="block text-sm font-medium text-neutral-300 mb-2"
         >
-          O ingresa un nombre personalizado:
+          Or enter a custom name:
         </label>
         <div className="flex space-x-2">
           <Input
             id="custom-exercise-name"
             type="text"
-            placeholder="Nombre personalizado del ejercicio"
+            placeholder="Custom exercise name"
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -180,7 +180,7 @@ export function ExercisePickerComponent({
             disabled={!customName.trim()}
             className="bg-white hover:bg-neutral-200 text-black"
           >
-            Agregar
+            Add
           </Button>
         </div>
       </div>
@@ -192,7 +192,7 @@ export function ExercisePickerComponent({
           onClick={onClose}
           className="flex-1 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
         >
-          Cancelar
+          Cancel
         </Button>
       </div>
     </div>
@@ -215,9 +215,9 @@ export function ExercisePickerDialog({
     <Dialog open={open} onOpenChange={(isOpen: boolean) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[500px] bg-black border-neutral-800 text-white">
         <DialogHeader>
-          <DialogTitle>Seleccionar Ejercicio</DialogTitle>
+          <DialogTitle>Select Exercise</DialogTitle>
           <DialogDescription className="text-neutral-400">
-            Busca un ejercicio en la biblioteca o ingresa un nombre personalizado
+            Search for an exercise in the library or enter a custom name
           </DialogDescription>
         </DialogHeader>
         <ExercisePickerComponent onClose={onClose} onSelect={onSelect} />

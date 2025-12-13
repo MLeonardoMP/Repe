@@ -69,6 +69,10 @@ const WorkoutSessionSchema = z.object({
   notes: z.string().optional(),
   createdAt: z.string().refine((val) => !isNaN(Date.parse(val))),
   updatedAt: z.string().refine((val) => !isNaN(Date.parse(val)))
+}).superRefine((value, ctx) => {
+  if (value.endTime && new Date(value.endTime).getTime() < new Date(value.startTime).getTime()) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endTime'], message: 'End time must be after start time' });
+  }
 });
 
 const ExerciseTemplateSchema = z.object({

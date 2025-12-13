@@ -16,10 +16,13 @@ import {
 } from '@/lib/storage';
 import type { User, WorkoutSession, ExerciseTemplate } from '@/types';
 
-// Mock UUID to return predictable values
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-123'),
-}));
+// Mock UUID to return predictable values while keeping uniqueness
+jest.mock('uuid', () => {
+  let counter = 0;
+  return {
+    v4: jest.fn(() => `mock-uuid-${++counter}`),
+  };
+});
 
 // Test data directory
 const TEST_DATA_DIR = path.join(process.cwd(), 'tests', 'fixtures', 'data');

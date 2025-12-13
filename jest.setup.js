@@ -2,47 +2,9 @@
 import '@testing-library/jest-dom';
 import 'whatwg-fetch';
 
-// Mock UUID module
+// Mock uuid module to avoid ESM issues
 jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid'),
-}));
-
-// In-memory storage for testing
-global.testStorage = {
-  users: [],
-  workouts: [],
-  exerciseTemplates: [],
-};
-
-// Mock file system operations for testing
-jest.mock('fs', () => ({
-  promises: {
-    readFile: jest.fn((filePath) => {
-      if (filePath.includes('users.json')) {
-        return Promise.resolve(JSON.stringify(global.testStorage.users));
-      } else if (filePath.includes('workouts.json')) {
-        return Promise.resolve(JSON.stringify(global.testStorage.workouts));
-      } else if (filePath.includes('exercise-templates.json')) {
-        return Promise.resolve(JSON.stringify(global.testStorage.exerciseTemplates));
-      }
-      return Promise.reject(new Error('File not found'));
-    }),
-    writeFile: jest.fn((filePath, data) => {
-      const jsonData = JSON.parse(data);
-      if (filePath.includes('users.json')) {
-        global.testStorage.users = jsonData;
-      } else if (filePath.includes('workouts.json')) {
-        global.testStorage.workouts = jsonData;
-      } else if (filePath.includes('exercise-templates.json')) {
-        global.testStorage.exerciseTemplates = jsonData;
-      }
-      return Promise.resolve();
-    }),
-    mkdir: jest.fn(() => Promise.resolve()),
-    access: jest.fn(() => Promise.resolve()),
-    rename: jest.fn(() => Promise.resolve()),
-    unlink: jest.fn(() => Promise.resolve()),
-  },
+  v4: () => 'test-uuid-' + Math.random().toString(36).substr(2, 9),
 }));
 
 // Mock fetch globally with a rejected Promise so tests can override per-case

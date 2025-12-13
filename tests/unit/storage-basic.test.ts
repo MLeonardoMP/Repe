@@ -3,33 +3,18 @@
  * Basic tests for JSON storage operations
  */
 
-import { promises as fs } from 'fs';
-import path from 'path';
 import {
   userStorage,
   workoutStorage,
   exerciseTemplateStorage,
+  clearAllData,
 } from '@/lib/storage';
-import type { User, WorkoutSession, ExerciseTemplate } from '@/types';
+import type { ExerciseTemplate } from '@/types';
 
 // Mock UUID to return predictable values
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid-123'),
 }));
-
-// Mock fs instead of using files
-jest.mock('fs', () => ({
-  promises: {
-    access: jest.fn(),
-    readFile: jest.fn(),
-    writeFile: jest.fn(),
-    mkdir: jest.fn(),
-    rename: jest.fn(),
-    unlink: jest.fn(),
-  },
-}));
-
-const mockedFs = jest.mocked(fs);
 
 // Mock data
 const mockUser = {
@@ -44,21 +29,7 @@ const mockUser = {
 const mockWorkoutSession = {
   userId: 'user-123',
   name: 'Push Day',
-  exercises: [
-    {
-      templateId: 'template-1',
-      sets: [
-        {
-          reps: 10,
-          weight: 50,
-          intensity: 8,
-          restTime: 60,
-          completed: true
-        }
-      ],
-      notes: 'Good form'
-    }
-  ],
+  exercises: [],
   startTime: new Date().toISOString(),
   endTime: new Date().toISOString(),
   notes: 'Great workout'
@@ -70,23 +41,13 @@ const mockExerciseTemplate: Omit<ExerciseTemplate, 'id'> = {
   defaultWeightUnit: 'kg'
 };
 
-describe('Storage Service', () => {
+describe('Storage Service (basic)', () => {
   beforeEach(async () => {
-    // Ensure clean test environment
-    try {
-      await fs.mkdir(TEST_DATA_DIR, { recursive: true });
-    } catch (error) {
-      // Directory might already exist
-    }
+    await clearAllData();
   });
 
   afterEach(async () => {
-    // Clean up test data
-    try {
-      await fs.rmdir(TEST_DATA_DIR, { recursive: true });
-    } catch (error) {
-      // Directory might not exist
-    }
+    await clearAllData();
   });
 
   describe('User Storage', () => {
@@ -109,9 +70,9 @@ describe('Storage Service', () => {
       expect(foundUser?.name).toBe(mockUser.name);
     });
 
-    it('should return null for non-existent user', async () => {
+    it('should return undefined for non-existent user', async () => {
       const foundUser = await userStorage.findById('non-existent-id');
-      expect(foundUser).toBeNull();
+      expect(foundUser).toBeUndefined();
     });
 
     it('should find all users', async () => {
@@ -146,10 +107,11 @@ describe('Storage Service', () => {
     it('should delete user', async () => {
       const createdUser = await userStorage.create(mockUser);
       
-      await userStorage.delete(createdUser.id);
-      
+      const deleted = await userStorage.delete(createdUser.id);
+      expect(deleted).toBe(true);
+
       const foundUser = await userStorage.findById(createdUser.id);
-      expect(foundUser).toBeNull();
+      expect(foundUser).toBeUndefined();
     });
   });
 

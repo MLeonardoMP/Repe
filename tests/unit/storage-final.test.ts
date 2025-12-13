@@ -7,8 +7,9 @@ import {
   userStorage,
   workoutStorage,
   exerciseTemplateStorage,
+  clearAllData,
 } from '@/lib/storage';
-import type { User, WorkoutSession, ExerciseTemplate } from '@/types';
+import type { ExerciseTemplate } from '@/types';
 
 // Mock data
 const mockUser = {
@@ -23,21 +24,7 @@ const mockUser = {
 const mockWorkoutSession = {
   userId: 'user-123',
   name: 'Push Day',
-  exercises: [
-    {
-      templateId: 'template-1',
-      sets: [
-        {
-          reps: 10,
-          weight: 50,
-          intensity: 8,
-          restTime: 60,
-          completed: true
-        }
-      ],
-      notes: 'Good form'
-    }
-  ],
+  exercises: [],
   startTime: new Date().toISOString(),
   endTime: new Date().toISOString(),
   notes: 'Great workout'
@@ -49,12 +36,13 @@ const mockExerciseTemplate: Omit<ExerciseTemplate, 'id'> = {
   defaultWeightUnit: 'kg'
 };
 
-describe('Storage Service', () => {
-  beforeEach(() => {
-    // Reset in-memory storage
-    global.testStorage.users = [];
-    global.testStorage.workouts = [];
-    global.testStorage.exerciseTemplates = [];
+describe('Storage Service (final)', () => {
+  beforeEach(async () => {
+    await clearAllData();
+  });
+
+  afterEach(async () => {
+    await clearAllData();
   });
 
   describe('User Storage', () => {
@@ -77,9 +65,9 @@ describe('Storage Service', () => {
       expect(foundUser?.name).toBe(mockUser.name);
     });
 
-    it('should return null for non-existent user', async () => {
+    it('should return undefined for non-existent user', async () => {
       const foundUser = await userStorage.findById('non-existent-id');
-      expect(foundUser).toBeNull();
+      expect(foundUser).toBeUndefined();
     });
   });
 

@@ -129,13 +129,11 @@ describe('API Routes Integration Tests (Simplified)', () => {
       const result = await workoutStorage.findById('non-existent-id');
       expect(result).toBeUndefined();
 
-      await expect(
-        workoutStorage.update('non-existent-id', { name: 'Updated' })
-      ).rejects.toThrow();
+      const updateResult = await workoutStorage.update('non-existent-id', { name: 'Updated' });
+      expect(updateResult).toBeUndefined();
 
-      await expect(
-        workoutStorage.delete('non-existent-id')
-      ).rejects.toThrow();
+      const deleteResult = await workoutStorage.delete('non-existent-id');
+      expect(deleteResult).toBe(false);
     });
 
     it('should maintain data consistency on errors', async () => {

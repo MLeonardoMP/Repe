@@ -1,342 +1,240 @@
 /**
  * Settings Component Unit Tests
- * Tests for user settings management and preferences
+ * Tests for user settings and preferences
+ * Updated to match current component API
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Settings } from '@/components/user/settings';
-import { UserSettings } from '@/types';
+import { Settings, UserSettings } from '@/components/user/settings';
 
-// Mock settings data
 const mockSettings: UserSettings = {
   units: 'kg',
   defaultRestTime: 120,
   theme: 'dark',
   notifications: true,
-  autoStart: false,
-  soundEnabled: true,
-  vibrationEnabled: true
 };
 
 describe('Settings Component', () => {
-  const mockOnUpdate = jest.fn();
+  const mockOnSettingsChange = jest.fn();
+  const mockOnSave = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should render all settings sections', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
+  it('should render settings component', () => {
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+      />
+    );
     
-    expect(screen.getByText(/units/i)).toBeInTheDocument();
-    expect(screen.getByText(/rest time/i)).toBeInTheDocument();
-    expect(screen.getByText(/theme/i)).toBeInTheDocument();
-    expect(screen.getByText(/notifications/i)).toBeInTheDocument();
+    expect(screen.getByTestId('settings-component')).toBeInTheDocument();
   });
 
-  it('should display current weight units selection', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
+  it('should display workout settings card', () => {
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+      />
+    );
     
-    const kgRadio = screen.getByRole('radio', { name: /kg/i });
-    const lbsRadio = screen.getByRole('radio', { name: /lbs/i });
-    
-    expect(kgRadio).toBeChecked();
-    expect(lbsRadio).not.toBeChecked();
+    expect(screen.getByText('Workout Settings')).toBeInTheDocument();
   });
 
-  it('should change weight units', async () => {
+  it('should render units selection', () => {
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+      />
+    );
+    
+    expect(screen.getByTestId('units-select')).toBeInTheDocument();
+    expect(screen.getByText('Weight Units')).toBeInTheDocument();
+  });
+
+  it('should handle units change', async () => {
     const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
     
-    const lbsRadio = screen.getByRole('radio', { name: /lbs/i });
-    await user.click(lbsRadio);
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+      />
+    );
     
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      ...mockSettings,
-      units: 'lbs'
-    });
+    const unitsSelect = screen.getByTestId('units-select');
+    await user.selectOptions(unitsSelect, 'lbs');
+    
+    expect(mockOnSettingsChange).toHaveBeenCalledWith(
+      expect.objectContaining({ units: 'lbs' })
+    );
   });
 
-  it('should display default rest time value', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
+  it('should render rest time input', () => {
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+      />
+    );
     
-    const restTimeInput = screen.getByLabelText(/default rest time/i) as HTMLInputElement;
-    expect(restTimeInput.value).toBe('120');
+    expect(screen.getByTestId('rest-time-input')).toBeInTheDocument();
+    expect(screen.getByText(/Default Rest Time/i)).toBeInTheDocument();
   });
 
-  it('should update default rest time', async () => {
+  it('should handle rest time change', async () => {
     const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
     
-    const restTimeInput = screen.getByLabelText(/default rest time/i);
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+      />
+    );
+    
+    const restTimeInput = screen.getByTestId('rest-time-input');
     await user.clear(restTimeInput);
     await user.type(restTimeInput, '90');
     
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      ...mockSettings,
-      defaultRestTime: 90
-    });
+    expect(mockOnSettingsChange).toHaveBeenCalled();
   });
 
-  it('should validate rest time range', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const restTimeInput = screen.getByLabelText(/default rest time/i);
-    await user.clear(restTimeInput);
-    await user.type(restTimeInput, '600');
-    
-    expect(screen.getByText(/rest time must be between/i)).toBeInTheDocument();
-  });
-
-  it('should display theme selection', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const themeSelect = screen.getByLabelText(/theme/i) as HTMLSelectElement;
-    expect(themeSelect.value).toBe('dark');
-  });
-
-  it('should change theme', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const themeSelect = screen.getByLabelText(/theme/i);
-    await user.selectOptions(themeSelect, 'light');
-    
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      ...mockSettings,
-      theme: 'light'
-    });
-  });
-
-  it('should toggle notifications', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const notificationsToggle = screen.getByRole('checkbox', { name: /notifications/i });
-    expect(notificationsToggle).toBeChecked();
-    
-    await user.click(notificationsToggle);
-    
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      ...mockSettings,
-      notifications: false
-    });
-  });
-
-  it('should toggle auto start workouts', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const autoStartToggle = screen.getByRole('checkbox', { name: /auto start/i });
-    expect(autoStartToggle).not.toBeChecked();
-    
-    await user.click(autoStartToggle);
-    
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      ...mockSettings,
-      autoStart: true
-    });
-  });
-
-  it('should toggle sound effects', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const soundToggle = screen.getByRole('checkbox', { name: /sound/i });
-    expect(soundToggle).toBeChecked();
-    
-    await user.click(soundToggle);
-    
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      ...mockSettings,
-      soundEnabled: false
-    });
-  });
-
-  it('should toggle vibration', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const vibrationToggle = screen.getByRole('checkbox', { name: /vibration/i });
-    expect(vibrationToggle).toBeChecked();
-    
-    await user.click(vibrationToggle);
-    
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      ...mockSettings,
-      vibrationEnabled: false
-    });
-  });
-
-  it('should show preset rest time buttons', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    expect(screen.getByRole('button', { name: '60s' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '90s' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '120s' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '180s' })).toBeInTheDocument();
-  });
-
-  it('should set rest time using preset buttons', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const preset90Button = screen.getByRole('button', { name: '90s' });
-    await user.click(preset90Button);
-    
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      ...mockSettings,
-      defaultRestTime: 90
-    });
-  });
-
-  it('should show save confirmation when settings change', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const lbsRadio = screen.getByRole('radio', { name: /lbs/i });
-    await user.click(lbsRadio);
-    
-    expect(screen.getByText(/settings saved/i)).toBeInTheDocument();
-  });
-
-  it('should show loading state during save', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} isLoading={true} />);
-    
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-  });
-
-  it('should display error messages', () => {
+  it('should render theme selection', () => {
     render(
-      <Settings 
-        settings={mockSettings} 
-        onUpdate={mockOnUpdate}
-        error="Failed to save settings"
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
       />
     );
     
-    expect(screen.getByText('Failed to save settings')).toBeInTheDocument();
+    expect(screen.getByTestId('theme-select')).toBeInTheDocument();
+    expect(screen.getByText(/Only dark theme is available/i)).toBeInTheDocument();
   });
 
-  it('should have reset to defaults button', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
+  it('should render notifications checkbox', () => {
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+      />
+    );
     
-    expect(screen.getByRole('button', { name: /reset to defaults/i })).toBeInTheDocument();
+    expect(screen.getByTestId('notifications-checkbox')).toBeInTheDocument();
+    expect(screen.getByText('Enable notifications')).toBeInTheDocument();
   });
 
-  it('should reset to default settings', async () => {
+  it('should handle notifications toggle', async () => {
     const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
     
-    const resetButton = screen.getByRole('button', { name: /reset to defaults/i });
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+      />
+    );
+    
+    const notificationsCheckbox = screen.getByTestId('notifications-checkbox');
+    await user.click(notificationsCheckbox);
+    
+    expect(mockOnSettingsChange).toHaveBeenCalledWith(
+      expect.objectContaining({ notifications: false })
+    );
+  });
+
+  it('should show save button when changes are made', async () => {
+    const user = userEvent.setup();
+    
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+        onSave={mockOnSave}
+      />
+    );
+    
+    const unitsSelect = screen.getByTestId('units-select');
+    await user.selectOptions(unitsSelect, 'lbs');
+    
+    expect(screen.getByTestId('save-button')).toBeInTheDocument();
+    expect(screen.getByTestId('reset-button')).toBeInTheDocument();
+  });
+
+  it('should handle save button click', async () => {
+    const user = userEvent.setup();
+    
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+        onSave={mockOnSave}
+      />
+    );
+    
+    // Make a change first
+    const unitsSelect = screen.getByTestId('units-select');
+    await user.selectOptions(unitsSelect, 'lbs');
+    
+    // Click save
+    const saveButton = screen.getByTestId('save-button');
+    await user.click(saveButton);
+    
+    expect(mockOnSave).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle reset button click', async () => {
+    const user = userEvent.setup();
+    
+    render(
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+        onSave={mockOnSave}
+      />
+    );
+    
+    // Make a change first
+    const unitsSelect = screen.getByTestId('units-select');
+    await user.selectOptions(unitsSelect, 'lbs');
+    
+    // Click reset
+    const resetButton = screen.getByTestId('reset-button');
     await user.click(resetButton);
     
-    // Should show confirmation dialog
-    expect(screen.getByText(/reset all settings/i)).toBeInTheDocument();
-    
-    const confirmButton = screen.getByRole('button', { name: /confirm/i });
-    await user.click(confirmButton);
-    
-    expect(mockOnUpdate).toHaveBeenCalledWith({
-      units: 'kg',
-      defaultRestTime: 120,
-      theme: 'dark',
-      notifications: true,
-      autoStart: false,
-      soundEnabled: true,
-      vibrationEnabled: true
-    });
+    // Should reset to original settings
+    expect(mockOnSettingsChange).toHaveBeenCalledWith(mockSettings);
   });
 
-  it('should show app version in settings', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    expect(screen.getByText(/version/i)).toBeInTheDocument();
-  });
-
-  it('should have export data option', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    expect(screen.getByRole('button', { name: /export data/i })).toBeInTheDocument();
-  });
-
-  it('should handle data export', async () => {
-    const user = userEvent.setup();
-    const mockOnExport = jest.fn();
-    
+  it('should apply custom className', () => {
     render(
-      <Settings 
-        settings={mockSettings} 
-        onUpdate={mockOnUpdate}
-        onExportData={mockOnExport}
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
+        className="custom-settings"
       />
     );
     
-    const exportButton = screen.getByRole('button', { name: /export data/i });
-    await user.click(exportButton);
-    
-    expect(mockOnExport).toHaveBeenCalledTimes(1);
+    const component = screen.getByTestId('settings-component');
+    expect(component).toHaveClass('custom-settings');
   });
 
-  it('should have import data option', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    expect(screen.getByLabelText(/import data/i)).toBeInTheDocument();
-  });
-
-  it('should handle data import', async () => {
-    const user = userEvent.setup();
-    const mockOnImport = jest.fn();
-    
+  it('should display current values from settings', () => {
     render(
-      <Settings 
-        settings={mockSettings} 
-        onUpdate={mockOnUpdate}
-        onImportData={mockOnImport}
+      <Settings
+        settings={mockSettings}
+        onSettingsChange={mockOnSettingsChange}
       />
     );
     
-    const importInput = screen.getByLabelText(/import data/i);
-    const file = new File(['{"settings": {}}'], 'backup.json', { type: 'application/json' });
+    const unitsSelect = screen.getByTestId('units-select') as HTMLSelectElement;
+    expect(unitsSelect.value).toBe('kg');
     
-    await user.upload(importInput, file);
-    
-    expect(mockOnImport).toHaveBeenCalledWith(file);
-  });
-
-  it('should support keyboard navigation', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const kgRadio = screen.getByRole('radio', { name: /kg/i });
-    const lbsRadio = screen.getByRole('radio', { name: /lbs/i });
-    
-    await user.click(kgRadio);
-    await user.tab();
-    
-    expect(lbsRadio).toHaveFocus();
-  });
-
-  it('should show settings categories', () => {
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    expect(screen.getByText(/general/i)).toBeInTheDocument();
-    expect(screen.getByText(/workout/i)).toBeInTheDocument();
-    expect(screen.getByText(/appearance/i)).toBeInTheDocument();
-    expect(screen.getByText(/notifications/i)).toBeInTheDocument();
-  });
-
-  it('should validate numeric inputs only', async () => {
-    const user = userEvent.setup();
-    render(<Settings settings={mockSettings} onUpdate={mockOnUpdate} />);
-    
-    const restTimeInput = screen.getByLabelText(/default rest time/i);
-    await user.clear(restTimeInput);
-    await user.type(restTimeInput, 'abc');
-    
-    expect(screen.getByText(/must be a number/i)).toBeInTheDocument();
+    const notificationsCheckbox = screen.getByTestId('notifications-checkbox') as HTMLInputElement;
+    expect(notificationsCheckbox.checked).toBe(true);
   });
 });

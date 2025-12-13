@@ -9,8 +9,8 @@ import { clearAllData } from '@/lib/storage';
 // Import API route handlers
 import { POST as createWorkout, GET as getWorkouts } from '@/app/api/workouts/route';
 import { GET as getWorkout, PUT as updateWorkout, DELETE as deleteWorkout } from '@/app/api/workouts/[id]/route';
-import { POST as addExercise } from '@/app/api/workouts/[sessionId]/exercises/route';
-import { PUT as updateExercise } from '@/app/api/workouts/[sessionId]/exercises/[exerciseId]/route';
+import { POST as addExercise } from '@/app/api/workouts/[id]/exercises/route';
+import { PUT as updateExercise } from '@/app/api/workouts/[id]/exercises/[exerciseId]/route';
 import { POST as addSet } from '@/app/api/exercises/[exerciseId]/sets/route';
 import { PUT as updateSet } from '@/app/api/exercises/[exerciseId]/sets/[setId]/route';
 

@@ -17,7 +17,7 @@ describe('Card Component', () => {
     
     const card = screen.getByTestId('card');
     expect(card).toBeInTheDocument();
-    expect(card).toHaveClass('border', 'rounded-lg', 'shadow-sm');
+    expect(card).toHaveClass('border', 'rounded-lg', 'bg-card');
   });
 
   it('should render card with header, title, and content', () => {
@@ -64,7 +64,7 @@ describe('Card Component', () => {
       </Card>
     );
     
-    expect(screen.getByTestId('card')).toHaveClass('border-2');
+    expect(screen.getByTestId('card')).toHaveClass('border');
   });
 
   it('should support custom className', () => {

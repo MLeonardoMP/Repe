@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ShimmerButton } from "@/components/magicui/shimmer-button";
 
 // --- Components ---
 
@@ -53,7 +54,7 @@ const Cross = ({ className, delay = 0 }: { className?: string; delay?: number })
 
 const CornerCircle = ({ className, delay = 0, id }: { className?: string; delay?: number; id: string }) => (
   <div className={cn("absolute pointer-events-none", className)}>
-    <svg className="w-[16rem] h-[16rem] -rotate-90" viewBox="0 0 256 256">
+    <svg className="w-[8rem] h-[8rem] -rotate-90" viewBox="0 0 256 256">
       <defs>
         <mask id={id}>
           <motion.circle
@@ -62,7 +63,7 @@ const CornerCircle = ({ className, delay = 0, id }: { className?: string; delay?
             r="128"
             fill="none"
             stroke="white"
-            strokeWidth="4"
+            strokeWidth="8"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{ duration: 2, delay, ease: "easeInOut" }}
@@ -75,8 +76,8 @@ const CornerCircle = ({ className, delay = 0, id }: { className?: string; delay?
         r="127"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1"
-        strokeDasharray="6 6"
+        strokeWidth="2"
+        strokeDasharray="12 12"
         className="text-[#333]"
         mask={`url(#${id})`}
       />
@@ -120,8 +121,8 @@ export default function HomePage() {
           <Cross className="-bottom-1.5 -right-1.5" delay={0.8} />
 
           {/* Geometric Circles (Next.js Conf Style) */}
-          <CornerCircle id="circle-top" className="-top-[8rem] -left-[8rem]" delay={1.6} />
-          <CornerCircle id="circle-bottom" className="-bottom-[8rem] -right-[8rem]" delay={1.6} />
+          <CornerCircle id="circle-top" className="-top-[4rem] -left-[4rem]" delay={1.6} />
+          <CornerCircle id="circle-bottom" className="-bottom-[4rem] -right-[4rem]" delay={1.6} />
 
           {/* Content Container */}
           <div className="flex flex-col">
@@ -168,23 +169,24 @@ export default function HomePage() {
               {/* Horizontal Divider (Mobile) */}
               <GridLine direction="horizontal" className="top-1/2 md:hidden" delay={1.5} />
 
-              {/* Button 1 */}
+              {/* Button 1 - Start Workout (Shimmer) */}
               <div className="flex items-center justify-center py-10 md:py-14">
                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 1.6 }}
                  >
-                    <Link 
-                      href="/workout/new"
-                      className="h-12 px-10 rounded-full bg-white text-black font-medium flex items-center justify-center hover:bg-neutral-200 transition-colors"
-                    >
-                      Start Workout
+                    <Link href="/workout/new">
+                      <ShimmerButton className="shadow-2xl">
+                        <span className="text-center text-sm leading-none font-medium tracking-tight whitespace-pre-wrap text-white lg:text-lg dark:from-white dark:to-slate-900/10">
+                          Start Workout
+                        </span>
+                      </ShimmerButton>
                     </Link>
                  </motion.div>
               </div>
 
-              {/* Button 2 */}
+              {/* Button 2 - View History (White) */}
               <div className="flex items-center justify-center py-10 md:py-14">
                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -193,7 +195,7 @@ export default function HomePage() {
                  >
                     <Link 
                       href="/history"
-                      className="h-12 px-10 rounded-full border border-white/20 text-white font-medium flex items-center justify-center hover:bg-white/10 transition-colors"
+                      className="h-12 px-10 rounded-full bg-white text-black font-medium flex items-center justify-center hover:bg-neutral-200 transition-colors"
                     >
                       View History
                     </Link>

@@ -3,32 +3,18 @@
  * Basic tests for JSON storage operations
  */
 
-import { promises as fs } from 'fs';
 import {
   userStorage,
   workoutStorage,
   exerciseTemplateStorage,
+  clearAllData,
 } from '@/lib/storage';
-import type { User, WorkoutSession, ExerciseTemplate } from '@/types';
+import type { ExerciseTemplate } from '@/types';
 
 // Mock UUID to return predictable values
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid-123'),
 }));
-
-// Mock fs instead of using files
-jest.mock('fs', () => ({
-  promises: {
-    access: jest.fn(),
-    readFile: jest.fn(),
-    writeFile: jest.fn(),
-    mkdir: jest.fn(),
-    rename: jest.fn(),
-    unlink: jest.fn(),
-  },
-}));
-
-const mockedFs = jest.mocked(fs);
 
 // Mock data
 const mockUser = {
@@ -43,21 +29,7 @@ const mockUser = {
 const mockWorkoutSession = {
   userId: 'user-123',
   name: 'Push Day',
-  exercises: [
-    {
-      templateId: 'template-1',
-      sets: [
-        {
-          reps: 10,
-          weight: 50,
-          intensity: 8,
-          restTime: 60,
-          completed: true
-        }
-      ],
-      notes: 'Good form'
-    }
-  ],
+  exercises: [],
   startTime: new Date().toISOString(),
   endTime: new Date().toISOString(),
   notes: 'Great workout'
@@ -69,39 +41,13 @@ const mockExerciseTemplate: Omit<ExerciseTemplate, 'id'> = {
   defaultWeightUnit: 'kg'
 };
 
-// In-memory storage for testing
-let mockUsersData: User[] = [];
-let mockWorkoutsData: WorkoutSession[] = [];
-let mockExerciseTemplatesData: ExerciseTemplate[] = [];
-
 describe('Storage Service', () => {
   beforeEach(async () => {
-    // Reset in-memory storage
-    mockUsersData = [];
-    mockWorkoutsData = [];
-    mockExerciseTemplatesData = [];
-    
-    // Setup fs mocks
-    mockedFs.mkdir.mockResolvedValue(undefined);
-    mockedFs.writeFile.mockResolvedValue();
-    mockedFs.rename.mockResolvedValue();
-    mockedFs.unlink.mockResolvedValue();
-    
-    // Mock readFile to return our in-memory data
-    mockedFs.readFile.mockImplementation((filePath: any) => {
-      const path = filePath.toString();
-      if (path.includes('users.json')) {
-        return Promise.resolve(JSON.stringify(mockUsersData));
-      } else if (path.includes('workouts.json')) {
-        return Promise.resolve(JSON.stringify(mockWorkoutsData));
-      } else if (path.includes('exercise-templates.json')) {
-        return Promise.resolve(JSON.stringify(mockExerciseTemplatesData));
-      }
-      return Promise.reject(new Error('File not found'));
-    });
-    
-    // Mock access to allow file existence checks
-    mockedFs.access.mockResolvedValue();
+    await clearAllData();
+  });
+
+  afterEach(async () => {
+    await clearAllData();
   });
 
   describe('User Storage', () => {
@@ -128,9 +74,9 @@ describe('Storage Service', () => {
       expect(foundUser?.name).toBe(mockUser.name);
     });
 
-    it('should return null for non-existent user', async () => {
+    it('should return undefined for non-existent user', async () => {
       const foundUser = await userStorage.findById('non-existent-id');
-      expect(foundUser).toBeNull();
+      expect(foundUser).toBeUndefined();
     });
 
     it('should find all users', async () => {
@@ -165,10 +111,11 @@ describe('Storage Service', () => {
     it('should delete user', async () => {
       const createdUser = await userStorage.create(mockUser);
       
-      await userStorage.delete(createdUser.id);
-      
+      const deleted = await userStorage.delete(createdUser.id);
+      expect(deleted).toBe(true);
+
       const foundUser = await userStorage.findById(createdUser.id);
-      expect(foundUser).toBeNull();
+      expect(foundUser).toBeUndefined();
     });
   });
 

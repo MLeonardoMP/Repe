@@ -10,12 +10,6 @@ declare global {
   var test: jest.It;
   var expect: jest.Expect;
   var jest: Jest;
-  
-  var testStorage: {
-    users: any[];
-    workouts: any[];
-    exerciseTemplates: any[];
-  };
 }
 
 export {};

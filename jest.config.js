@@ -33,7 +33,8 @@ const customJestConfig = {
     },
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(uuid)/)',
+    '/node_modules/(?!uuid)/',
+    '\\.pnpm/(?!uuid)',
   ],
 };
 

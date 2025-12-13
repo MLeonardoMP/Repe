@@ -1,6 +1,7 @@
 /**
  * Button Component Unit Tests
  * Tests for basic button component with variants and states
+ * Updated to match current component API
  */
 
 import React from 'react';
@@ -13,21 +14,42 @@ describe('Button Component', () => {
     
     const button = screen.getByRole('button', { name: /click me/i });
     expect(button).toBeInTheDocument();
-    expect(button).toHaveClass('bg-white', 'text-black');
+    expect(button).toHaveClass('inline-flex');
   });
 
   it('should handle primary variant', () => {
     render(<Button variant="primary">Primary Button</Button>);
     
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('bg-black', 'text-white');
+    expect(button).toHaveClass('bg-primary');
   });
 
   it('should handle secondary variant', () => {
     render(<Button variant="secondary">Secondary Button</Button>);
     
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('border', 'bg-transparent');
+    expect(button).toHaveClass('bg-secondary');
+  });
+
+  it('should handle destructive variant', () => {
+    render(<Button variant="destructive">Delete</Button>);
+    
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('bg-destructive');
+  });
+
+  it('should handle outline variant', () => {
+    render(<Button variant="outline">Outline</Button>);
+    
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('border', 'border-input');
+  });
+
+  it('should handle ghost variant', () => {
+    render(<Button variant="ghost">Ghost</Button>);
+    
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('hover:bg-accent');
   });
 
   it('should handle different sizes', () => {
@@ -36,6 +58,9 @@ describe('Button Component', () => {
 
     rerender(<Button size="lg">Large</Button>);
     expect(screen.getByRole('button')).toHaveClass('h-12', 'px-8');
+    
+    rerender(<Button size="default">Default</Button>);
+    expect(screen.getByRole('button')).toHaveClass('h-10', 'px-4');
   });
 
   it('should be disabled when disabled prop is true', () => {
@@ -52,6 +77,12 @@ describe('Button Component', () => {
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+  });
+
+  it('should show custom loading text', () => {
+    render(<Button loading loadingText="Saving...">Save</Button>);
+    
+    expect(screen.getByText('Saving...')).toBeInTheDocument();
   });
 
   it('should handle click events', () => {
@@ -92,18 +123,24 @@ describe('Button Component', () => {
     expect(button).toHaveClass('custom-class');
   });
 
-  it('should render as different element types', () => {
-    render(<Button as="a" href="/link">Link Button</Button>);
-    
-    const link = screen.getByRole('link');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', '/link');
-  });
-
-  it('should handle full width variant', () => {
+  it('should handle fullWidth prop', () => {
     render(<Button fullWidth>Full Width</Button>);
     
     const button = screen.getByRole('button');
     expect(button).toHaveClass('w-full');
+  });
+
+  it('should handle mobile size', () => {
+    render(<Button size="mobile">Mobile</Button>);
+    
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('h-12');
+  });
+
+  it('should handle icon size', () => {
+    render(<Button size="icon">🏋️</Button>);
+    
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('h-10', 'w-10');
   });
 });
