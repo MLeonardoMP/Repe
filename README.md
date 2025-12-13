@@ -1,4 +1,25 @@
+# Repe - Workout Tracking App
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Recent Updates
+
+### Next.js 16 Upgrade (December 2024)
+
+This project has been upgraded to **Next.js 16.0.10** with the following changes:
+
+- **Next.js 16.0.10**: Updated from 15.5.3 to leverage Turbopack by default and latest features
+- **Turbopack as Default**: Removed explicit `--turbopack` flags from scripts; now uses Turbopack by default in dev and build
+- **ESLint Config Modernized**: Simplified ESLint configuration to work with ESLint 9 flat config
+- **Test Suite Cleanup**: Removed redundant test files to maintain a leaner, more maintainable test suite
+  - Removed duplicate storage tests (kept `storage.test.ts` as the main test)
+  - Removed placeholder integration tests
+  - Removed placeholder-only repository contract tests
+  - Kept meaningful contract tests with real HTTP assertions
+- **Security**: Upgraded to address CVE-2025-66478
+- **Jest Coverage**: Adjusted coverage thresholds to 60% for better balance
+
+All route handlers already use the async params pattern required by Next.js 16.
 
 ## Getting Started
 
@@ -19,6 +40,16 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Scripts
+
+- `npm run dev` - Start development server with Turbopack (default)
+- `npm run build` - Create production build with Turbopack (default)
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Run ESLint with auto-fix
+- `npm test` - Run Jest tests
+- `npm run test:coverage` - Run tests with coverage report
 
 ## Learn More
 
