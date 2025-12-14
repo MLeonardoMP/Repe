@@ -86,7 +86,7 @@ export async function listHistory(
 ): Promise<HistoryPage> {
   try {
     const limit = Math.min(Math.max(1, params.limit || 20), 100);
-    let query = getDb()
+    const baseSelect = getDb()
       .select({
         id: history.id,
         workoutId: history.workoutId,
@@ -100,8 +100,8 @@ export async function listHistory(
       .leftJoin(workouts, eq(history.workoutId, workouts.id))
       .orderBy(desc(history.performedAt), desc(history.id));
 
-    // Apply date range filters
-    const conditions: Array<ReturnType<typeof gte> | ReturnType<typeof lte>> = [];
+    const conditions: Array<ReturnType<typeof gte> | ReturnType<typeof lte> | ReturnType<typeof or>> = [];
+
     if (params.from) {
       const fromDate = new Date(params.from);
       conditions.push(gte(history.performedAt, fromDate));
@@ -111,20 +111,22 @@ export async function listHistory(
       conditions.push(lte(history.performedAt, toDate));
     }
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-
-    // Apply cursor for keyset pagination
     if (params.cursor) {
       const cursorDate = new Date(params.cursor.performedAt);
       const cursorCondition = or(
         lt(history.performedAt, cursorDate),
         and(eq(history.performedAt, cursorDate), lt(history.id, params.cursor.id))
       );
-
-      query = query.where(cursorCondition);
+      conditions.push(cursorCondition);
     }
+
+    const whereClause = conditions.length > 0
+      ? conditions.length === 1
+        ? conditions[0]
+        : and(...conditions)
+      : undefined;
+
+    const query = whereClause ? baseSelect.where(whereClause) : baseSelect;
 
     // Fetch limit + 1 to determine hasMore
     const results = await query.limit(limit + 1);

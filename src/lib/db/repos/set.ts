@@ -56,11 +56,11 @@ export async function addSet(input: NewSetPayload): Promise<Set> {
       reps: input.reps,
       weight:
         input.weight !== undefined && input.weight !== null
-          ? parseFloat(input.weight.toString())
+          ? input.weight.toString()
           : null,
       rpe:
         input.rpe !== undefined && input.rpe !== null
-          ? parseFloat(input.rpe.toString())
+          ? input.rpe.toString()
           : null,
       restSeconds: input.restSeconds,
       notes: input.notes,
@@ -108,13 +108,13 @@ export async function updateSet(
       weight:
         patch.weight !== undefined
           ? patch.weight !== null
-            ? parseFloat(patch.weight.toString())
+            ? patch.weight.toString()
             : null
           : undefined,
       rpe:
         patch.rpe !== undefined
           ? patch.rpe !== null
-            ? parseFloat(patch.rpe.toString())
+            ? patch.rpe.toString()
             : null
           : undefined,
       restSeconds: patch.restSeconds ?? undefined,
@@ -168,16 +168,16 @@ export async function listSetsByWorkout(
       .from(sets)
       .where(eq(sets.workoutExerciseId, workoutExerciseId))
       .orderBy(desc(sets.performedAt));
-    let query = baseQuery;
 
-    if (options?.limit) {
-      query = query.limit(Math.max(1, options.limit));
-    }
-    if (options?.offset) {
-      query = query.offset(Math.max(0, options.offset));
-    }
+    const limitedQuery = options?.limit
+      ? baseQuery.limit(Math.max(1, options.limit))
+      : baseQuery;
 
-    return await query;
+    const pagedQuery = options?.offset
+      ? limitedQuery.offset(Math.max(0, options.offset))
+      : limitedQuery;
+
+    return await pagedQuery;
   } catch (error) {
     throw StorageError.internal(
       "Failed to list sets",

@@ -1,7 +1,7 @@
 import { getDb } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
-import { ilike, eq, count } from "drizzle-orm";
+import { ilike, eq, count, and } from "drizzle-orm";
 
 export type Exercise = typeof exercises.$inferSelect;
 export type NewExercise = typeof exercises.$inferInsert;
@@ -27,32 +27,26 @@ export async function listExercises(
   try {
     const { search, category, limit = 20, offset = 0 } = params;
 
-    // Build the query with conditions
-    const baseQuery = getDb().select().from(exercises);
-    let query = baseQuery;
-
-    // Apply search filter on name
+    const filters = [] as Array<ReturnType<typeof ilike> | ReturnType<typeof eq>>;
     if (search && search.trim()) {
-      query = query.where(ilike(exercises.name, `%${search.trim()}%`));
-    }
-
-    // Apply category filter
-    if (category && category.trim()) {
-      query = query.where(eq(exercises.category, category.trim()));
-    }
-
-    // Add pagination
-    query = query.limit(Math.max(1, limit)).offset(Math.max(0, offset));
-
-    // Get total count - use the same filters
-    let countQuery = getDb().select({ count: count() }).from(exercises);
-
-    if (search && search.trim()) {
-      countQuery = countQuery.where(ilike(exercises.name, `%${search.trim()}%`));
+      filters.push(ilike(exercises.name, `%${search.trim()}%`));
     }
     if (category && category.trim()) {
-      countQuery = countQuery.where(eq(exercises.category, category.trim()));
+      filters.push(eq(exercises.category, category.trim()));
     }
+
+    const baseSelect = getDb().select().from(exercises);
+    const query = (filters.length > 0
+      ? baseSelect.where(filters.length === 1 ? filters[0] : and(...filters))
+      : baseSelect
+    )
+      .limit(Math.max(1, limit))
+      .offset(Math.max(0, offset));
+
+    const baseCount = getDb().select({ count: count() }).from(exercises);
+    const countQuery = filters.length > 0
+      ? baseCount.where(filters.length === 1 ? filters[0] : and(...filters))
+      : baseCount;
 
     const countResult = await countQuery;
     const total = countResult[0]?.count || 0;

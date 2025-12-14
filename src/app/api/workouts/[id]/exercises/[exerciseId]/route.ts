@@ -46,7 +46,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (input.targetSets !== undefined) updateData.targetSets = input.targetSets;
     if (input.targetReps !== undefined) updateData.targetReps = input.targetReps;
     if (input.targetWeight !== undefined) {
-      updateData.targetWeight = input.targetWeight ?? null;
+      updateData.targetWeight =
+        input.targetWeight === null
+          ? null
+          : input.targetWeight.toString();
     }
 
     if (Object.keys(updateData).length === 0) {

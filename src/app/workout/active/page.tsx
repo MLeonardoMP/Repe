@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { ExerciseCard } from '@/components/workout/ExerciseCard';
 import { SmartSetInput } from '@/components/workout/SmartSetInput';
-import { useWorkout, type Exercise } from '@/hooks/use-workout';
+import { useWorkout } from '@/hooks/use-workout';
+import type { Exercise } from '@/types';
 
 // Dynamic import of ExercisePickerComponent
 const ExercisePickerComponent = dynamic(
@@ -67,9 +68,13 @@ export default function ActiveWorkoutPage() {
     try {
       const newExercise: Exercise = {
         id: Math.random().toString(36).substr(2, 9),
+        sessionId: activeWorkout.id,
         name: exerciseName,
         sets: [],
         restTime: 60,
+        order: activeWorkout.exercises.length,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       await addExerciseToWorkout(newExercise);
     } catch (error) {
@@ -83,10 +88,15 @@ export default function ActiveWorkoutPage() {
     try {
       const newSet = {
         id: Math.random().toString(36).substr(2, 9),
-        reps: reps,
+        exerciseId,
+        repetitions: reps,
         weight: weight && weight > 0 ? weight : 0,
-        completed: false,
-        restTime: 60,
+        intensity: undefined,
+        notes: undefined,
+        order: activeWorkout.exercises.find((ex) => ex.id === exerciseId)?.sets.length || 0,
+        isCompleted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       await addSetToWorkout(exerciseId, newSet);
     } catch (error) {
@@ -101,9 +111,9 @@ export default function ActiveWorkoutPage() {
     if (exercise && exercise.sets.length > 0) {
       const lastSet = exercise.sets[exercise.sets.length - 1];
       const repsFromSet =
-        (typeof lastSet.reps === 'number' ? lastSet.reps : undefined) ??
-        (typeof (lastSet as { repetitions?: number }).repetitions === 'number'
-          ? (lastSet as { repetitions?: number }).repetitions
+        (typeof lastSet.repetitions === 'number' ? lastSet.repetitions : undefined) ??
+        (typeof (lastSet as { reps?: number }).reps === 'number'
+          ? (lastSet as { reps?: number }).reps
           : undefined);
       const lastReps = repsFromSet ?? 10;
       const lastWeight = lastSet.weight ?? 0;

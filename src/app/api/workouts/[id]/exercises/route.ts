@@ -67,7 +67,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       orderIndex: input.orderIndex,
       targetSets: input.targetSets,
       targetReps: input.targetReps,
-      targetWeight: input.targetWeight ?? null,
+      targetWeight: input.targetWeight !== undefined
+        ? input.targetWeight.toString()
+        : null,
     };
 
     const result = await getDb()

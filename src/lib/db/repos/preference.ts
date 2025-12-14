@@ -26,13 +26,10 @@ export async function getPreferences(
 ): Promise<UserSettings | null> {
   try {
     const baseQuery = getDb().select().from(userSettings);
-    let query = baseQuery;
-
-    if (userId) {
-      query = query.where(eq(userSettings.userId, userId));
-    }
-
-    const result = await query.limit(1);
+    const result = await (userId
+      ? baseQuery.where(eq(userSettings.userId, userId))
+      : baseQuery
+    ).limit(1);
     return result[0] || null;
   } catch (error) {
     throw StorageError.internal(
@@ -57,12 +54,10 @@ export async function savePreferences(
 
     // Check if preferences exist
     const baseQuery = getDb().select().from(userSettings);
-    let query = baseQuery;
-    if (input.userId) {
-      query = query.where(eq(userSettings.userId, input.userId));
-    }
-
-    const existing = await query.limit(1);
+    const existing = await (input.userId
+      ? baseQuery.where(eq(userSettings.userId, input.userId))
+      : baseQuery
+    ).limit(1);
 
     let result;
     if (existing[0]) {

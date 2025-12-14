@@ -12,6 +12,7 @@ export interface Exercise {
   category?: string;       // Optional category (e.g., "Chest", "Legs")
   sets: Set[];            // Array of sets performed
   notes?: string;          // Optional exercise notes
+  restTime?: number;       // Optional rest time between sets (seconds)
   order: number;           // Display order within session
   createdAt: string;       // ISO date string
   updatedAt: string;       // ISO date string

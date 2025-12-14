@@ -1,4 +1,5 @@
-import Link, { type LinkProps } from "next/link";
+import Link from "next/link";
+import type { Route } from "next";
 import { ComponentPropsWithoutRef, ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 
@@ -17,7 +18,7 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
   background: ReactNode;
   Icon: React.ElementType;
   description: string;
-  href: LinkProps["href"];
+  href: Route;
   cta: string;
 }
 

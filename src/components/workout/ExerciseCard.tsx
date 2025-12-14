@@ -81,8 +81,8 @@ const SetItem = React.memo<SetItemProps>(({ set, index, onEdit, onDelete }) => {
 
   // Handle invalid data gracefully
   // Support both 'reps' (localStorage) and 'repetitions' (API) field names
-  const reps = typeof set.reps === 'number'
-    ? set.reps
+  const reps = typeof set.repetitions === 'number'
+    ? set.repetitions
     : typeof (set as LegacySet).repetitions === 'number'
       ? (set as LegacySet).repetitions || 0
       : 0;

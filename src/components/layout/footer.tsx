@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { Button } from '@/components/ui/button';
 
 interface FooterProps {
@@ -20,7 +21,7 @@ export function Footer({ onNavigate, onAction, className = '', version }: Footer
       onNavigate(path);
       return;
     }
-    router.push(path);
+    router.push(path as Route);
   };
 
   const handleAction = (action: string) => {

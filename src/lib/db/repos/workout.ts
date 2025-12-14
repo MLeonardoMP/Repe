@@ -194,7 +194,7 @@ export async function upsertWorkout(
         targetSets: ex.targetSets,
         targetReps: ex.targetReps,
         targetWeight: ex.targetWeight
-          ? parseFloat(ex.targetWeight.toString())
+          ? ex.targetWeight.toString()
           : null,
       };
 

@@ -8,6 +8,7 @@ import {
   index,
   jsonb,
   unique,
+  check,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
