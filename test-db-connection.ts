@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { getDb } from './src/lib/db';
 import { exercises } from './src/lib/db/schema';
 import { count } from 'drizzle-orm';

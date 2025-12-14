@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { workoutExercises } from '@/lib/db/schema';
+import { workoutExercises, type NewWorkoutExercise } from '@/lib/db/schema';
 import { StorageError, errorToHttpStatus } from '@/lib/storage-errors';
 import { eq } from 'drizzle-orm';
 
@@ -41,12 +41,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const input = UpdateExerciseSchema.parse(body);
 
     // Build update object with only provided fields
-    const updateData: any = {};
+    const updateData: Partial<Omit<NewWorkoutExercise, 'id' | 'workoutId' | 'exerciseId'>> = {};
     if (input.orderIndex !== undefined) updateData.orderIndex = input.orderIndex;
     if (input.targetSets !== undefined) updateData.targetSets = input.targetSets;
     if (input.targetReps !== undefined) updateData.targetReps = input.targetReps;
     if (input.targetWeight !== undefined) {
-      updateData.targetWeight = input.targetWeight ? parseFloat(input.targetWeight.toString()) : null;
+      updateData.targetWeight = input.targetWeight ?? null;
     }
 
     if (Object.keys(updateData).length === 0) {

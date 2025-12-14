@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link, { type LinkProps } from "next/link";
 import { ComponentPropsWithoutRef, ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 
@@ -17,7 +17,7 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
   background: ReactNode;
   Icon: React.ElementType;
   description: string;
-  href: string;
+  href: LinkProps["href"];
   cta: string;
 }
 
@@ -72,8 +72,7 @@ const BentoCard = ({
       )}
     >
       <Button variant="ghost" asChild size="sm" className="pointer-events-auto">
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <Link href={href as any}>
+        <Link href={href}>
           {cta}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Link>

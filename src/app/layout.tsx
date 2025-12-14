@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import Footer from "@/components/layout/footer";
+import packageJson from "../../package.json";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,10 +33,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${GeistSans.variable} ${GeistMono.variable}`}>
       <body
-        className="font-sans antialiased bg-black text-white min-h-screen"
+        className="font-sans antialiased bg-black text-white min-h-screen pb-24"
       >
         <div className="flex flex-col min-h-screen">
-          {children}
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer version={packageJson.version} />
         </div>
       </body>
     </html>

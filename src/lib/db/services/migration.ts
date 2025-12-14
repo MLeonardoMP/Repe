@@ -1,9 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { getDb } from "@/lib/db";
-import { exercises, workouts, sets, history } from "@/lib/db/schema";
+import { exercises, workouts, history } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
 import { count } from "drizzle-orm";
+
+type DualWritePayload = { name?: string };
 
 /**
  * DualWriteService: Writes to both JSON storage and Postgres database
@@ -17,16 +19,16 @@ export class DualWriteService {
     );
   }
 
-  static async writeExercise(data: any) {
+  static async writeExercise(data: DualWritePayload) {
     // Write to JSON (existing storage)
     if (process.env.USE_DB !== "true") {
-      console.log("[DualWrite] Writing exercise to JSON:", data.name);
+      console.warn("[DualWrite] Writing exercise to JSON:", data.name);
     }
 
     // Write to Postgres if enabled
     if (this.isEnabled()) {
       try {
-        console.log("[DualWrite] Writing exercise to DB:", data.name);
+        console.warn("[DualWrite] Writing exercise to DB:", data.name);
         // Implementation would call exercise repository
       } catch (error) {
         console.error("[DualWrite] DB write failed:", error);
@@ -35,20 +37,20 @@ export class DualWriteService {
     }
   }
 
-  static async writeWorkout(data: any) {
+  static async writeWorkout(data: DualWritePayload) {
     if (this.isEnabled()) {
       try {
-        console.log("[DualWrite] Writing workout to DB:", data.name);
+        console.warn("[DualWrite] Writing workout to DB:", data.name);
       } catch (error) {
         console.error("[DualWrite] DB write failed:", error);
       }
     }
   }
 
-  static async writeSet(data: any) {
+  static async writeSet(data: DualWritePayload) {
     if (this.isEnabled()) {
       try {
-        console.log("[DualWrite] Writing set to DB");
+        console.warn("[DualWrite] Writing set to DB", data.name);
       } catch (error) {
         console.error("[DualWrite] DB write failed:", error);
       }
@@ -96,7 +98,7 @@ export class BackfillService {
           } else {
             skipped++;
           }
-        } catch (error) {
+        } catch {
           skipped++;
         }
       }
@@ -139,7 +141,7 @@ export class BackfillService {
           } else {
             skipped++;
           }
-        } catch (error) {
+        } catch {
           skipped++;
         }
       }

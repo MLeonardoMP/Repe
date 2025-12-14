@@ -1,33 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useStorage } from './use-storage';
-
-// Types based on test expectations
-export interface WorkoutSession {
-  id: string;
-  userId: string;
-  name: string;
-  exercises: Exercise[];
-  startTime: string;
-  endTime?: string;
-  status: 'active' | 'paused' | 'completed';
-  duration: number;
-  notes: string;
-}
-
-export interface Exercise {
-  id: string;
-  name: string;
-  sets: Set[];
-  restTime: number;
-}
-
-export interface Set {
-  id: string;
-  reps: number;
-  weight: number;
-  completed: boolean;
-  restTime: number;
-}
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import type { WorkoutSession, Exercise, Set } from '@/types';
 
 export interface WorkoutTemplate {
   name: string;
@@ -78,190 +50,105 @@ export interface UseWorkoutReturn {
 }
 
 export function useWorkout(): UseWorkoutReturn {
-  const storage = useStorage<WorkoutSession>('workouts');
   const [activeWorkout, setActiveWorkout] = useState<WorkoutSession | null>(null);
   const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
   const [workoutHistory, setWorkoutHistory] = useState<WorkoutSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Load active workout on mount
+
+  const buildId = useCallback(() => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return `workout-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }, []);
+
   useEffect(() => {
-    const loadActiveWorkout = async () => {
-      try {
-        console.log('[useWorkout] Loading active workout from storage...');
-        const workouts = await storage.list();
-        console.log('[useWorkout] All workouts:', workouts);
-        const active = workouts.find(w => w.status === 'active');
-        console.log('[useWorkout] Active workout found:', active);
-        if (active) {
-          setActiveWorkout(active);
-        }
-      } catch (error) {
-        console.error('Error loading active workout:', error);
-      } finally {
-        console.log('[useWorkout] Loading finished, setting isLoading to false');
-        setIsLoading(false);
-      }
-    };
-    loadActiveWorkout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - only run on mount
-  
+    setIsLoading(false);
+  }, []);
+
   const startWorkout = useCallback(async (template: WorkoutTemplate) => {
-    console.log('[useWorkout] Starting new workout with template:', template);
-    const newWorkout: Omit<WorkoutSession, 'id'> = {
-      userId: 'user-1', // Default user for now
+    const workout: WorkoutSession = {
+      id: buildId(),
+      userId: 'user-1',
       name: template.name,
       exercises: template.exercises,
       startTime: new Date().toISOString(),
       status: 'active',
-      duration: 0,
+      durationSeconds: 0,
       notes: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-    
-    console.log('[useWorkout] Creating workout in storage:', newWorkout);
-    const createdWorkout = await storage.create(newWorkout);
-    console.log('[useWorkout] Workout created:', createdWorkout);
-    
-    // FASE 2: Sincronizar con Neon (non-blocking)
-    try {
-      const response = await fetch('/api/workouts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: createdWorkout.id,
-          name: createdWorkout.name,
-          userId: createdWorkout.userId,
-          exercises: [], // Inicialmente vacío
-        }),
-      });
-      
-      if (response.ok) {
-        console.log('[useWorkout] Workout synced to Neon successfully');
-      } else {
-        console.warn('[useWorkout] Failed to sync to Neon:', response.status);
-      }
-    } catch (error) {
-      console.warn('[useWorkout] Failed to sync workout to Neon (non-blocking):', error);
-      // No lanzar error, permitir que la app continúe
-    }
-    
-    setActiveWorkout(createdWorkout);
-    console.log('[useWorkout] Active workout state updated');
-    return createdWorkout;
-  }, [storage]);
+
+    setActiveWorkout(workout);
+    return workout;
+  }, [buildId]);
 
   const pauseWorkout = useCallback(async () => {
     if (!activeWorkout) return;
-    
-    const updatedWorkout = await storage.update(activeWorkout.id, {
-      status: 'paused',
-    });
-    
-    setActiveWorkout(updatedWorkout);
-  }, [activeWorkout, storage]);
+    setActiveWorkout({ ...activeWorkout, status: 'paused' });
+  }, [activeWorkout]);
 
   const resumeWorkout = useCallback(async () => {
     if (!activeWorkout) return;
-    
-    const updatedWorkout = await storage.update(activeWorkout.id, {
-      status: 'active',
-    });
-    
-    setActiveWorkout(updatedWorkout);
-  }, [activeWorkout, storage]);
+    setActiveWorkout({ ...activeWorkout, status: 'active' });
+  }, [activeWorkout]);
 
   const finishWorkout = useCallback(async () => {
     if (!activeWorkout) return;
-    
-    const completedWorkout = await storage.update(activeWorkout.id, {
+
+    const endTime = new Date().toISOString();
+    const durationSeconds = Math.max(
+      0,
+      Math.floor(
+        (new Date(endTime).getTime() - new Date(activeWorkout.startTime).getTime()) / 1000
+      )
+    );
+
+    const completed: WorkoutSession = {
+      ...activeWorkout,
+      endTime,
       status: 'completed',
-      endTime: new Date().toISOString(),
-    });
-    
-    // Calcular duración
-    const duration = completedWorkout.endTime && completedWorkout.startTime
-      ? Math.floor((new Date(completedWorkout.endTime).getTime() - new Date(completedWorkout.startTime).getTime()) / 1000)
-      : 0;
-    
-    // FASE 3: Intentar guardar con workoutId, con fallback
+      durationSeconds,
+      updatedAt: endTime,
+    };
+
     try {
-      console.log('[useWorkout] Attempting to log history with workoutId:', completedWorkout.id);
-      
-      const response = await fetch('/api/history', {
+      await fetch('/api/history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          workoutId: completedWorkout.id,
-          performedAt: completedWorkout.startTime,
-          durationSeconds: duration,
-          notes: completedWorkout.notes,
+          workoutId: completed.id,
+          performedAt: completed.startTime,
+          durationSeconds,
+          notes: completed.notes,
         }),
       });
-      
-      if (!response.ok) {
-        throw new Error(`History API returned ${response.status}`);
-      }
-      
-      console.log('[useWorkout] Successfully logged workout to history with workoutId');
     } catch (error) {
-      console.warn('[useWorkout] Failed with workoutId, trying fallback:', error);
-      
-      // FALLBACK: Guardar sin workoutId
-      try {
-        const fallbackResponse = await fetch('/api/history', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            workoutId: null,
-            performedAt: completedWorkout.startTime,
-            durationSeconds: duration,
-            notes: `${completedWorkout.name}${completedWorkout.notes ? ` - ${completedWorkout.notes}` : ''}`,
-          }),
-        });
-        
-        if (fallbackResponse.ok) {
-          console.log('[useWorkout] Successfully logged to history without workoutId (fallback)');
-        } else {
-          console.error('[useWorkout] Fallback also failed:', fallbackResponse.status);
-        }
-      } catch (fallbackError) {
-        console.error('[useWorkout] Both attempts failed. Last error:', fallbackError);
-      }
+      console.error('Failed to log history', error);
     }
-    
+
+    setWorkoutHistory(prev => [completed, ...prev]);
     setActiveWorkout(null);
-  }, [activeWorkout, storage]);
+  }, [activeWorkout]);
 
   const addExercise = useCallback(async (exercise: Exercise) => {
     if (!activeWorkout) return;
-    
-    const updatedExercises = [...activeWorkout.exercises, exercise];
-    
-    await storage.update(activeWorkout.id, {
-      exercises: updatedExercises,
-    });
-    
     setActiveWorkout({
       ...activeWorkout,
-      exercises: updatedExercises,
+      updatedAt: new Date().toISOString(),
+      exercises: [...activeWorkout.exercises, exercise],
     });
-  }, [activeWorkout, storage]);
+  }, [activeWorkout]);
 
   const removeExercise = useCallback(async (exerciseId: string) => {
     if (!activeWorkout) return;
-    
-    const updatedExercises = activeWorkout.exercises.filter(ex => ex.id !== exerciseId);
-    
-    await storage.update(activeWorkout.id, {
-      exercises: updatedExercises,
-    });
-    
     setActiveWorkout({
       ...activeWorkout,
-      exercises: updatedExercises,
+      updatedAt: new Date().toISOString(),
+      exercises: activeWorkout.exercises.filter(ex => ex.id !== exerciseId),
     });
-  }, [activeWorkout, storage]);
+  }, [activeWorkout]);
 
   const selectExercise = useCallback((exercise: Exercise) => {
     setCurrentExercise(exercise);
@@ -269,110 +156,103 @@ export function useWorkout(): UseWorkoutReturn {
 
   const addSet = useCallback(async (exerciseId: string, set: Set) => {
     if (!activeWorkout) return;
-    
-    const updatedExercises = activeWorkout.exercises.map(ex =>
-      ex.id === exerciseId
-        ? { ...ex, sets: [...ex.sets, set] }
-        : ex
-    );
-    
-    await storage.update(activeWorkout.id, {
-      exercises: updatedExercises,
-    });
-    
     setActiveWorkout({
       ...activeWorkout,
-      exercises: updatedExercises,
+      updatedAt: new Date().toISOString(),
+      exercises: activeWorkout.exercises.map(ex =>
+        ex.id === exerciseId ? { ...ex, sets: [...ex.sets, set] } : ex
+      ),
     });
-  }, [activeWorkout, storage]);
+  }, [activeWorkout]);
 
   const updateSet = useCallback(async (exerciseId: string, setId: string, set: Set) => {
     if (!activeWorkout) return;
-    
-    const updatedExercises = activeWorkout.exercises.map(ex =>
-      ex.id === exerciseId
-        ? {
-            ...ex,
-            sets: ex.sets.map(s => s.id === setId ? set : s)
-          }
-        : ex
-    );
-    
-    await storage.update(activeWorkout.id, {
-      exercises: updatedExercises,
-    });
-    
     setActiveWorkout({
       ...activeWorkout,
-      exercises: updatedExercises,
+      updatedAt: new Date().toISOString(),
+      exercises: activeWorkout.exercises.map(ex =>
+        ex.id === exerciseId
+          ? { ...ex, sets: ex.sets.map(s => (s.id === setId ? set : s)) }
+          : ex
+      ),
     });
-  }, [activeWorkout, storage]);
+  }, [activeWorkout]);
 
   const removeSet = useCallback(async (exerciseId: string, setId: string) => {
     if (!activeWorkout) return;
-    
-    const updatedExercises = activeWorkout.exercises.map(ex =>
-      ex.id === exerciseId
-        ? { ...ex, sets: ex.sets.filter(s => s.id !== setId) }
-        : ex
-    );
-    
-    await storage.update(activeWorkout.id, {
-      exercises: updatedExercises,
-    });
-    
     setActiveWorkout({
       ...activeWorkout,
-      exercises: updatedExercises,
+      updatedAt: new Date().toISOString(),
+      exercises: activeWorkout.exercises.map(ex =>
+        ex.id === exerciseId ? { ...ex, sets: ex.sets.filter(s => s.id !== setId) } : ex
+      ),
     });
-  }, [activeWorkout, storage]);
+  }, [activeWorkout]);
 
-  const saveTemplate = useCallback(async (template: WorkoutTemplate) => {
-    const templateWorkout: Omit<WorkoutSession, 'id'> = {
-      userId: 'user-1',
-      name: template.name,
-      exercises: template.exercises,
-      startTime: new Date().toISOString(),
-      status: 'completed',
-      duration: 0,
-      notes: '',
-      isTemplate: true,
-    } as unknown as WorkoutSession; // TypeScript workaround for isTemplate
-    
-    await storage.create(templateWorkout);
-  }, [storage]);
+  const saveTemplate = useCallback(async () => {
+    // No-op placeholder after removing legacy storage
+    return Promise.resolve();
+  }, []);
 
   const loadWorkoutHistory = useCallback(async () => {
-    const history = await storage.list();
-    setWorkoutHistory(history);
-  }, [storage]);
+    try {
+      const response = await fetch('/api/history', { cache: 'no-store' });
+      if (!response.ok) return;
+      const payload = await response.json();
+      if (Array.isArray(payload.data)) {
+        type HistoryItem = {
+          id: string;
+          userId?: string;
+          workoutName?: string;
+          performedAt: string;
+          durationSeconds?: number;
+          notes?: string;
+        };
 
-  // Calculate stats from workout history
-  const stats: WorkoutStats = {
+        const mapped: WorkoutSession[] = (payload.data as HistoryItem[]).map((entry) => ({
+          id: entry.id,
+          userId: entry.userId || 'user-1',
+          name: entry.workoutName || 'Workout',
+          startTime: entry.performedAt,
+          endTime: entry.performedAt,
+          exercises: [],
+          notes: entry.notes,
+          createdAt: entry.performedAt,
+          updatedAt: entry.performedAt,
+          durationSeconds: entry.durationSeconds,
+          status: 'completed',
+        }));
+        setWorkoutHistory(mapped);
+      }
+    } catch (error) {
+      console.error('Failed to load history', error);
+    }
+  }, []);
+
+  const stats: WorkoutStats = useMemo(() => ({
     totalWorkouts: workoutHistory.length,
-    totalSets: workoutHistory.reduce((total, workout) => 
-      total + workout.exercises.reduce((exerciseTotal, exercise) => 
-        exerciseTotal + exercise.sets.length, 0
-      ), 0
+    totalSets: workoutHistory.reduce(
+      (total, workout) => total + workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0),
+      0
     ),
-    totalReps: workoutHistory.reduce((total, workout) => 
-      total + workout.exercises.reduce((exerciseTotal, exercise) => 
-        exerciseTotal + exercise.sets.reduce((setTotal, set) => 
-          setTotal + set.reps, 0
-        ), 0
-      ), 0
+    totalReps: workoutHistory.reduce(
+      (total, workout) => total + workout.exercises.reduce(
+        (exerciseTotal, exercise) => exerciseTotal + exercise.sets.reduce((setTotal, set) => setTotal + (set.repetitions ?? 0), 0),
+        0
+      ),
+      0
     ),
-    totalWeight: workoutHistory.reduce((total, workout) => 
-      total + workout.exercises.reduce((exerciseTotal, exercise) => 
-        exerciseTotal + exercise.sets.reduce((setTotal, set) => 
-          setTotal + set.weight, 0
-        ), 0
-      ), 0
+    totalWeight: workoutHistory.reduce(
+      (total, workout) => total + workout.exercises.reduce(
+        (exerciseTotal, exercise) => exerciseTotal + exercise.sets.reduce((setTotal, set) => setTotal + (set.weight ?? 0), 0),
+        0
+      ),
+      0
     ),
-    averageDuration: workoutHistory.length > 0 
-      ? workoutHistory.reduce((total, workout) => total + workout.duration, 0) / workoutHistory.length
+    averageDuration: workoutHistory.length > 0
+      ? workoutHistory.reduce((total, workout) => total + (workout.durationSeconds ?? 0), 0) / workoutHistory.length
       : 0,
-  };
+  }), [workoutHistory]);
 
   return {
     activeWorkout,

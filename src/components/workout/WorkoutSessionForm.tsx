@@ -123,7 +123,7 @@ export const WorkoutSessionForm = React.memo<WorkoutSessionFormProps>(({
       };
 
       await onSave(sessionData);
-    } catch (error) {
+    } catch {
       setErrors({ general: 'Failed to save workout session. Please try again.' });
     }
   };

@@ -4,11 +4,13 @@ import { listHistory, logSession } from '@/lib/db/repos/history';
 import { StorageError, errorToHttpStatus } from '@/lib/storage-errors';
 
 // Validation schemas
+const CursorSchema = z.object({
+  performedAt: z.string(),
+  id: z.string().uuid(),
+});
+
 const QuerySchema = z.object({
-  cursor: z.object({
-    performedAt: z.string(),
-    id: z.string().uuid(),
-  }).optional(),
+  cursor: CursorSchema.optional(),
   limit: z.coerce.number().int().positive().default(20).pipe(z.number().max(100)),
   from: z.string().datetime().nullable().optional(),
   to: z.string().datetime().nullable().optional(),
@@ -26,18 +28,14 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     
     // Parse cursor if provided
-    let cursor: { performedAt: string; id: string } | undefined = undefined;
+    let cursor: { performedAt: string; id: string } | undefined;
     const cursorStr = searchParams.get('cursor');
     if (cursorStr) {
-      try {
-        cursor = JSON.parse(cursorStr);
-      } catch {
-        throw new z.ZodError([{
-          code: 'custom',
-          message: 'Invalid cursor format',
-          path: ['cursor'],
-        } as any]);
+      const parsedCursor = CursorSchema.safeParse(JSON.parse(cursorStr));
+      if (!parsedCursor.success) {
+        throw parsedCursor.error;
       }
+      cursor = parsedCursor.data;
     }
 
     const query = QuerySchema.parse({

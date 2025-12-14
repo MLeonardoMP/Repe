@@ -1,7 +1,7 @@
 import { getDb } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
-import { sql, ilike, eq, count } from "drizzle-orm";
+import { ilike, eq, count } from "drizzle-orm";
 
 export type Exercise = typeof exercises.$inferSelect;
 export type NewExercise = typeof exercises.$inferInsert;
@@ -28,7 +28,8 @@ export async function listExercises(
     const { search, category, limit = 20, offset = 0 } = params;
 
     // Build the query with conditions
-    let query = getDb().select().from(exercises) as any;
+    const baseQuery = getDb().select().from(exercises);
+    let query = baseQuery;
 
     // Apply search filter on name
     if (search && search.trim()) {
@@ -44,9 +45,7 @@ export async function listExercises(
     query = query.limit(Math.max(1, limit)).offset(Math.max(0, offset));
 
     // Get total count - use the same filters
-    let countQuery = getDb()
-      .select({ count: count() })
-      .from(exercises) as any;
+    let countQuery = getDb().select({ count: count() }).from(exercises);
 
     if (search && search.trim()) {
       countQuery = countQuery.where(ilike(exercises.name, `%${search.trim()}%`));

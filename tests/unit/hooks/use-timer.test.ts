@@ -514,10 +514,12 @@ describe('useTimer Hook', () => {
     });
 
     it('should cleanup intervals on component unmount', () => {
-      const { unmount } = renderHook(() => useTimer());
-      
-      // Spy on clearInterval to ensure cleanup
+      const { result, unmount } = renderHook(() => useTimer());
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+      act(() => {
+        result.current.start();
+      });
       
       unmount();
       

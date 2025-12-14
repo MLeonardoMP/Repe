@@ -1,137 +1,106 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { workoutStorage } from '@/lib/storage';
+import { z } from 'zod';
+import { addSet, listSetsByWorkout } from '@/lib/db/repos/set';
+import { StorageError, errorToHttpStatus } from '@/lib/storage-errors';
 
 type RouteParams = {
   params: Promise<{
-    exerciseId: string;
+    exerciseId: string; // Treated as workoutExerciseId for backward compatibility
   }>;
 };
 
-// POST /api/exercises/[exerciseId]/sets - Add set to exercise
+const AddSetSchema = z.object({
+  reps: z.number().int().nonnegative(),
+  weight: z.number().nonnegative().optional(),
+  rpe: z.number().min(0).max(10).optional(),
+  restSeconds: z.number().int().nonnegative().optional(),
+  notes: z.string().optional(),
+});
+
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { exerciseId } = await params;
     const body = await request.json();
-    
-    if (!exerciseId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Exercise ID is required',
-          },
-        },
-        { status: 400 }
-      );
-    }
 
-    // Validate intensity if provided
-    if (body.intensity !== undefined && (body.intensity < 1 || body.intensity > 10)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Intensity must be between 1 and 10',
-          },
-        },
-        { status: 400 }
-      );
-    }
+    const input = AddSetSchema.parse(body);
 
-    // Find the workout containing this exercise
-    const allWorkouts = await workoutStorage.findAll();
-    let targetWorkout = null;
-    let exerciseIndex = -1;
-
-    for (const workout of allWorkouts) {
-      const index = workout.exercises.findIndex(ex => ex.id === exerciseId);
-      if (index !== -1) {
-        targetWorkout = workout;
-        exerciseIndex = index;
-        break;
-      }
-    }
-
-    if (!targetWorkout || exerciseIndex === -1) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Exercise not found',
-          },
-        },
-        { status: 404 }
-      );
-    }
-
-    const exercise = targetWorkout.exercises[exerciseIndex];
-
-    // Create new set
-    const newSet = {
-      id: `set-${Date.now()}`,
-      exerciseId,
-      startTime: body.startTime,
-      endTime: body.endTime,
-      weight: body.weight,
-      repetitions: body.repetitions,
-      intensity: body.intensity,
-      notes: body.notes || '',
-      order: exercise.sets.length + 1,
-      isCompleted: body.repetitions !== undefined && body.repetitions > 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Add set to exercise
-    const updatedExercise = {
-      ...exercise,
-      sets: [...exercise.sets, newSet],
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Update the workout with the modified exercise
-    const updatedExercises = [...targetWorkout.exercises];
-    updatedExercises[exerciseIndex] = updatedExercise;
-
-    const updatedWorkout = await workoutStorage.update(targetWorkout.id, {
-      exercises: updatedExercises,
+    const set = await addSet({
+      workoutExerciseId: exerciseId,
+      reps: input.reps,
+      weight: input.weight,
+      rpe: input.rpe,
+      restSeconds: input.restSeconds,
+      notes: input.notes,
     });
-
-    if (!updatedWorkout) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Failed to add set to exercise',
-          },
-        },
-        { status: 500 }
-      );
-    }
-
-    // Find and return the newly created set
-    const resultExercise = updatedWorkout.exercises.find(ex => ex.id === exerciseId);
-    const createdSet = resultExercise?.sets.find(set => set.id === newSet.id);
 
     return NextResponse.json(
       {
         success: true,
-        data: createdSet,
+        data: set,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error adding set:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid request body',
+            details: error.issues,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    if (error instanceof StorageError) {
+      return NextResponse.json(
+        { success: false, error: { code: error.type, message: error.message } },
+        { status: errorToHttpStatus(error) }
+      );
+    }
+
+    console.error('POST /api/exercises/[exerciseId]/sets error:', error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
           message: 'Failed to add set to exercise',
+        },
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { exerciseId } = await params;
+    const searchParams = request.nextUrl.searchParams;
+    const limit = searchParams.get('limit') ? Number(searchParams.get('limit')) : undefined;
+    const offset = searchParams.get('offset') ? Number(searchParams.get('offset')) : undefined;
+
+    const data = await listSetsByWorkout(exerciseId, { limit, offset });
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    if (error instanceof StorageError) {
+      return NextResponse.json(
+        { success: false, error: { code: error.type, message: error.message } },
+        { status: errorToHttpStatus(error) }
+      );
+    }
+
+    console.error('GET /api/exercises/[exerciseId]/sets error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Failed to fetch sets',
         },
       },
       { status: 500 }

@@ -28,6 +28,8 @@ interface SetItemProps {
   onDelete: (setId: string) => void;
 }
 
+type LegacySet = { repetitions?: number };
+
 const SetItem = React.memo<SetItemProps>(({ set, index, onEdit, onDelete }) => {
   const [isSwipeActive, setIsSwipeActive] = React.useState(false);
 
@@ -79,7 +81,11 @@ const SetItem = React.memo<SetItemProps>(({ set, index, onEdit, onDelete }) => {
 
   // Handle invalid data gracefully
   // Support both 'reps' (localStorage) and 'repetitions' (API) field names
-  const reps = (set as any).reps ?? (set as any).repetitions ?? 0;
+  const reps = typeof set.reps === 'number'
+    ? set.reps
+    : typeof (set as LegacySet).repetitions === 'number'
+      ? (set as LegacySet).repetitions || 0
+      : 0;
   const weight = set.weight;
   const intensity = set.intensity;
 

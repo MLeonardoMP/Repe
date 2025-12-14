@@ -1,140 +1,51 @@
-'use client';
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { deleteWorkout, getWorkout } from "@/lib/db/repos/workout";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ExerciseCard } from '@/components/workout/ExerciseCard';
-import type { WorkoutSession } from '@/types/workout';
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
 
-export default function WorkoutDetailPage() {
-  const router = useRouter();
-  const params = useParams();
-  const workoutId = params.id as string;
-  
-  const [workout, setWorkout] = useState<WorkoutSession | null>(null);
-  const [loading, setLoading] = useState(true);
+function formatDuration(start: Date, end?: Date) {
+  const startDate = new Date(start);
+  const endDate = end ? new Date(end) : new Date();
+  const duration = endDate.getTime() - startDate.getTime();
+  const hours = Math.floor(duration / (1000 * 60 * 60));
+  const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
 
-  useEffect(() => {
-    const loadWorkout = async () => {
-      if (!workoutId) return;
+const formatDate = (date: Date) => date.toLocaleString("es-ES");
 
-      try {
-        const response = await fetch(`/api/workouts/${workoutId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setWorkout(data.data);
-        } else {
-          router.push('/history');
-        }
-      } catch (error) {
-        console.error('Error loading workout:', error);
-        router.push('/history');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadWorkout();
-  }, [workoutId, router]);
-
-  const formatDuration = (startTime: string, endTime?: string): string => {
-    const start = new Date(startTime);
-    const end = endTime ? new Date(endTime) : new Date();
-    const duration = end.getTime() - start.getTime();
-    
-    const hours = Math.floor(duration / (1000 * 60 * 60));
-    const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
-  };
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const handleContinue = () => {
-    router.push(`/workout/active?id=${workout!.id}`);
-  };
-
-  const handleDelete = async () => {
-    if (!workout) return;
-    
-    const confirmed = window.confirm('Are you sure you want to delete this workout? This action cannot be undone.');
-    if (!confirmed) return;
-
-    try {
-      const response = await fetch(`/api/workouts/${workout.id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        router.push('/history');
-      } else {
-        console.error('Failed to delete workout');
-      }
-    } catch (error) {
-      console.error('Error deleting workout:', error);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex-1 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-neutral-800 rounded w-3/4"></div>
-            <div className="h-32 bg-neutral-800 rounded"></div>
-            <div className="h-20 bg-neutral-800 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+export default async function WorkoutDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  const workout = await getWorkout(id);
 
   if (!workout) {
-    return (
-      <div className="flex-1 p-4">
-        <div className="max-w-md mx-auto text-center space-y-4">
-          <h1 className="text-xl font-semibold text-white">Workout not found</h1>
-          <Link href="/history">
-            <Button>Back to History</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
-  const isActive = !workout.endTime;
-  const totalSets = workout.exercises.reduce((total, ex) => total + ex.sets.length, 0);
-  const completedSets = workout.exercises.reduce((total, ex) => 
-    total + ex.sets.filter(set => set.isCompleted).length, 0
-  );
+  const totalSets = workout.sets.length;
+  const completedSets = workout.sets.filter(set => (set.reps ?? 0) > 0).length;
+  const isActive = workout.updatedAt.getTime() === workout.createdAt.getTime();
+
+  const handleDelete = async () => {
+    "use server";
+    await deleteWorkout(id);
+    redirect("/history");
+  };
 
   return (
     <div className="flex-1 p-4">
       <div className="max-w-md mx-auto space-y-6">
-        {/* Header */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Link href="/history">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-neutral-400 hover:text-white p-2"
-              >
+              <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white p-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
@@ -145,107 +56,63 @@ export default function WorkoutDetailPage() {
               <div className="flex items-center gap-2 mt-1">
                 {isActive && (
                   <Badge variant="outline" className="bg-white text-black border-white">
-                    Active
+                    Activo
                   </Badge>
                 )}
-                <span className="text-sm text-neutral-400">
-                  {formatDate(workout.startTime)}
-                </span>
+                <span className="text-sm text-neutral-400">{formatDate(workout.createdAt)}</span>
               </div>
             </div>
           </div>
-
-          {/* Workout Summary */}
-          <Card className="bg-black border-neutral-800">
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{workout.exercises.length}</div>
-                  <div className="text-xs text-neutral-400">Exercises</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{totalSets}</div>
-                  <div className="text-xs text-neutral-400">Total Sets</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{completedSets}</div>
-                  <div className="text-xs text-neutral-400">Completed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">
-                    {formatDuration(workout.startTime, workout.endTime)}
-                  </div>
-                  <div className="text-xs text-neutral-400">Duration</div>
-                </div>
-              </div>
-
-              {workout.notes && (
-                <div className="mt-4 pt-4 border-t border-neutral-800">
-                  <h3 className="text-sm font-medium text-neutral-300 mb-2">Notes</h3>
-                  <p className="text-sm text-neutral-400">{workout.notes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Exercises */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-white">Exercises</h2>
-          {workout.exercises.length > 0 ? (
-            workout.exercises.map((exercise) => (
-              <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
-                onEditExercise={() => {}}
-                onAddSet={() => {}}
-                onEditSet={() => {}}
-                onDeleteSet={() => {}}
-                isActive={false}
-              />
-            ))
-          ) : (
-            <Card className="bg-black border-neutral-800">
-              <CardContent className="text-center py-8">
-                <div className="text-neutral-400">
-                  <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-2">No exercises</h3>
-                <p className="text-neutral-400">This workout doesn&apos;t have any exercises yet.</p>
+          <div className="flex items-center gap-3">
+            <Card className="flex-1 bg-neutral-900 border-neutral-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-neutral-400">Duración</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl font-semibold text-white">{formatDuration(workout.createdAt, workout.updatedAt)}</p>
               </CardContent>
             </Card>
+            <Card className="flex-1 bg-neutral-900 border-neutral-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-neutral-400">Sets</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl font-semibold text-white">{completedSets}/{totalSets}</p>
+                <p className="text-xs text-neutral-400">completados</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {workout.exercises.length === 0 ? (
+            <Card className="bg-neutral-900 border-neutral-800">
+              <CardContent className="p-4 text-center text-neutral-400">No exercises added yet.</CardContent>
+            </Card>
+          ) : (
+            workout.exercises.map(exercise => (
+              <Card key={exercise.id} className="bg-neutral-900 border-neutral-800">
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold">{exercise.exercise.name}</p>
+                    <span className="text-sm text-neutral-400">Orden {exercise.orderIndex}</span>
+                  </div>
+                  <p className="text-sm text-neutral-400">Objetivo: {exercise.targetReps ?? '-'} reps</p>
+                </CardContent>
+              </Card>
+            ))
           )}
         </div>
 
-        {/* Actions */}
-        <div className="space-y-3">
-          {isActive && (
-            <Button
-              onClick={handleContinue}
-              className="w-full h-12 bg-white hover:bg-neutral-200 text-black text-lg font-medium"
-            >
-              Continue Workout
+        <div className="flex gap-3">
+          <Link href={`/workout/active?id=${workout.id}`} className="flex-1">
+            <Button className="w-full">Continuar</Button>
+          </Link>
+          <form action={handleDelete} className="flex-1">
+            <Button variant="secondary" type="submit" className="w-full">
+              Eliminar
             </Button>
-          )}
-          
-          <div className="flex gap-3">
-            <Link href="/history" className="flex-1">
-              <Button variant="outline" className="w-full border-neutral-800 text-neutral-300 hover:bg-neutral-800">
-                Back to History
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              onClick={handleDelete}
-              className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </Button>
-          </div>
+          </form>
         </div>
       </div>
     </div>

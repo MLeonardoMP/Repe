@@ -15,6 +15,8 @@ export interface WorkoutSession {
   notes?: string;          // Optional session notes
   createdAt: string;       // ISO date string
   updatedAt: string;       // ISO date string
+  status?: WorkoutSessionState; // Optional runtime status for UI
+  durationSeconds?: number;     // Optional computed duration
 }
 
 // Derived properties interface for computed values
@@ -27,7 +29,7 @@ export interface WorkoutSessionStats {
 }
 
 // State transitions for workout session
-export type WorkoutSessionState = 'created' | 'active' | 'completed' | 'archived';
+export type WorkoutSessionState = 'created' | 'active' | 'completed' | 'archived' | 'paused';
 
 // Session creation type (without auto-generated fields)
 export type CreateWorkoutSessionData = Omit<WorkoutSession, 'id' | 'exercises' | 'createdAt' | 'updatedAt'>;

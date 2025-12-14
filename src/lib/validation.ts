@@ -6,7 +6,6 @@
 import { z } from 'zod';
 import type { 
   User, 
-  UserPreferences, 
   WorkoutSession, 
   Exercise, 
   ExerciseTemplate,
@@ -17,8 +16,6 @@ import type {
 
 // Common field validations
 const NonEmptyString = z.string().min(1, 'Field cannot be empty');
-const PositiveNumber = z.number().positive('Must be a positive number');
-const NonNegativeNumber = z.number().min(0, 'Cannot be negative');
 const ISODateString = z.string().refine(
   (val) => !isNaN(Date.parse(val)), 
   { message: "Must be a valid ISO date string" }
@@ -27,8 +24,6 @@ const ISODateString = z.string().refine(
 // Weight and measurement validations
 const WeightSchema = z.number().min(0.1).max(1000, 'Weight must be between 0.1 and 1000');
 const RepsSchema = z.number().int().min(1).max(999, 'Reps must be between 1 and 999');
-const DurationSchema = z.number().int().min(1).max(86400, 'Duration must be between 1 second and 24 hours'); // max 24h in seconds
-const DistanceSchema = z.number().min(0.01).max(999, 'Distance must be between 0.01 and 999');
 const IntensitySchema = z.number().int().min(1).max(10, 'Intensity must be between 1 and 10');
 
 // ========== User Validation Schemas ==========

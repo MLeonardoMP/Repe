@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 import fs from 'fs';
 import path from 'path';
@@ -6,7 +7,13 @@ import { randomUUID } from 'crypto';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { exercises } from '../src/lib/db/schema';
-import { sql } from 'drizzle-orm';
+
+type SeedExercise = {
+  name: string;
+  category: string;
+  equipment?: string[];
+  notes?: string;
+};
 
 const args = process.argv.slice(2);
 const isDryRun = args.includes('--dry-run');
@@ -30,8 +37,12 @@ async function seedExercises() {
       return;
     }
 
-    const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
-    const exercises_list = Array.isArray(seedData) ? seedData : seedData.exercises;
+    const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8')) as
+      | SeedExercise[]
+      | { exercises: SeedExercise[] };
+    const exercises_list: SeedExercise[] = Array.isArray(seedData)
+      ? seedData
+      : seedData.exercises;
     
     if (!Array.isArray(exercises_list)) {
       throw new Error('Seed data must be an array');
@@ -41,7 +52,7 @@ async function seedExercises() {
 
     if (isDryRun) {
       console.log('📋 DRY RUN - Sample exercises:');
-      exercises_list.slice(0, 3).forEach((ex: any) => {
+      exercises_list.slice(0, 3).forEach((ex) => {
         console.log(`   - ${ex.name} (${ex.category})`);
       });
       return;

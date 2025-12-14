@@ -9,12 +9,12 @@ export type UserSettings = typeof userSettings.$inferSelect;
 // Validate user settings with Zod
 const UserSettingsSchema = z.object({
   units: z.enum(["metric" as const, "imperial" as const]).default("metric"),
-  preferencesJson: z.any().default({}),
+  preferencesJson: z.record(z.string(), z.unknown()).default({}),
 });
 
 export interface UserSettingsInput {
   units?: "metric" | "imperial";
-  preferencesJson?: Record<string, any>;
+  preferencesJson?: Record<string, unknown>;
   userId?: string;
 }
 
@@ -25,7 +25,8 @@ export async function getPreferences(
   userId?: string
 ): Promise<UserSettings | null> {
   try {
-    let query = getDb().select().from(userSettings) as any;
+    const baseQuery = getDb().select().from(userSettings);
+    let query = baseQuery;
 
     if (userId) {
       query = query.where(eq(userSettings.userId, userId));
@@ -55,7 +56,8 @@ export async function savePreferences(
     });
 
     // Check if preferences exist
-    let query = getDb().select().from(userSettings) as any;
+    const baseQuery = getDb().select().from(userSettings);
+    let query = baseQuery;
     if (input.userId) {
       query = query.where(eq(userSettings.userId, input.userId));
     }

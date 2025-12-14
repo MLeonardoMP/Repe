@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { workoutExercises, workouts } from '@/lib/db/schema';
+import { workoutExercises, workouts, type NewWorkoutExercise } from '@/lib/db/schema';
 import { StorageError, errorToHttpStatus } from '@/lib/storage-errors';
 import { eq } from 'drizzle-orm';
 
@@ -61,16 +61,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Insert workout exercise
+    const insertValue: NewWorkoutExercise = {
+      workoutId: id,
+      exerciseId: input.exerciseId,
+      orderIndex: input.orderIndex,
+      targetSets: input.targetSets,
+      targetReps: input.targetReps,
+      targetWeight: input.targetWeight ?? null,
+    };
+
     const result = await getDb()
       .insert(workoutExercises)
-      .values({
-        workoutId: id,
-        exerciseId: input.exerciseId,
-        orderIndex: input.orderIndex,
-        targetSets: input.targetSets,
-        targetReps: input.targetReps,
-        targetWeight: input.targetWeight ? parseFloat(input.targetWeight.toString()) : null,
-      } as any)
+      .values(insertValue)
       .returning();
 
     if (!result[0]) {

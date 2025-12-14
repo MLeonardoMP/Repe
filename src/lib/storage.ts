@@ -82,12 +82,6 @@ const ExerciseTemplateSchema = z.object({
   defaultWeightUnit: z.enum(['kg', 'lbs'])
 });
 
-// Extended types for storage (with timestamps)
-type StorageExerciseTemplate = ExerciseTemplate & {
-  createdAt: string;
-  updatedAt: string;
-};
-
 const StorageExerciseTemplateSchema = ExerciseTemplateSchema.extend({
   createdAt: z.string().refine((val) => !isNaN(Date.parse(val))),
   updatedAt: z.string().refine((val) => !isNaN(Date.parse(val)))
@@ -357,7 +351,7 @@ export const exerciseTemplateStorage = {
             error as Error
           );
         }
-      }).map(({ createdAt, updatedAt, ...template }) => template);
+      }).map(({ createdAt: _createdAt, updatedAt: _updatedAt, ...template }) => template);
     } catch (error) {
       if (error instanceof StorageError) {
         throw error;
@@ -381,7 +375,7 @@ export const exerciseTemplateStorage = {
     const templates = await readJsonFile(EXERCISE_TEMPLATES_FILE, StorageExerciseTemplateSchema);
     const template = templates.find(t => t.id === id);
     if (!template) return undefined;
-    const { createdAt, updatedAt, ...publicTemplate } = template;
+    const { createdAt: _createdAt, updatedAt: _updatedAt, ...publicTemplate } = template;
     return publicTemplate;
   },
   
@@ -403,7 +397,7 @@ export const exerciseTemplateStorage = {
     templates.push(newTemplate);
     await writeJsonFile(EXERCISE_TEMPLATES_FILE, templates, StorageExerciseTemplateSchema);
     
-    const { createdAt, updatedAt, ...publicTemplate } = newTemplate;
+    const { createdAt: _createdAt, updatedAt: _updatedAt, ...publicTemplate } = newTemplate;
     return publicTemplate;
   },
   
@@ -424,7 +418,7 @@ export const exerciseTemplateStorage = {
     templates[index] = updatedTemplate;
     await writeJsonFile(EXERCISE_TEMPLATES_FILE, templates, StorageExerciseTemplateSchema);
     
-    const { createdAt, updatedAt, ...publicTemplate } = updatedTemplate;
+    const { createdAt: _createdAt, updatedAt: _updatedAt, ...publicTemplate } = updatedTemplate;
     return publicTemplate;
   },
   

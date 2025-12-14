@@ -50,8 +50,16 @@ export const errorToHttpStatus = (error: StorageError): number => {
 /**
  * Helper to create error response
  */
-export const createErrorResponse = (error: StorageError) => {
-  const response: any = {
+type ErrorResponse = {
+  error: {
+    type: StorageError["type"];
+    message: string;
+    cause?: string;
+  };
+};
+
+export const createErrorResponse = (error: StorageError): ErrorResponse => {
+  const response: ErrorResponse = {
     error: {
       type: error.type,
       message: error.message,

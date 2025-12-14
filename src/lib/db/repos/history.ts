@@ -98,10 +98,10 @@ export async function listHistory(
       })
       .from(history)
       .leftJoin(workouts, eq(history.workoutId, workouts.id))
-      .orderBy(desc(history.performedAt), desc(history.id)) as any;
+      .orderBy(desc(history.performedAt), desc(history.id));
 
     // Apply date range filters
-    const conditions: any[] = [];
+    const conditions: Array<ReturnType<typeof gte> | ReturnType<typeof lte>> = [];
     if (params.from) {
       const fromDate = new Date(params.from);
       conditions.push(gte(history.performedAt, fromDate));
@@ -118,15 +118,12 @@ export async function listHistory(
     // Apply cursor for keyset pagination
     if (params.cursor) {
       const cursorDate = new Date(params.cursor.performedAt);
-      query = query.where(
-        (or(
-          lt(history.performedAt, cursorDate),
-          (and(
-            eq(history.performedAt, cursorDate),
-            lt(history.id, params.cursor.id)
-          ) as any)
-        ) as any)
+      const cursorCondition = or(
+        lt(history.performedAt, cursorDate),
+        and(eq(history.performedAt, cursorDate), lt(history.id, params.cursor.id))
       );
+
+      query = query.where(cursorCondition);
     }
 
     // Fetch limit + 1 to determine hasMore
@@ -190,7 +187,7 @@ export async function backfillHistory(
         } else {
           skipped++;
         }
-      } catch (error) {
+      } catch {
         skipped++;
       }
     }

@@ -1,17 +1,26 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 interface FooterProps {
   onNavigate?: (path: string) => void;
   onAction?: (action: string) => void;
   className?: string;
+  version?: string;
 }
 
-export function Footer({ onNavigate, onAction, className = '' }: FooterProps) {
+export function Footer({ onNavigate, onAction, className = '', version }: FooterProps) {
+  const router = useRouter();
+  const versionLabel = version || process.env.NEXT_PUBLIC_APP_VERSION || '0.1.13';
+
   const handleNavigation = (path: string) => {
-    onNavigate?.(path);
+    if (onNavigate) {
+      onNavigate(path);
+      return;
+    }
+    router.push(path);
   };
 
   const handleAction = (action: string) => {
@@ -73,6 +82,10 @@ export function Footer({ onNavigate, onAction, className = '' }: FooterProps) {
           <span className="text-xs">Settings</span>
         </Button>
       </nav>
+
+      <div className="mt-3 text-center text-[10px] uppercase tracking-[0.08em] text-neutral-500">
+        v{versionLabel}
+      </div>
     </footer>
   );
 }

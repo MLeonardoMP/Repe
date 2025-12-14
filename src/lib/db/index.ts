@@ -3,7 +3,6 @@ import { neon } from '@neondatabase/serverless';
 import * as schema from './schema';
 
 declare global {
-  // eslint-disable-next-line no-var
   var db: ReturnType<typeof drizzle> | undefined;
 }
 

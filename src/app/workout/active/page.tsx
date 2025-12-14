@@ -40,13 +40,9 @@ export default function ActiveWorkoutPage() {
   
   // Redirect if no active workout after hook has finished loading
   useEffect(() => {
-    console.log('[ActivePage] Effect triggered - isLoading:', isLoading, 'isActive:', isActive, 'activeWorkout:', activeWorkout);
     if (!isLoading) {
       if (!isActive) {
-        console.log('[ActivePage] No active workout, redirecting to home');
         router.push('/');
-      } else {
-        console.log('[ActivePage] Active workout found, staying on page');
       }
       setPageLoading(false);
     }
@@ -103,15 +99,17 @@ export default function ActiveWorkoutPage() {
     
     const exercise = activeWorkout.exercises.find(e => e.id === exerciseId);
     if (exercise && exercise.sets.length > 0) {
-      // Get the last set
       const lastSet = exercise.sets[exercise.sets.length - 1];
-      // Handle potential different property names (reps vs repetitions) just in case
-      const lastReps = (lastSet as any).reps ?? (lastSet as any).repetitions ?? 10;
+      const repsFromSet =
+        (typeof lastSet.reps === 'number' ? lastSet.reps : undefined) ??
+        (typeof (lastSet as { repetitions?: number }).repetitions === 'number'
+          ? (lastSet as { repetitions?: number }).repetitions
+          : undefined);
+      const lastReps = repsFromSet ?? 10;
       const lastWeight = lastSet.weight ?? 0;
-      
+
       setInitialSetValues({ reps: lastReps, weight: lastWeight });
     } else {
-      // Default values if no previous sets
       setInitialSetValues({ reps: 10, weight: 0 });
     }
 
@@ -123,6 +121,31 @@ export default function ActiveWorkoutPage() {
       handleAddSet(expandedSetFormExerciseId, reps, weight);
       setExpandedSetFormExerciseId(null);
     }
+  };
+
+  const normalizeExerciseForCard = (exercise: Exercise, index: number): Exercise => {
+    const now = new Date().toISOString();
+
+    return {
+      ...exercise,
+      sessionId: exercise.sessionId ?? activeWorkout?.id ?? "session",
+      order: exercise.order ?? index,
+      createdAt: exercise.createdAt ?? now,
+      updatedAt: exercise.updatedAt ?? now,
+      sets: exercise.sets.map((set, setIndex) => ({
+        ...set,
+        exerciseId: set.exerciseId ?? exercise.id,
+        repetitions:
+          set.repetitions ??
+          (typeof (set as { reps?: number }).reps === "number"
+            ? (set as { reps?: number }).reps
+            : undefined),
+        order: set.order ?? setIndex,
+        isCompleted: set.isCompleted ?? false,
+        createdAt: set.createdAt ?? now,
+        updatedAt: set.updatedAt ?? now,
+      })),
+    };
   };
 
   const handleSetCancel = () => {
@@ -237,27 +260,30 @@ export default function ActiveWorkoutPage() {
 
         {/* Exercises */}
         <div className="space-y-4">
-          {activeWorkout.exercises.map((exercise) => (
-            <div key={exercise.id} className="space-y-3">
-              <ExerciseCard
-                exercise={exercise as any}
-                onEditExercise={() => {}}
-                onAddSet={() => handleAddSetClick(exercise.id)}
-                onEditSet={() => {}}
-                onDeleteSet={() => {}}
-              />
-              
-              {/* Inline Set Form */}
-              {expandedSetFormExerciseId === exercise.id && (
-                <SmartSetInput
-                  initialReps={initialSetValues.reps}
-                  initialWeight={initialSetValues.weight}
-                  onConfirm={handleSetConfirm}
-                  onCancel={handleSetCancel}
+          {activeWorkout.exercises.map((exercise, index) => {
+            const normalizedExercise = normalizeExerciseForCard(exercise, index);
+            return (
+              <div key={exercise.id} className="space-y-3">
+                <ExerciseCard
+                  exercise={normalizedExercise}
+                  onEditExercise={() => {}}
+                  onAddSet={() => handleAddSetClick(exercise.id)}
+                  onEditSet={() => {}}
+                  onDeleteSet={() => {}}
                 />
-              )}
-            </div>
-          ))}
+              
+                {/* Inline Set Form */}
+                {expandedSetFormExerciseId === exercise.id && (
+                  <SmartSetInput
+                    initialReps={initialSetValues.reps}
+                    initialWeight={initialSetValues.weight}
+                    onConfirm={handleSetConfirm}
+                    onCancel={handleSetCancel}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Add Exercise */}

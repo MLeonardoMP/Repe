@@ -6,11 +6,13 @@ import {
   exercises,
 } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
-import { sql, eq, desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export type Workout = typeof workouts.$inferSelect;
 export type WorkoutExercise = typeof workoutExercises.$inferSelect;
 export type WorkoutExerciseType = typeof exercises.$inferSelect;
+export type WorkoutSet = typeof sets.$inferSelect;
+export type NewWorkoutExercise = typeof workoutExercises.$inferInsert;
 
 export interface WorkoutWithExercises extends Workout {
   exercises: WorkoutExercise[];
@@ -18,7 +20,7 @@ export interface WorkoutWithExercises extends Workout {
 
 export interface WorkoutDetail extends Workout {
   exercises: (WorkoutExercise & { exercise: WorkoutExerciseType })[];
-  sets: any[];
+  sets: WorkoutSet[];
 }
 
 export interface UpsertWorkoutPayload {
@@ -30,6 +32,7 @@ export interface UpsertWorkoutPayload {
     targetSets?: number;
     targetReps?: number;
     targetWeight?: number;
+    preferencesJson?: Record<string, unknown>;
   }>;
 }
 
@@ -184,14 +187,18 @@ export async function upsertWorkout(
       .where(eq(workoutExercises.workoutId, workoutId));
     // Insert new exercises
     for (const ex of payload.exercises) {
-      await getDb().insert(workoutExercises).values({
+      const exerciseInput: NewWorkoutExercise = {
         workoutId,
         exerciseId: ex.id,
         orderIndex: ex.orderIndex,
         targetSets: ex.targetSets,
         targetReps: ex.targetReps,
-        targetWeight: ex.targetWeight ? parseFloat(ex.targetWeight.toString()) : null,
-      } as any);
+        targetWeight: ex.targetWeight
+          ? parseFloat(ex.targetWeight.toString())
+          : null,
+      };
+
+      await getDb().insert(workoutExercises).values(exerciseInput);
     }
 
     // Return full details

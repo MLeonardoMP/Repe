@@ -6,13 +6,7 @@ import {
   integer,
   numeric,
   index,
-  uniqueIndex,
-  foreignKey,
-  check,
-  serial,
   jsonb,
-  varchar,
-  primaryKey,
   unique,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';

@@ -1,9 +1,10 @@
 import { getDb } from "@/lib/db";
-import { sets, workoutExercises } from "@/lib/db/schema";
+import { sets } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
 import { eq, desc } from "drizzle-orm";
 
 export type Set = typeof sets.$inferSelect;
+export type NewSet = typeof sets.$inferInsert;
 
 export interface NewSetPayload {
   workoutExerciseId: string;
@@ -50,17 +51,22 @@ export async function addSet(input: NewSetPayload): Promise<Set> {
     }
 
     // Create set
-    const result = await getDb()
-      .insert(sets)
-      .values({
-        workoutExerciseId: input.workoutExerciseId,
-        reps: input.reps,
-        weight: input.weight ? parseFloat(input.weight.toString()) : null,
-        rpe: input.rpe ? parseFloat(input.rpe.toString()) : null,
-        restSeconds: input.restSeconds,
-        notes: input.notes,
-      } as any)
-      .returning();
+    const payload: NewSet = {
+      workoutExerciseId: input.workoutExerciseId,
+      reps: input.reps,
+      weight:
+        input.weight !== undefined && input.weight !== null
+          ? parseFloat(input.weight.toString())
+          : null,
+      rpe:
+        input.rpe !== undefined && input.rpe !== null
+          ? parseFloat(input.rpe.toString())
+          : null,
+      restSeconds: input.restSeconds,
+      notes: input.notes,
+    };
+
+    const result = await getDb().insert(sets).values(payload).returning();
 
     if (!result[0]) {
       throw new Error("Failed to create set");
@@ -97,15 +103,27 @@ export async function updateSet(
         throw StorageError.validation("RPE must be between 0 and 10");
       }
     }
+    const updatePayload: Partial<NewSet> = {
+      reps: patch.reps ?? undefined,
+      weight:
+        patch.weight !== undefined
+          ? patch.weight !== null
+            ? parseFloat(patch.weight.toString())
+            : null
+          : undefined,
+      rpe:
+        patch.rpe !== undefined
+          ? patch.rpe !== null
+            ? parseFloat(patch.rpe.toString())
+            : null
+          : undefined,
+      restSeconds: patch.restSeconds ?? undefined,
+      notes: patch.notes ?? undefined,
+    };
+
     const result = await getDb()
       .update(sets)
-      .set({
-        reps: patch.reps ?? undefined,
-        weight: patch.weight !== undefined ? (patch.weight ? parseFloat(patch.weight.toString()) : null) : undefined,
-        rpe: patch.rpe !== undefined ? (patch.rpe ? parseFloat(patch.rpe.toString()) : null) : undefined,
-        restSeconds: patch.restSeconds ?? undefined,
-        notes: patch.notes ?? undefined,
-      } as any)
+      .set(updatePayload)
       .where(eq(sets.id, id))
       .returning();
 
@@ -145,11 +163,12 @@ export async function listSetsByWorkout(
   options?: { limit?: number; offset?: number }
 ): Promise<Set[]> {
   try {
-    let query = getDb()
+    const baseQuery = getDb()
       .select()
       .from(sets)
       .where(eq(sets.workoutExerciseId, workoutExerciseId))
-      .orderBy(desc(sets.performedAt)) as any;
+      .orderBy(desc(sets.performedAt));
+    let query = baseQuery;
 
     if (options?.limit) {
       query = query.limit(Math.max(1, options.limit));
