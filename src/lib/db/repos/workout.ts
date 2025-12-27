@@ -6,7 +6,7 @@ import {
   exercises,
 } from "@/lib/db/schema";
 import { StorageError } from "@/lib/storage-errors";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql, inArray } from "drizzle-orm";
 
 export type Workout = typeof workouts.$inferSelect;
 export type WorkoutExercise = typeof workoutExercises.$inferSelect;
@@ -26,8 +26,12 @@ export interface WorkoutDetail extends Workout {
 export interface UpsertWorkoutPayload {
   id?: string;
   name: string;
+  userId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
   exercises: Array<{
-    id: string;
+    id?: string;
+    name?: string;
     orderIndex: number;
     targetSets?: number;
     targetReps?: number;
@@ -142,11 +146,14 @@ export async function getWorkout(id: string): Promise<WorkoutDetail | null> {
 }
 
 /**
- * Create or update workout with exercises (transactional)
+ * Create or update workout with exercises
+ * Note: neon-http does not support transactions, so operations are sequential
  */
 export async function upsertWorkout(
   payload: UpsertWorkoutPayload
 ): Promise<WorkoutDetail> {
+  const db = getDb();
+  
   try {
     // Validate input
     if (!payload.name || !payload.name.trim()) {
@@ -157,21 +164,47 @@ export async function upsertWorkout(
     }
 
     let workoutId = payload.id;
+    const now = new Date();
+    const createdAt = payload.createdAt || now;
+    const updatedAt = payload.updatedAt || now;
 
     // Create or update workout
     if (workoutId) {
-      await getDb()
+      const updated = await db
         .update(workouts)
         .set({
           name: payload.name.trim(),
-          updatedAt: new Date(),
+          userId: payload.userId,
+          updatedAt,
         })
-        .where(eq(workouts.id, workoutId));
+        .where(eq(workouts.id, workoutId))
+        .returning();
+
+      if (updated.length === 0) {
+        // If ID was provided but not found, insert it with that ID
+        const result = await db
+          .insert(workouts)
+          .values({
+            id: workoutId,
+            name: payload.name.trim(),
+            userId: payload.userId,
+            createdAt,
+            updatedAt,
+          })
+          .returning();
+        
+        if (!result[0]) {
+          throw new Error("Failed to create workout with provided ID");
+        }
+      }
     } else {
-      const result = await getDb()
+      const result = await db
         .insert(workouts)
         .values({
           name: payload.name.trim(),
+          userId: payload.userId,
+          createdAt,
+          updatedAt,
         })
         .returning();
 
@@ -181,24 +214,55 @@ export async function upsertWorkout(
       workoutId = result[0].id;
     }
 
-    // Remove old exercises
-    await getDb()
+    // Remove old exercises for this workout
+    await db
       .delete(workoutExercises)
       .where(eq(workoutExercises.workoutId, workoutId));
-    // Insert new exercises
+
+    // Process and insert exercises one by one
     for (const ex of payload.exercises) {
-      const exerciseInput: NewWorkoutExercise = {
+      let exerciseId = ex.id;
+
+      if (!exerciseId && ex.name) {
+        // Try find by name (case-insensitive)
+        const existing = await db
+          .select()
+          .from(exercises)
+          .where(sql`lower(${exercises.name}) = lower(${ex.name})`)
+          .limit(1);
+
+        if (existing[0]) {
+          exerciseId = existing[0].id;
+        } else {
+          // Create new exercise
+          const created = await db
+            .insert(exercises)
+            .values({
+              name: ex.name,
+              category: 'custom',
+              equipment: [],
+            })
+            .onConflictDoUpdate({
+              target: exercises.name,
+              set: { updatedAt: new Date() }
+            })
+            .returning();
+          exerciseId = created[0]?.id;
+        }
+      }
+
+      if (!exerciseId) {
+        throw StorageError.validation('Exercise id or name is required');
+      }
+
+      await db.insert(workoutExercises).values({
         workoutId,
-        exerciseId: ex.id,
+        exerciseId,
         orderIndex: ex.orderIndex,
         targetSets: ex.targetSets,
         targetReps: ex.targetReps,
-        targetWeight: ex.targetWeight
-          ? ex.targetWeight.toString()
-          : null,
-      };
-
-      await getDb().insert(workoutExercises).values(exerciseInput);
+        targetWeight: ex.targetWeight ? ex.targetWeight.toString() : null,
+      });
     }
 
     // Return full details
@@ -209,6 +273,7 @@ export async function upsertWorkout(
     return detail;
   } catch (error) {
     if (error instanceof StorageError) throw error;
+    console.error("upsertWorkout error:", error);
     throw StorageError.internal(
       "Failed to upsert workout",
       error instanceof Error ? error.message : String(error)

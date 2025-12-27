@@ -12,13 +12,13 @@ const CursorSchema = z.object({
 const QuerySchema = z.object({
   cursor: CursorSchema.optional(),
   limit: z.coerce.number().int().positive().default(20).pipe(z.number().max(100)),
-  from: z.string().datetime().nullable().optional(),
-  to: z.string().datetime().nullable().optional(),
+  from: z.coerce.date().nullable().optional(),
+  to: z.coerce.date().nullable().optional(),
 });
 
 const LogSessionSchema = z.object({
   workoutId: z.string().uuid().nullable().optional(),
-  performedAt: z.string().datetime().optional(),
+  performedAt: z.coerce.date().optional(),
   durationSeconds: z.number().int().nonnegative().optional(),
   notes: z.string().optional(),
 });

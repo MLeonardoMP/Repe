@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { WorkoutSession, Exercise, Set } from '@/types';
+import { isValidUUID } from '@/lib/validation';
 
 export interface WorkoutTemplate {
   name: string;
@@ -13,6 +14,8 @@ export interface WorkoutStats {
   totalWeight: number;
   averageDuration: number;
 }
+
+export const ACTIVE_WORKOUT_STORAGE_KEY = 'repe-active-workout';
 
 export interface UseWorkoutReturn {
   // Current state
@@ -63,8 +66,36 @@ export function useWorkout(): UseWorkoutReturn {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      setIsLoading(false);
+      return;
+    }
+
+    const stored = localStorage.getItem(ACTIVE_WORKOUT_STORAGE_KEY);
+    if (stored) {
+      try {
+        setActiveWorkout(JSON.parse(stored));
+      } catch (error) {
+        console.error('Failed to parse stored workout', error);
+      }
+    }
+
     setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (activeWorkout) {
+      try {
+        localStorage.setItem(ACTIVE_WORKOUT_STORAGE_KEY, JSON.stringify(activeWorkout));
+      } catch (error) {
+        console.error('Failed to persist workout', error);
+      }
+    } else {
+      localStorage.removeItem(ACTIVE_WORKOUT_STORAGE_KEY);
+    }
+  }, [activeWorkout]);
 
   const startWorkout = useCallback(async (template: WorkoutTemplate) => {
     const workout: WorkoutSession = {
@@ -114,15 +145,76 @@ export function useWorkout(): UseWorkoutReturn {
     };
 
     try {
+      // Persist workout, exercises, and sets so detail view can render
+      let workoutIdForHistory: string | undefined = undefined;
+      try {
+        const workoutResponse = await fetch('/api/workouts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: isValidUUID(completed.id) ? completed.id : undefined,
+            name: completed.name || 'Workout',
+            userId: completed.userId,
+            createdAt: completed.startTime,
+            updatedAt: endTime,
+            exercises: completed.exercises.map((ex, index) => ({
+              name: ex.name,
+              orderIndex: index,
+            })),
+          }),
+        });
+
+        if (workoutResponse.ok) {
+          const workout = await workoutResponse.json();
+          workoutIdForHistory = workout.id;
+
+          // Save completed sets for each exercise
+          for (const exercise of completed.exercises) {
+            // Find the matching workout exercise from the response
+            const workoutExercise = workout.exercises?.find(
+              (we: { exercise: { name: string } }) => 
+                we.exercise.name.toLowerCase() === exercise.name.toLowerCase()
+            );
+
+            if (workoutExercise && exercise.sets && exercise.sets.length > 0) {
+              // Save each completed set
+              for (const set of exercise.sets) {
+                const reps = set.repetitions ?? (set as { reps?: number }).reps ?? 0;
+                if (reps > 0) {
+                  try {
+                    await fetch(`/api/exercises/${workoutExercise.id}/sets`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        reps,
+                        weight: set.weight ?? 0,
+                      }),
+                    });
+                  } catch (setError) {
+                    console.error('Error saving set:', setError);
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          console.error('Failed to persist workout before history', workoutResponse.status);
+        }
+      } catch (workoutError) {
+        console.error('Error persisting workout before history', workoutError);
+      }
+
+      const payload = {
+        workoutId: workoutIdForHistory || (isValidUUID(completed.id) ? completed.id : undefined),
+        performedAt: completed.startTime,
+        durationSeconds,
+        notes: completed.notes,
+      };
+
       await fetch('/api/history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          workoutId: completed.id,
-          performedAt: completed.startTime,
-          durationSeconds,
-          notes: completed.notes,
-        }),
+        body: JSON.stringify(payload),
       });
     } catch (error) {
       console.error('Failed to log history', error);

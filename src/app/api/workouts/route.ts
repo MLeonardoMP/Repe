@@ -9,19 +9,23 @@ const QuerySchema = z.object({
   offset: z.coerce.number().int().nonnegative().default(0),
 });
 
+const ExerciseInputSchema = z.object({
+  // Either reference an existing exercise by id or provide a name to create one
+  id: z.string().uuid().optional(),
+  name: z.string().min(1).max(255).optional(),
+  orderIndex: z.number().int().nonnegative(),
+  targetSets: z.number().int().positive().optional(),
+  targetReps: z.number().int().positive().optional(),
+  targetWeight: z.number().positive().optional(),
+});
+
 const CreateWorkoutSchema = z.object({
   id: z.string().uuid().optional(), // Permite sincronizar con localStorage
   name: z.string().min(1).max(255),
   userId: z.string().optional(), // Para compatibilidad con useWorkout
-  exercises: z.array(
-    z.object({
-      id: z.string().uuid(),
-      orderIndex: z.number().int().nonnegative(),
-      targetSets: z.number().int().positive().optional(),
-      targetReps: z.number().int().positive().optional(),
-      targetWeight: z.number().positive().optional(),
-    })
-  ).optional().default([]), // Permitir workout sin ejercicios al iniciar
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  exercises: z.array(ExerciseInputSchema).optional().default([]),
 });
 
 export async function GET(request: NextRequest) {

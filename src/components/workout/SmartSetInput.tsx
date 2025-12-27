@@ -118,7 +118,7 @@ export function SmartSetInput({
               background="black"
               shimmerColor="#ffffff"
             >
-              <span className="text-lg font-bold">OK</span>
+              <span className="text-lg font-bold text-white">Confirm</span>
             </ShimmerButton>
           </div>
         </div>

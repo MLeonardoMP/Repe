@@ -33,7 +33,7 @@ export function Footer({ onNavigate, onAction, className = '', version }: Footer
       className={`fixed bottom-0 left-0 right-0 bg-black border-t border-neutral-800 p-4 ${className}`}
       data-testid="app-footer"
     >
-      <nav className="flex justify-around items-center max-w-md mx-auto">
+      {/* <nav className="flex justify-around items-center max-w-md mx-auto">
         <Button
           variant="ghost"
           onClick={() => handleNavigation('/')}
@@ -82,7 +82,7 @@ export function Footer({ onNavigate, onAction, className = '', version }: Footer
           </svg>
           <span className="text-xs">Settings</span>
         </Button>
-      </nav>
+      </nav> */}
 
       <div className="mt-3 text-center text-[10px] uppercase tracking-[0.08em] text-neutral-500">
         v{versionLabel}

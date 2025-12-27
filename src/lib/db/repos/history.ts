@@ -79,6 +79,26 @@ export async function logSession(input: NewHistoryEntry): Promise<History> {
 }
 
 /**
+ * Get history entry by workout ID
+ */
+export async function getHistoryByWorkoutId(workoutId: string): Promise<History | null> {
+  try {
+    const result = await getDb()
+      .select()
+      .from(history)
+      .where(eq(history.workoutId, workoutId))
+      .limit(1);
+
+    return result[0] || null;
+  } catch (error) {
+    throw StorageError.internal(
+      "Failed to get history by workout ID",
+      error instanceof Error ? error.message : String(error)
+    );
+  }
+}
+
+/**
  * List history with keyset pagination
  */
 export async function listHistory(
