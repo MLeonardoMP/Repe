@@ -3,34 +3,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ShimmerButton } from '@/components/magicui/shimmer-button';
-import { Minus, Plus, Check, X, Settings2 } from 'lucide-react';
-import type { IntensityTechnique } from '@/types';
-import { TechniqueSelector } from './TechniqueSelector';
-import { WeightIncrementSelector } from './WeightIncrementSelector';
-import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { Minus, Plus, Check, X } from 'lucide-react';
 
 interface SmartSetInputProps {
   initialReps?: number;
   initialWeight?: number;
-  initialTechnique?: IntensityTechnique;
-  onConfirm: (data: { reps: number; weight: number; technique: IntensityTechnique }) => void;
+  onConfirm: (reps: number, weight?: number) => void;
   onCancel: () => void;
-  mode?: 'add' | 'edit';
 }
 
 export function SmartSetInput({
   initialReps = 10,
   initialWeight = 0,
-  initialTechnique = 'normal',
   onConfirm,
   onCancel,
-  mode = 'add',
 }: SmartSetInputProps) {
-  const { preferences, updatePreferences } = useUserPreferences();
   const [reps, setReps] = useState(initialReps);
   const [weight, setWeight] = useState(initialWeight);
-  const [technique, setTechnique] = useState<IntensityTechnique>(initialTechnique);
-  const [showSettings, setShowSettings] = useState(false);
   const [editingField, setEditingField] = useState<'reps' | 'weight' | null>(null);
 
   const repsInputRef = useRef<HTMLInputElement | null>(null);
@@ -44,20 +33,19 @@ export function SmartSetInput({
     setWeight(initialWeight);
   }, [initialWeight]);
 
-  useEffect(() => {
-    setTechnique(initialTechnique);
-  }, [initialTechnique]);
+  const REPS_STEP = 1;
+  const WEIGHT_STEP = 2.5;
 
   const handleIncrement = (type: 'reps' | 'weight', direction: 1 | -1) => {
     if (type === 'reps') {
-      setReps((prev) => Math.max(0, prev + preferences.repsIncrement * direction));
+      setReps((prev) => Math.max(0, prev + REPS_STEP * direction));
     } else {
-      setWeight((prev) => Math.max(0, prev + preferences.weightIncrement * direction));
+      setWeight((prev) => Math.max(0, prev + WEIGHT_STEP * direction));
     }
   };
 
   const handleConfirm = () => {
-    onConfirm({ reps, weight, technique });
+    onConfirm(reps, weight);
   };
 
   return (
@@ -72,49 +60,7 @@ export function SmartSetInput({
 
       <div className="flex items-center justify-between gap-2 pr-8">
         <div className="text-xs uppercase tracking-[0.08em] text-neutral-500">Registrar set</div>
-        <button
-          onClick={() => setShowSettings((prev) => !prev)}
-          className="p-2 text-neutral-500 hover:text-white transition-colors"
-          aria-label="Open quick settings"
-        >
-          <Settings2 className="w-4 h-4" />
-        </button>
       </div>
-
-      {showSettings && (
-        <div className="rounded-lg border border-neutral-800 bg-neutral-950/80 p-3 space-y-3">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Salto de peso</span>
-            <span className="font-mono text-neutral-200">+/-{preferences.weightIncrement} kg</span>
-          </div>
-          <WeightIncrementSelector
-            value={preferences.weightIncrement}
-            onChange={(value) => updatePreferences({ weightIncrement: value })}
-          />
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Salto de reps</span>
-            <span className="font-mono text-neutral-200">+/-{preferences.repsIncrement}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => updatePreferences({ repsIncrement: Math.max(1, preferences.repsIncrement - 1) })}
-              className="border-neutral-800 text-neutral-300"
-            >
-              -1
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => updatePreferences({ repsIncrement: preferences.repsIncrement + 1 })}
-              className="border-neutral-800 text-neutral-300"
-            >
-              +1
-            </Button>
-          </div>
-        </div>
-      )}
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
@@ -248,7 +194,7 @@ export function SmartSetInput({
               </div>
             )}
             <div className="text-[11px] uppercase tracking-widest text-neutral-500 mt-1">
-              Kg | salto +/-{preferences.weightIncrement}
+              Kg
             </div>
           </div>
           <Button
@@ -261,11 +207,6 @@ export function SmartSetInput({
             <Plus className="w-5 h-5" />
           </Button>
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <div className="text-xs text-neutral-400">Tecnica de intensidad</div>
-        <TechniqueSelector value={technique} onChange={setTechnique} compact />
       </div>
 
       <div className="pt-1 flex items-center gap-2">
@@ -285,7 +226,7 @@ export function SmartSetInput({
           >
             <div className="flex items-center justify-center gap-2 text-white text-sm font-semibold">
               <Check className="w-4 h-4" />
-              {mode === 'edit' ? 'Actualizar set' : 'Guardar set'}
+              Guardar set
             </div>
           </ShimmerButton>
         </div>
