@@ -3,6 +3,8 @@ import { HistoryClient } from '@/components/history/history-client';
 
 const ITEMS_PER_PAGE = 10;
 
+export const dynamic = 'force-dynamic';
+
 export default async function HistoryPage() {
   const initial = await listHistoryAction({ limit: ITEMS_PER_PAGE });
 
