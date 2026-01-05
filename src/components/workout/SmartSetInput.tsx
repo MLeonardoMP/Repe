@@ -1,209 +1,292 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ShimmerButton } from '@/components/magicui/shimmer-button';
-import { Minus, Plus, Check, X, Delete } from 'lucide-react';
+import { Minus, Plus, Check, X, Settings2 } from 'lucide-react';
+import type { IntensityTechnique } from '@/types';
+import { TechniqueSelector } from './TechniqueSelector';
+import { WeightIncrementSelector } from './WeightIncrementSelector';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
 
 interface SmartSetInputProps {
   initialReps?: number;
   initialWeight?: number;
-  onConfirm: (reps: number, weight: number) => void;
+  initialTechnique?: IntensityTechnique;
+  onConfirm: (data: { reps: number; weight: number; technique: IntensityTechnique }) => void;
   onCancel: () => void;
+  mode?: 'add' | 'edit';
 }
-
-type InputMode = 'view' | 'edit-reps' | 'edit-weight';
 
 export function SmartSetInput({
   initialReps = 10,
   initialWeight = 0,
+  initialTechnique = 'normal',
   onConfirm,
   onCancel,
+  mode = 'add',
 }: SmartSetInputProps) {
+  const { preferences, updatePreferences } = useUserPreferences();
   const [reps, setReps] = useState(initialReps);
   const [weight, setWeight] = useState(initialWeight);
-  const [mode, setMode] = useState<InputMode>('view');
-  const [tempValue, setTempValue] = useState('');
+  const [technique, setTechnique] = useState<IntensityTechnique>(initialTechnique);
+  const [showSettings, setShowSettings] = useState(false);
+  const [editingField, setEditingField] = useState<'reps' | 'weight' | null>(null);
 
-  // Reset state when initial values change (if the component is reused)
+  const repsInputRef = useRef<HTMLInputElement | null>(null);
+  const weightInputRef = useRef<HTMLInputElement | null>(null);
+
   useEffect(() => {
     setReps(initialReps);
+  }, [initialReps]);
+
+  useEffect(() => {
     setWeight(initialWeight);
-  }, [initialReps, initialWeight]);
+  }, [initialWeight]);
 
-  const handleIncrement = (type: 'reps' | 'weight', amount: number) => {
+  useEffect(() => {
+    setTechnique(initialTechnique);
+  }, [initialTechnique]);
+
+  const handleIncrement = (type: 'reps' | 'weight', direction: 1 | -1) => {
     if (type === 'reps') {
-      setReps(prev => Math.max(0, prev + amount));
+      setReps((prev) => Math.max(0, prev + preferences.repsIncrement * direction));
     } else {
-      setWeight(prev => Math.max(0, prev + amount));
+      setWeight((prev) => Math.max(0, prev + preferences.weightIncrement * direction));
     }
   };
 
-  const handleOpenKeypad = (type: 'reps' | 'weight') => {
-    setMode(type === 'reps' ? 'edit-reps' : 'edit-weight');
-    setTempValue(''); // Start fresh or maybe stringify current value? Let's start fresh for speed.
+  const handleConfirm = () => {
+    onConfirm({ reps, weight, technique });
   };
-
-  const handleKeypadInput = (key: string) => {
-    if (key === 'backspace') {
-      setTempValue(prev => prev.slice(0, -1));
-    } else if (key === '.') {
-      if (!tempValue.includes('.')) {
-        setTempValue(prev => prev + '.');
-      }
-    } else {
-      setTempValue(prev => prev + key);
-    }
-  };
-
-  const handleKeypadConfirm = () => {
-    const val = parseFloat(tempValue);
-    if (!isNaN(val)) {
-      if (mode === 'edit-reps') {
-        setReps(val);
-      } else {
-        setWeight(val);
-      }
-    }
-    setMode('view');
-  };
-
-  const handleSave = () => {
-    onConfirm(reps, weight);
-  };
-
-  if (mode !== 'view') {
-    return (
-      <div className="p-4 bg-black border-2 border-dashed border-neutral-800 rounded-xl animate-in fade-in zoom-in-95 duration-200">
-        <div className="text-center mb-6">
-          <div className="text-sm text-neutral-400 uppercase tracking-wider mb-1">
-            {mode === 'edit-reps' ? 'REPS' : 'WEIGHT (KG)'}
-          </div>
-          <div className="text-5xl font-bold text-white h-16 flex items-center justify-center">
-            {tempValue || <span className="text-neutral-800">0</span>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0].map((num) => (
-            <button
-              key={num}
-              onClick={() => handleKeypadInput(num.toString())}
-              className="h-16 bg-black border border-neutral-800 rounded-lg text-2xl font-medium text-white active:bg-neutral-900 transition-colors hover:border-neutral-600"
-            >
-              {num}
-            </button>
-          ))}
-          <button
-            onClick={() => handleKeypadInput('backspace')}
-            className="h-16 bg-black border border-neutral-800 rounded-lg flex items-center justify-center text-white active:bg-neutral-900 transition-colors hover:border-neutral-600"
-            aria-label="Backspace"
-          >
-            <Delete className="w-6 h-6" />
-          </button>
-        </div>
-
-        <div className="flex gap-3">
-          <Button 
-            onClick={() => setMode('view')}
-            variant="outline" 
-            className="flex-1 h-14 border-neutral-800 text-neutral-400 bg-black hover:bg-neutral-900 hover:text-white"
-          >
-            Cancel
-          </Button>
-          <div className="flex-1 h-14">
-            <ShimmerButton 
-              onClick={handleKeypadConfirm}
-              className="w-full h-full"
-              background="black"
-              shimmerColor="#ffffff"
-            >
-              <span className="text-lg font-bold text-white">Confirm</span>
-            </ShimmerButton>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="relative p-4 bg-black border-2 border-dashed border-neutral-800 rounded-xl space-y-6 animate-in slide-in-from-top-2 duration-200">
-      {/* Close Button (Top Right) */}
+    <div className="relative p-3 bg-black border border-neutral-800 rounded-xl space-y-4 shadow-lg">
       <button
         onClick={onCancel}
-        className="absolute top-0 right-0 m-1 p-3 text-neutral-500 hover:text-white transition-colors z-10"
-        aria-label="Close"
+        className="absolute top-2 right-2 p-2 text-neutral-500 hover:text-white transition-colors"
+        aria-label="Close set input"
       >
-        <X className="w-6 h-6" />
+        <X className="w-5 h-5" />
       </button>
 
-      {/* Reps Control */}
-      <div className="flex items-center justify-between gap-4 pt-8">
+      <div className="flex items-center justify-between gap-2 pr-8">
+        <div className="text-xs uppercase tracking-[0.08em] text-neutral-500">Registrar set</div>
         <button
-          onClick={() => handleIncrement('reps', -1)}
-          className="w-16 h-16 rounded-full bg-black border border-neutral-800 flex items-center justify-center text-white active:scale-95 transition-transform hover:border-neutral-600"
-          aria-label="Decrease reps"
+          onClick={() => setShowSettings((prev) => !prev)}
+          className="p-2 text-neutral-500 hover:text-white transition-colors"
+          aria-label="Open quick settings"
         >
-          <Minus className="w-8 h-8" />
-        </button>
-        
-        <div 
-          onClick={() => handleOpenKeypad('reps')}
-          className="flex-1 flex flex-col items-center justify-center cursor-pointer py-2 active:opacity-70 group"
-        >
-          <span className="text-5xl font-bold text-white leading-none group-hover:scale-110 transition-transform">{reps}</span>
-          <span className="text-xs text-neutral-500 font-medium tracking-widest mt-1 group-hover:text-white transition-colors">REPS</span>
-        </div>
-
-        <button
-          onClick={() => handleIncrement('reps', 1)}
-          className="w-16 h-16 rounded-full bg-black border border-neutral-800 flex items-center justify-center text-white active:scale-95 transition-transform hover:border-neutral-600"
-          aria-label="Increase reps"
-        >
-          <Plus className="w-8 h-8" />
+          <Settings2 className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Weight Control */}
-      <div className="flex items-center justify-between gap-4">
-        <button
-          onClick={() => handleIncrement('weight', -2.5)}
-          className="w-16 h-16 rounded-full bg-black border border-neutral-800 flex items-center justify-center text-white active:scale-95 transition-transform hover:border-neutral-600"
-          aria-label="Decrease weight"
-        >
-          <Minus className="w-8 h-8" />
-        </button>
-        
-        <div 
-          onClick={() => handleOpenKeypad('weight')}
-          className="flex-1 flex flex-col items-center justify-center cursor-pointer py-2 active:opacity-70 group"
-        >
-          <span className="text-5xl font-bold text-white leading-none group-hover:scale-110 transition-transform">{weight}</span>
-          <span className="text-xs text-neutral-500 font-medium tracking-widest mt-1 group-hover:text-white transition-colors">KG</span>
+      {showSettings && (
+        <div className="rounded-lg border border-neutral-800 bg-neutral-950/80 p-3 space-y-3">
+          <div className="flex items-center justify-between text-xs text-neutral-400">
+            <span>Salto de peso</span>
+            <span className="font-mono text-neutral-200">+/-{preferences.weightIncrement} kg</span>
+          </div>
+          <WeightIncrementSelector
+            value={preferences.weightIncrement}
+            onChange={(value) => updatePreferences({ weightIncrement: value })}
+          />
+          <div className="flex items-center justify-between text-xs text-neutral-400">
+            <span>Salto de reps</span>
+            <span className="font-mono text-neutral-200">+/-{preferences.repsIncrement}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => updatePreferences({ repsIncrement: Math.max(1, preferences.repsIncrement - 1) })}
+              className="border-neutral-800 text-neutral-300"
+            >
+              -1
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => updatePreferences({ repsIncrement: preferences.repsIncrement + 1 })}
+              className="border-neutral-800 text-neutral-300"
+            >
+              +1
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleIncrement('reps', -1)}
+            className="w-12 h-12 border-neutral-800 text-white"
+            aria-label="Decrease reps"
+          >
+            <Minus className="w-5 h-5" />
+          </Button>
+          <div
+            className="flex-1 text-center"
+            data-testid="reps-display"
+            onClick={() => {
+              setEditingField('reps');
+              requestAnimationFrame(() => {
+                repsInputRef.current?.focus();
+                repsInputRef.current?.select();
+              });
+            }}
+          >
+            {editingField === 'reps' ? (
+              <input
+                ref={repsInputRef}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="done"
+                aria-label="Reps input"
+                value={String(reps)}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  if (!isNaN(val) && val >= 0) setReps(val);
+                  else if (e.target.value === '') setReps(0);
+                }}
+                onFocus={(e) => e.target.select()}
+                onBlur={() => setEditingField(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    setEditingField(null);
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    setEditingField(null);
+                  }
+                }}
+                className="w-full min-h-12 bg-transparent text-4xl font-bold text-white text-center border border-neutral-800 rounded-md outline-none ring-0 p-1 cursor-text touch-manipulation caret-white"
+                autoFocus
+              />
+            ) : (
+              <div className="text-4xl font-bold text-white leading-none" aria-label="Reps value">
+                {reps}
+              </div>
+            )}
+            <div className="text-[11px] uppercase tracking-widest text-neutral-500 mt-1">Reps</div>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleIncrement('reps', 1)}
+            className="w-12 h-12 border-neutral-800 text-white"
+            aria-label="Increase reps"
+          >
+            <Plus className="w-5 h-5" />
+          </Button>
         </div>
 
-        <button
-          onClick={() => handleIncrement('weight', 2.5)}
-          className="w-16 h-16 rounded-full bg-black border border-neutral-800 flex items-center justify-center text-white active:scale-95 transition-transform hover:border-neutral-600"
-          aria-label="Increase weight"
-        >
-          <Plus className="w-8 h-8" />
-        </button>
+        <div className="flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleIncrement('weight', -1)}
+            className="w-12 h-12 border-neutral-800 text-white"
+            aria-label="Decrease weight"
+          >
+            <Minus className="w-5 h-5" />
+          </Button>
+          <div
+            className="flex-1 text-center"
+            data-testid="weight-display"
+            onClick={() => {
+              setEditingField('weight');
+              requestAnimationFrame(() => {
+                weightInputRef.current?.focus();
+                weightInputRef.current?.select();
+              });
+            }}
+          >
+            {editingField === 'weight' ? (
+              <input
+                ref={weightInputRef}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.,]?[0-9]*"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="done"
+                aria-label="Weight input"
+                value={String(weight)}
+                onChange={(e) => {
+                  const normalized = e.target.value.replace(',', '.');
+                  const val = parseFloat(normalized);
+                  if (!isNaN(val) && val >= 0) setWeight(val);
+                  else if (e.target.value === '') setWeight(0);
+                }}
+                onFocus={(e) => e.target.select()}
+                onBlur={() => setEditingField(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    setEditingField(null);
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    setEditingField(null);
+                  }
+                }}
+                className="w-full min-h-12 bg-transparent text-4xl font-bold text-white text-center border border-neutral-800 rounded-md outline-none ring-0 p-1 cursor-text touch-manipulation caret-white"
+                autoFocus
+              />
+            ) : (
+              <div className="text-4xl font-bold text-white leading-none" aria-label="Weight value">
+                {weight}
+              </div>
+            )}
+            <div className="text-[11px] uppercase tracking-widest text-neutral-500 mt-1">
+              Kg | salto +/-{preferences.weightIncrement}
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleIncrement('weight', 1)}
+            className="w-12 h-12 border-neutral-800 text-white"
+            aria-label="Increase weight"
+          >
+            <Plus className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
 
-      {/* Actions */}
-      <div className="pt-2">
-        <div className="h-12 w-full max-w-[200px] mx-auto">
+      <div className="space-y-2">
+        <div className="text-xs text-neutral-400">Tecnica de intensidad</div>
+        <TechniqueSelector value={technique} onChange={setTechnique} compact />
+      </div>
+
+      <div className="pt-1 flex items-center gap-2">
+        <Button
+          onClick={onCancel}
+          variant="outline"
+          className="flex-1 border-neutral-800 text-neutral-300"
+        >
+          Cancelar
+        </Button>
+        <div className="flex-1 h-10">
           <ShimmerButton
-            onClick={handleSave}
-            className="w-full h-full text-white dark:text-white"
+            onClick={handleConfirm}
+            className="w-full h-full"
             background="black"
             shimmerColor="#ffffff"
           >
-            <span className="flex items-center gap-2 text-base font-bold text-white">
-              <Check className="w-5 h-5" />
-              Save Set
-            </span>
+            <div className="flex items-center justify-center gap-2 text-white text-sm font-semibold">
+              <Check className="w-4 h-4" />
+              {mode === 'edit' ? 'Actualizar set' : 'Guardar set'}
+            </div>
           </ShimmerButton>
         </div>
       </div>
