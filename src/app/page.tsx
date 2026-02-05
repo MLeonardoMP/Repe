@@ -3,210 +3,256 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { ArrowRight, Dumbbell, Clock, TrendingUp, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ShimmerButton } from "@/components/magicui/shimmer-button";
 
-// --- Components ---
-
-const GridLine = ({
-  direction,
-  className,
-  delay = 0,
-}: {
-  direction: 'horizontal' | 'vertical';
-  className?: string;
-  delay?: number;
-}) => {
-  const isHorizontal = direction === 'horizontal';
-
+// Spotlight component for elegant hero effect
+const Spotlight = ({ className }: { className?: string }) => {
   return (
     <motion.div
-      initial={isHorizontal ? { width: 0 } : { height: 0 }}
-      animate={isHorizontal ? { width: '100%' } : { height: '100%' }}
-      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay }}
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1.5, ease: 'easeOut' }}
       className={cn(
-        'absolute overflow-hidden',
-        isHorizontal ? 'h-[1px] left-0' : 'w-[1px] top-0',
+        'pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500',
         className
       )}
-    >
-      <div
-        className={cn(
-          isHorizontal ? 'dotted-line-h' : 'dotted-line-v',
-          'absolute inset-0'
-        )}
-      />
-    </motion.div>
+      style={{
+        background:
+          'radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(201, 168, 124, 0.06), transparent 40%)',
+      }}
+    />
   );
 };
 
-const Cross = ({ className, delay = 0 }: { className?: string; delay?: number }) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.5, delay }}
-    className={cn('absolute text-neutral-700', className)}
-  >
-    <Plus className="w-3 h-3" />
-  </motion.div>
-);
+// Animated border component
+const AnimatedBorder = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+  return (
+    <div className={cn('relative group', className)}>
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-accent/50 via-transparent to-accent/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+      <div className="relative">{children}</div>
+    </div>
+  );
+};
 
-const CornerCircle = ({ className, delay = 0, id }: { className?: string; delay?: number; id: string }) => (
-  <div className={cn("absolute pointer-events-none", className)}>
-    <svg className="w-[8rem] h-[8rem] -rotate-90" viewBox="0 0 256 256">
-      <defs>
-        <mask id={id}>
-          <motion.circle
-            cx="128"
-            cy="128"
-            r="128"
-            fill="none"
-            stroke="white"
-            strokeWidth="8"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 2, delay, ease: "easeInOut" }}
-          />
-        </mask>
-      </defs>
-      <circle
-        cx="128"
-        cy="128"
-        r="127"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeDasharray="12 12"
-        className="text-[#333]"
-        mask={`url(#${id})`}
-      />
-    </svg>
-  </div>
-);
-
-// --- Main Page ---
+// Feature card component
+const FeatureCard = ({
+  icon: Icon,
+  title,
+  description,
+  delay,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  delay: number;
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="group relative"
+    >
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="relative">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
+            <Icon className="h-6 w-6 text-foreground" />
+          </div>
+          <h3 className="mb-2 text-lg font-semibold text-foreground">{title}</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+
+    // Mouse tracking for spotlight effect
+    const handleMouseMove = (e: MouseEvent) => {
+      const cards = document.querySelectorAll('.spotlight-card');
+      cards.forEach((card) => {
+        const rect = (card as HTMLElement).getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (card as HTMLElement).style.setProperty('--mouse-x', `${x}px`);
+        (card as HTMLElement).style.setProperty('--mouse-y', `${y}px`);
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden selection:bg-white/20">
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      {/* Subtle grid pattern */}
+      <div className="absolute inset-0 grid-pattern opacity-40 pointer-events-none" />
       
-      {/* Background Grid (Subtle) */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#222_1px,transparent_1px),linear-gradient(to_bottom,#222_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+      {/* Gradient orbs */}
+      <div className="absolute top-0 -left-40 h-80 w-80 rounded-full bg-accent/10 blur-[120px]" />
+      <div className="absolute bottom-0 -right-40 h-80 w-80 rounded-full bg-accent/10 blur-[120px]" />
 
-      {/* Main Hero Container */}
-      <div className="relative z-10 max-w-4xl w-full px-6 md:px-12">
-        
-        {/* The "Architectural" Box */}
-        <div className="relative">
-          
-          {/* Grid Lines - The Reveal */}
-          <GridLine direction="horizontal" className="top-0" delay={0} />
-          <GridLine direction="horizontal" className="bottom-0" delay={0} />
-          <GridLine direction="vertical" className="left-0" delay={0.4} />
-          <GridLine direction="vertical" className="right-0" delay={0.4} />
-
-          {/* Corner Crosses */}
-          <Cross className="-top-1.5 -left-1.5" delay={0.8} />
-          <Cross className="-top-1.5 -right-1.5" delay={0.8} />
-          <Cross className="-bottom-1.5 -left-1.5" delay={0.8} />
-          <Cross className="-bottom-1.5 -right-1.5" delay={0.8} />
-
-          {/* Geometric Circles (Next.js Conf Style) */}
-          <CornerCircle id="circle-top" className="-top-[4rem] -left-[4rem]" delay={1.6} />
-          <CornerCircle id="circle-bottom" className="-bottom-[4rem] -right-[4rem]" delay={1.6} />
-
-          {/* Content Container */}
-          <div className="flex flex-col">
-            
-            {/* Top Section: Title & Subtitle */}
-            <div className="py-16 md:py-24 px-8 md:px-16 flex flex-col items-center text-center space-y-6">
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.2 }}
-                className="text-7xl md:text-9xl font-bold tracking-tighter text-white"
-              >
-                Repe
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.4 }}
-                className="text-neutral-400 text-lg md:text-xl max-w-xl font-light leading-relaxed"
-              >
-                The minimalist strength tracker for serious lifters.
-              </motion.p>
-            </div>
-
-            {/* Separator Line */}
-            <div className="relative w-full h-[1px] overflow-hidden">
-               <motion.div
-                 initial={{ width: 0 }}
-                 animate={{ width: '100%' }}
-                 transition={{ duration: 1, delay: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                 className="h-full w-full"
-               >
-                 <div className="dotted-line-h absolute inset-0" />
-               </motion.div>
-            </div>
-
-            {/* Bottom Section: Buttons */}
-            <div className="relative grid grid-cols-1 md:grid-cols-2">
-              
-              {/* Vertical Divider (Desktop) */}
-              <GridLine direction="vertical" className="left-1/2 hidden md:block" delay={1.5} />
-              
-              {/* Horizontal Divider (Mobile) */}
-              <GridLine direction="horizontal" className="top-1/2 md:hidden" delay={1.5} />
-
-              {/* Button 1 - Start Workout (Shimmer) */}
-              <div className="flex items-center justify-center py-10 md:py-14">
-                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 1.6 }}
-                 >
-                    <Link href="/workout/new">
-                      <ShimmerButton className="shadow-2xl">
-                        <span className="text-center text-sm leading-none font-medium tracking-tight whitespace-pre-wrap text-white lg:text-lg dark:from-white dark:to-slate-900/10">
-                          Start Workout
-                        </span>
-                      </ShimmerButton>
-                    </Link>
-                 </motion.div>
+      <main className="relative z-10">
+        {/* Hero Section */}
+        <section className="min-h-[85vh] flex flex-col items-center justify-center px-6 pt-12">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card/50 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+                </span>
+                <span className="text-sm text-muted-foreground">Minimalista y poderoso</span>
               </div>
+            </motion.div>
 
-              {/* Button 2 - View History (White) */}
-              <div className="flex items-center justify-center py-10 md:py-14">
-                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 1.8 }}
-                 >
-                    <Link 
-                      href="/history"
-                      className="h-12 px-10 rounded-full bg-white text-black font-medium flex items-center justify-center hover:bg-neutral-200 transition-colors"
-                    >
-                      View History
-                    </Link>
-                 </motion.div>
-              </div>
-            </div>
+            {/* Main Heading */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="space-y-4"
+            >
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight">
+                <span className="block">Tu fuerza,</span>
+                <span className="block text-muted-foreground">sin complicaciones</span>
+              </h1>
+            </motion.div>
 
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            >
+              Registra tus entrenamientos con elegancia. Una experiencia de seguimiento 
+              diseñada para quienes valoran la simplicidad y la eficacia.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+            >
+              <Link
+                href="/workout/new"
+                className="group relative inline-flex h-14 items-center justify-center gap-2 rounded-full bg-foreground px-8 text-background font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-foreground/20"
+              >
+                <span>Comenzar entrenamiento</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+              
+              <Link
+                href="/history"
+                className="group inline-flex h-14 items-center justify-center gap-2 rounded-full border border-border px-8 font-medium transition-all duration-300 hover:bg-secondary hover:border-muted-foreground/30"
+              >
+                <span>Ver historial</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+              </Link>
+            </motion.div>
           </div>
+        </section>
+
+        {/* Elegant divider */}
+        <div className="max-w-xl mx-auto px-6">
+          <div className="elegant-divider" />
         </div>
-      </div>
+
+        {/* Features Section */}
+        <section className="py-24 px-6">
+          <div className="max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.9 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                Diseñado para el rendimiento
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Cada detalle pensado para que te enfoques en lo que importa: tu progreso.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FeatureCard
+                icon={Dumbbell}
+                title="Registro inteligente"
+                description="Agrega ejercicios y series con un flujo natural. Tu ultimo peso y repeticiones siempre a la mano."
+                delay={1.1}
+              />
+              <FeatureCard
+                icon={Clock}
+                title="Temporizador integrado"
+                description="Control preciso de tus descansos. Mantén el ritmo sin perder la concentración."
+                delay={1.2}
+              />
+              <FeatureCard
+                icon={TrendingUp}
+                title="Progreso visible"
+                description="Visualiza tu evolución con métricas claras. Cada sesión cuenta para tu historia."
+                delay={1.3}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Bottom CTA */}
+        <section className="py-20 px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="max-w-2xl mx-auto text-center"
+          >
+            <AnimatedBorder>
+              <div className="spotlight-card relative overflow-hidden rounded-2xl border border-border bg-card p-10 md:p-14">
+                <Spotlight className="opacity-100" />
+                <div className="relative">
+                  <h3 className="text-2xl md:text-3xl font-bold mb-4">
+                    Listo para empezar?
+                  </h3>
+                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                    No necesitas crear una cuenta. Comienza a registrar tu primer entrenamiento ahora.
+                  </p>
+                  <Link
+                    href="/workout/new"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-foreground px-6 text-background font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    <span>Iniciar ahora</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            </AnimatedBorder>
+          </motion.div>
+        </section>
+      </main>
     </div>
   );
 }
-
