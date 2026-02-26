@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, Dumbbell, Clock, TrendingUp, ChevronRight, Zap, Target, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,20 +42,35 @@ const GeometricGrid = () => {
   );
 };
 
+// Stable particle positions (pre-computed to avoid hydration mismatch)
+const PARTICLES = [
+  { id: 0,  x: 12,  y: 8,  size: 2, duration: 18, delay: 0 },
+  { id: 1,  x: 34,  y: 22, size: 3, duration: 22, delay: 1 },
+  { id: 2,  x: 58,  y: 15, size: 1, duration: 17, delay: 2 },
+  { id: 3,  x: 78,  y: 35, size: 2, duration: 20, delay: 0.5 },
+  { id: 4,  x: 91,  y: 12, size: 3, duration: 24, delay: 3 },
+  { id: 5,  x: 23,  y: 55, size: 1, duration: 19, delay: 1.5 },
+  { id: 6,  x: 45,  y: 68, size: 2, duration: 21, delay: 4 },
+  { id: 7,  x: 67,  y: 45, size: 3, duration: 16, delay: 2.5 },
+  { id: 8,  x: 88,  y: 72, size: 1, duration: 23, delay: 0.8 },
+  { id: 9,  x: 5,   y: 85, size: 2, duration: 25, delay: 3.5 },
+  { id: 10, x: 30,  y: 90, size: 3, duration: 18, delay: 1.2 },
+  { id: 11, x: 52,  y: 78, size: 1, duration: 20, delay: 4.5 },
+  { id: 12, x: 74,  y: 92, size: 2, duration: 22, delay: 0.3 },
+  { id: 13, x: 95,  y: 60, size: 3, duration: 17, delay: 2.8 },
+  { id: 14, x: 18,  y: 42, size: 1, duration: 19, delay: 1.8 },
+  { id: 15, x: 40,  y: 30, size: 2, duration: 24, delay: 3.2 },
+  { id: 16, x: 62,  y: 58, size: 3, duration: 16, delay: 0.6 },
+  { id: 17, x: 83,  y: 20, size: 1, duration: 21, delay: 4.2 },
+  { id: 18, x: 8,   y: 65, size: 2, duration: 23, delay: 1.6 },
+  { id: 19, x: 50,  y: 5,  size: 3, duration: 18, delay: 3.8 },
+];
+
 // Floating particles effect
 const FloatingParticles = () => {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    duration: Math.random() * 10 + 15,
-    delay: Math.random() * 5,
-  }));
-
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((particle) => (
+      {PARTICLES.map((particle) => (
         <motion.div
           key={particle.id}
           className="absolute rounded-full bg-accent/20"
@@ -427,8 +442,8 @@ export default function HomePage() {
       <InteractiveSpotlight />
       
       {/* Gradient orbs */}
-      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-accent/8 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-accent/6 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-accent/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
 
       <main className="relative z-10">
         {/* Hero Section */}

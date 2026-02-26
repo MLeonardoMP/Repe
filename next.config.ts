@@ -11,8 +11,6 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // typedRoutes improves type safety for route segments
-  typedRoutes: true,
   experimental: {
     optimizePackageImports: ["@radix-ui/react-dialog"],
   },
